@@ -1,0 +1,10 @@
+{
+  "id": "audit-002",
+  "timestamp": "2026-06-23T10:00:02.000Z",
+  "principal": "viewer",
+  "resource": "mrn:mcp:filesystem:tool:read-file",
+  "operation": "invoke",
+  "decision": "deny",
+  "policyRule": "viewer-public-only-scope",
+  "agentTaskId": "task-002"
+}

@@ -1,0 +1,41 @@
+[
+  {
+    "name": "read-file",
+    "mrn": "mrn:mcp:filesystem:tool:read-file",
+    "description": "Read contents of a file from the document corpus",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "description": "Relative path to the file" }
+      },
+      "required": ["path"]
+    },
+    "accessible": true
+  },
+  {
+    "name": "list-directory",
+    "mrn": "mrn:mcp:filesystem:tool:list-directory",
+    "description": "List files and directories in the document corpus",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": { "type": "string", "description": "Directory path to list" }
+      },
+      "required": ["path"]
+    },
+    "accessible": true
+  },
+  {
+    "name": "search-files",
+    "mrn": "mrn:mcp:filesystem:tool:search-files",
+    "description": "Search for files matching a pattern in the document corpus",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": { "type": "string", "description": "Search query" }
+      },
+      "required": ["query"]
+    },
+    "accessible": true
+  }
+]

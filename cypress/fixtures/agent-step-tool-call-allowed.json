@@ -1,0 +1,23 @@
+{
+  "stepNumber": 2,
+  "type": "tool-call",
+  "content": "Calling list-directory to browse the public folder.",
+  "toolCall": {
+    "toolName": "list-directory",
+    "mrn": "mrn:mcp:filesystem:tool:list-directory",
+    "args": { "path": "public" },
+    "policyDecision": {
+      "decision": "allow",
+      "principal": "developer",
+      "resource": "mrn:mcp:filesystem:tool:list-directory",
+      "operation": "invoke",
+      "rule": "developer-full-access"
+    },
+    "result": [
+      { "name": "readme.md", "type": "file" },
+      { "name": "api-docs.md", "type": "file" }
+    ],
+    "durationMs": 45
+  },
+  "timestamp": "2026-06-23T10:00:02.000Z"
+}

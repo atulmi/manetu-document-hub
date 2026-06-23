@@ -1,0 +1,29 @@
+[
+  {
+    "id": "doc-001",
+    "title": "Public README",
+    "path": "public/readme.md",
+    "sensitivity": "public",
+    "excerpt": "Welcome to the AI Document Hub. This project demonstrates policy-controlled AI agent access.",
+    "sizeBytes": 2048,
+    "accessible": true
+  },
+  {
+    "id": "doc-003",
+    "title": "Internal Analytics Report",
+    "path": "internal/analytics-q2.md",
+    "sensitivity": "internal",
+    "excerpt": "Q2 analytics summary: 15,000 document accesses across 3 sensitivity tiers with 98.7% policy compliance.",
+    "sizeBytes": 8192,
+    "accessible": true
+  },
+  {
+    "id": "doc-004",
+    "title": "Data Pipeline Architecture",
+    "path": "internal/pipeline-arch.md",
+    "sensitivity": "internal",
+    "excerpt": "The data ingestion pipeline processes documents through classification, tagging, and sensitivity analysis.",
+    "sizeBytes": 6144,
+    "accessible": true
+  }
+]

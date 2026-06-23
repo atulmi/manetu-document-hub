@@ -1,0 +1,21 @@
+{
+  "stepNumber": 2,
+  "type": "tool-call",
+  "content": "Attempting to read a confidential document.",
+  "toolCall": {
+    "toolName": "read-file",
+    "mrn": "mrn:mcp:filesystem:tool:read-file",
+    "args": { "path": "confidential/secrets.md" },
+    "policyDecision": {
+      "decision": "deny",
+      "principal": "viewer",
+      "resource": "mrn:mcp:filesystem:tool:read-file",
+      "operation": "invoke",
+      "rule": "viewer-public-only-scope",
+      "reason": "Viewer role cannot access confidential resources"
+    },
+    "error": "Access denied by policy: viewer-public-only-scope",
+    "durationMs": 12
+  },
+  "timestamp": "2026-06-23T10:00:02.000Z"
+}

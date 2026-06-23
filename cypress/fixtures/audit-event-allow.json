@@ -1,0 +1,10 @@
+{
+  "id": "audit-001",
+  "timestamp": "2026-06-23T10:00:02.000Z",
+  "principal": "developer",
+  "resource": "mrn:mcp:filesystem:tool:list-directory",
+  "operation": "invoke",
+  "decision": "allow",
+  "policyRule": "developer-full-access",
+  "agentTaskId": "task-001"
+}
