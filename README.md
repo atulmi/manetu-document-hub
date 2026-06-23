@@ -155,6 +155,15 @@ server/
     audit.ts         GET /api/audit/stream (stub)
   middleware/
     roleExtract.ts   x-role header validation
+  lib/
+    mpe-client.ts    Typed MPE/OPA client (evaluate + discover)
+docker/
+  docker-compose.yml     OPA as policy engine on port 8181
+  docker-compose.ci.yml  CI override (quieter logging)
+  docker-entrypoint.sh   Standalone policy loader script
+policies/
+  docs-domain.rego   OPA Rego policy (default-deny, MRN matching)
+  roles-data.json    Role grants for all 5 roles
 cypress/
   e2e/               E2E test specs
   fixtures/          Mock API responses
@@ -200,14 +209,17 @@ No API keys or Docker required in CI — Cypress tests use `cy.intercept()` to m
 - Cypress E2E configuration with fixtures and custom commands
 - Sample document corpus (15 docs across 3 sensitivity tiers)
 - GitHub Actions CI pipeline (5-stage: lint, typecheck, test, build, e2e)
-- Three-panel resizable layout (Document Library / Agent Task / Audit Log)
-- Role switcher with color-coded roles and toast notifications
-- Typed API fetch wrapper with automatic `x-role` header
+- Three-panel resizable layout with drag handles (Document Library / Agent Task / Audit Log)
+- Split header: purple brand bar + neutral controls row
+- Role switcher with color-coded dot indicators and toast notifications
+- Security demo toggle with confirmation dialog and warning banner
+- Typed API fetch wrapper with automatic `x-role` and `x-security-enabled` headers
+- Docker Compose setup with OPA as the policy engine
+- OPA Rego policies with role-based MRN access control (verified: viewer denied confidential, admin allowed)
+- MPE client library with typed evaluate/discover and custom error types (5 unit tests)
 
 ### Planned
-- Security demo toggle (on/off in header)
-- Docker + MPE policy domain setup
-- MPE client library and MCP filesystem client
+- MCP filesystem client
 - Claude agent orchestration loop
 - Backend route implementations (tools, agent/run, audit/stream)
 - Document library browser with sensitivity badges

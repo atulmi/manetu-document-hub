@@ -1,0 +1,142 @@
+{
+  "roles": {
+    "viewer": {
+    "description": "Read-only access to public documents and directory listing only",
+    "grants": [
+      {
+        "mrn": "mrn:mcp:docs:resource:public:*",
+        "operations": ["read", "discover"],
+        "rule": "viewer-public-read",
+        "reason": "Viewer role can read and discover public documents"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:list-directory",
+        "operations": ["invoke"],
+        "rule": "viewer-list-directory",
+        "reason": "Viewer role can list directories to browse the corpus"
+      }
+    ]
+  },
+
+  "developer": {
+    "description": "Full read access to public and internal documents, plus all filesystem tools",
+    "grants": [
+      {
+        "mrn": "mrn:mcp:docs:resource:public:*",
+        "rule": "developer-public-access",
+        "reason": "Developer role has full access to public documents"
+      },
+      {
+        "mrn": "mrn:mcp:docs:resource:internal:*",
+        "rule": "developer-internal-access",
+        "reason": "Developer role has full access to internal documents"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:list-directory",
+        "operations": ["invoke"],
+        "rule": "developer-list-directory",
+        "reason": "Developer role can list directories"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:read-file",
+        "operations": ["invoke"],
+        "rule": "developer-read-file",
+        "reason": "Developer role can read files"
+      },
+      {
+        "mrn": "mrn:mcp:docs:tool:keyword-search",
+        "operations": ["invoke"],
+        "rule": "developer-keyword-search",
+        "reason": "Developer role can search documents"
+      }
+    ]
+  },
+
+  "data-analyst": {
+    "description": "Read access to public and internal documents, search and read tools",
+    "grants": [
+      {
+        "mrn": "mrn:mcp:docs:resource:public:*",
+        "rule": "analyst-public-access",
+        "reason": "Data analyst can access public documents"
+      },
+      {
+        "mrn": "mrn:mcp:docs:resource:internal:*",
+        "rule": "analyst-internal-access",
+        "reason": "Data analyst can access internal documents"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:list-directory",
+        "operations": ["invoke"],
+        "rule": "analyst-list-directory",
+        "reason": "Data analyst can list directories"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:read-file",
+        "operations": ["invoke"],
+        "rule": "analyst-read-file",
+        "reason": "Data analyst can read files"
+      },
+      {
+        "mrn": "mrn:mcp:docs:tool:keyword-search",
+        "operations": ["invoke"],
+        "rule": "analyst-keyword-search",
+        "reason": "Data analyst can search documents"
+      }
+    ]
+  },
+
+  "auditor": {
+    "description": "Read-only access to all documents including confidential, for audit purposes",
+    "grants": [
+      {
+        "mrn": "mrn:mcp:docs:resource:public:*",
+        "operations": ["read", "discover"],
+        "rule": "auditor-public-read",
+        "reason": "Auditor has read access to public documents"
+      },
+      {
+        "mrn": "mrn:mcp:docs:resource:internal:*",
+        "operations": ["read", "discover"],
+        "rule": "auditor-internal-read",
+        "reason": "Auditor has read access to internal documents"
+      },
+      {
+        "mrn": "mrn:mcp:docs:resource:confidential:*",
+        "operations": ["read", "discover"],
+        "rule": "auditor-confidential-read",
+        "reason": "Auditor has read-only access to confidential documents for audit purposes"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:list-directory",
+        "operations": ["invoke"],
+        "rule": "auditor-list-directory",
+        "reason": "Auditor can list directories"
+      },
+      {
+        "mrn": "mrn:mcp:filesystem:tool:read-file",
+        "operations": ["invoke"],
+        "rule": "auditor-read-file",
+        "reason": "Auditor can read files"
+      },
+      {
+        "mrn": "mrn:mcp:docs:tool:keyword-search",
+        "operations": ["invoke"],
+        "rule": "auditor-keyword-search",
+        "reason": "Auditor can search documents"
+      }
+    ]
+  },
+
+  "admin": {
+    "description": "Unrestricted access to all MCP resources and tools",
+    "grants": [
+      {
+        "mrn": "mrn:mcp:*",
+        "rule": "admin-unrestricted",
+        "reason": "Admin role has unrestricted access to all MCP resources"
+      }
+    ]
+  }
+  }
+}

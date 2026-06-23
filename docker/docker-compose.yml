@@ -1,0 +1,30 @@
+services:
+  # Manetu Policy Engine — OPA-based access control
+  # Evaluates every MCP tool call against role-based policies
+  #
+  # OPA automatically loads all .rego and .json files from /policies on startup.
+  # No sidecar loader needed — policies/docs-domain.rego and policies/roles-data.json
+  # are mounted directly.
+  mpe:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "8181:8181"
+    volumes:
+      - ../policies:/policies:ro
+    command:
+      - "run"
+      - "--server"
+      - "--addr=:8181"
+      - "--log-level=info"
+      - "/policies"
+    healthcheck:
+      test: ["CMD", "/opa", "eval", "1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 3s
+
+  # The MCP filesystem server runs as a Node.js process inside the
+  # Express backend (not as a separate container), since the official
+  # MCP filesystem server uses stdio transport. The docs-corpus is
+  # mounted into the backend's working directory.

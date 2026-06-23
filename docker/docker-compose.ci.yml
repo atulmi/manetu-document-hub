@@ -1,0 +1,22 @@
+# CI override — MPE runs with bundled policies, no external volumes needed.
+# MCP filesystem is mocked by cy.intercept() in Cypress tests.
+
+services:
+  mpe:
+    image: openpolicyagent/opa:latest
+    ports:
+      - "8181:8181"
+    volumes:
+      - ../policies:/policies:ro
+    command:
+      - "run"
+      - "--server"
+      - "--addr=:8181"
+      - "--log-level=error"
+      - "/policies"
+    healthcheck:
+      test: ["CMD", "/opa", "eval", "1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 3s

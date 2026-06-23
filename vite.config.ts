@@ -10,5 +10,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     coverage: { provider: 'v8', reporter: ['text', 'lcov'] },
+    environmentMatchGlobs: [
+      ['server/**/*.test.*', 'node'],
+    ],
   },
 })
