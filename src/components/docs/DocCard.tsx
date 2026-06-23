@@ -1,15 +1,11 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Chip from '@mui/material/Chip';
+import Tooltip from '@mui/material/Tooltip';
 import ButtonBase from '@mui/material/ButtonBase';
 import Lock from '@mui/icons-material/Lock';
-import type { DocMeta, DocSensitivity } from '../../types';
-
-const SENSITIVITY_COLORS: Record<DocSensitivity, 'success' | 'warning' | 'error'> = {
-  public: 'success',
-  internal: 'warning',
-  confidential: 'error',
-};
+import { motion } from 'framer-motion';
+import { SensitivityBadge } from './SensitivityBadge';
+import type { DocMeta } from '../../types';
 
 interface DocCardProps {
   doc: DocMeta & { accessible: boolean };
@@ -27,50 +23,60 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
     }
   };
 
-  return (
-    <ButtonBase
-      onClick={handleClick}
-      sx={{
-        display: 'block',
-        width: '100%',
-        textAlign: 'left',
-        borderRadius: 1,
-        p: 1,
-        mb: 0.5,
-        opacity: doc.accessible ? 1 : 0.5,
-        bgcolor: selected ? 'action.selected' : 'transparent',
-        '&:hover': { bgcolor: selected ? 'action.selected' : 'action.hover' },
-        transition: 'background-color 0.15s',
-      }}
+  const card = (
+    <motion.div
+      layout
+      animate={{ opacity: doc.accessible ? 1 : 0.45, filter: doc.accessible ? 'blur(0px)' : 'blur(0.5px)' }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }} noWrap>
-          {doc.title}
-        </Typography>
-        {!doc.accessible && <Lock sx={{ fontSize: 14, color: 'text.disabled' }} />}
-      </Box>
-      <Typography
-        variant="caption"
-        color="text.secondary"
+      <ButtonBase
+        onClick={handleClick}
         sx={{
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          lineHeight: 1.4,
+          display: 'block',
+          width: '100%',
+          textAlign: 'left',
+          borderRadius: 1,
+          p: 1,
+          mb: 0.5,
+          cursor: doc.accessible ? 'pointer' : 'not-allowed',
+          bgcolor: selected ? 'action.selected' : 'transparent',
+          '&:hover': { bgcolor: selected ? 'action.selected' : 'action.hover' },
+          transition: 'background-color 0.15s',
         }}
       >
-        {doc.excerpt}
-      </Typography>
-      <Box sx={{ mt: 0.5 }}>
-        <Chip
-          label={doc.sensitivity}
-          size="small"
-          color={SENSITIVITY_COLORS[doc.sensitivity]}
-          variant="filled"
-          sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }}
-        />
-      </Box>
-    </ButtonBase>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }} noWrap>
+            {doc.title}
+          </Typography>
+          {!doc.accessible && <Lock sx={{ fontSize: 14, color: 'text.disabled' }} />}
+        </Box>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            lineHeight: 1.4,
+          }}
+        >
+          {doc.excerpt}
+        </Typography>
+        <Box sx={{ mt: 0.5 }}>
+          <SensitivityBadge sensitivity={doc.sensitivity} />
+        </Box>
+      </ButtonBase>
+    </motion.div>
   );
+
+  if (!doc.accessible) {
+    return (
+      <Tooltip title={`Access restricted for current role`} arrow placement="right">
+        {card}
+      </Tooltip>
+    );
+  }
+
+  return card;
 }

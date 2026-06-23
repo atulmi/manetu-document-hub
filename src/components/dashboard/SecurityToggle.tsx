@@ -60,7 +60,7 @@ export function SecurityToggle() {
         fullWidth
         PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden' } }}
       >
-        <Box sx={{ bgcolor: 'error.main', color: 'error.contrastText', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <WarningAmber />
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Disable policy engine?
