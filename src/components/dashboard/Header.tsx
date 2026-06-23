@@ -8,6 +8,7 @@ import Shield from '@mui/icons-material/Shield';
 import DarkMode from '@mui/icons-material/DarkMode';
 import LightMode from '@mui/icons-material/LightMode';
 import { useStore } from '../../lib/store';
+import { RoleSwitcher } from './RoleSwitcher';
 
 export function Header() {
   const themeMode = useStore((s) => s.themeMode);
@@ -23,7 +24,8 @@ export function Header() {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box data-testid="header-controls" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box data-testid="header-controls" sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <RoleSwitcher />
           <Tooltip title={themeMode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
             <IconButton onClick={toggleTheme} color="inherit" size="small" data-testid="theme-toggle">
               {themeMode === 'dark' ? <LightMode fontSize="small" /> : <DarkMode fontSize="small" />}

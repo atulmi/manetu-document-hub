@@ -1,6 +1,7 @@
 import { createTheme, type PaletteMode } from '@mui/material/styles';
 
 export function buildTheme(mode: PaletteMode) {
+  const dark = mode === 'dark';
   return createTheme({
     palette: {
       mode,
@@ -8,6 +9,13 @@ export function buildTheme(mode: PaletteMode) {
       error:   { main: '#ef4444' },
       warning: { main: '#f59e0b' },
       success: { main: '#22c55e' },
+      ...(dark && {
+        background: {
+          default: '#0f1117',
+          paper:   '#1a1d2e',
+        },
+        divider: 'rgba(255,255,255,0.08)',
+      }),
     },
     typography: {
       fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -22,6 +30,14 @@ export function buildTheme(mode: PaletteMode) {
       MuiCard: {
         styleOverrides: {
           root: { backgroundImage: 'none' },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundImage: 'none',
+            backgroundColor: dark ? '#141726' : undefined,
+          },
         },
       },
     },

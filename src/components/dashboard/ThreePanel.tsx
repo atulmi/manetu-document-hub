@@ -38,7 +38,7 @@ function ResizeHandle() {
 
 function PanelSlot({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', bgcolor: 'background.paper' }}>
       <PanelHeader title={title} />
       <Box sx={{ flex: 1, overflow: 'auto', p: 1 }}>
         {children}

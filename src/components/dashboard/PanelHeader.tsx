@@ -8,8 +8,8 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ title }: PanelHeaderProps) {
   return (
-    <Box sx={{ flexShrink: 0 }}>
-      <Typography variant="subtitle2" sx={{ px: 2, py: 1, color: 'text.secondary', fontWeight: 600 }}>
+    <Box sx={{ flexShrink: 0, bgcolor: 'action.hover' }}>
+      <Typography variant="subtitle2" sx={{ px: 2, py: 1, color: 'text.primary', fontWeight: 600 }}>
         {title}
       </Typography>
       <Divider />
