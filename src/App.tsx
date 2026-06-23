@@ -1,5 +1,7 @@
+import { Dashboard } from './pages/Dashboard';
+
 function App() {
-  return <div>AI Document Hub</div>
+  return <Dashboard />;
 }
 
 export default App

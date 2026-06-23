@@ -1,14 +1,24 @@
-import { StrictMode } from 'react'
+import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider, CssBaseline } from '@mui/material'
-import { theme } from './lib/theme'
+import { buildTheme } from './lib/theme'
+import { useStore } from './lib/store'
 import App from './App.tsx'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+function Root() {
+  const themeMode = useStore((s) => s.themeMode);
+  const theme = useMemo(() => buildTheme(themeMode), [themeMode]);
+
+  return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <App />
     </ThemeProvider>
+  );
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Root />
   </StrictMode>,
 )
