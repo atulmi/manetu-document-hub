@@ -33,7 +33,7 @@ export const useStore = create<RoleSlice & SecuritySlice & ThemeSlice & AgentSli
     })),
     securityEnabled: true,
     toggleSecurity: () => set((s) => ({ securityEnabled: !s.securityEnabled })),
-    themeMode: 'dark',
+    themeMode: 'light',
     toggleTheme: () => set((s) => ({ themeMode: s.themeMode === 'dark' ? 'light' : 'dark' })),
     currentTask: null,
     setTask: (task) => set({ currentTask: task }),
