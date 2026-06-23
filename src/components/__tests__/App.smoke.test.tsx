@@ -10,7 +10,7 @@ test('renders without crashing', () => {
       <App />
     </ThemeProvider>,
   );
-  expect(screen.getByText('AI Document Hub')).toBeInTheDocument();
+  expect(screen.getByText('Manetu AI Document Hub')).toBeInTheDocument();
   expect(screen.getByText('Document Library')).toBeInTheDocument();
   expect(screen.getByText('Agent Task View')).toBeInTheDocument();
   expect(screen.getByText('Audit Log')).toBeInTheDocument();

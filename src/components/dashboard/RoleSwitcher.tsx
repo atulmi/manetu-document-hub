@@ -41,18 +41,10 @@ export function RoleSwitcher() {
           value={activeRole}
           onChange={handleChange}
           variant="outlined"
-          sx={(t) => ({
+          sx={{
             minWidth: 140,
-            '.MuiSelect-select': { py: 0.75, display: 'flex', alignItems: 'center', gap: 1 },
-            '.MuiOutlinedInput-notchedOutline': {
-              borderColor: t.palette.mode === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.4)',
-              borderWidth: 1.5,
-            },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: t.palette.mode === 'dark' ? '#000' : 'rgba(0,0,0,0.6)',
-            },
-            bgcolor: t.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : '#fff',
-          })}
+            '.MuiSelect-select': { py: 0.5, display: 'flex', alignItems: 'center', gap: 1 },
+          }}
           renderValue={(val) => {
             const r = ROLES.find((r) => r.value === val)!;
             return (

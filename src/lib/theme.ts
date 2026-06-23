@@ -32,6 +32,11 @@ export function buildTheme(mode: PaletteMode) {
           root: { backgroundImage: 'none' },
         },
       },
+      MuiButton: {
+        styleOverrides: {
+          root: { textTransform: 'none', fontWeight: 600 },
+        },
+      },
       MuiAppBar: {
         styleOverrides: {
           root: {
