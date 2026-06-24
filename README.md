@@ -1,16 +1,17 @@
 # AI Document Hub
 
-A React/TypeScript dashboard that demonstrates **AI agent orchestration** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), secured by the [Manetu Policy Engine (MPE)](https://manetu.github.io/policyengine). Every AI tool call is gated by fine-grained, role-based access control — and every policy decision is visible in a real-time audit log.
+A React/TypeScript dashboard that demonstrates **AI agent orchestration** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), secured by the [Manetu Policy Engine (MPE)](https://manetu.github.io/policyengine). Every AI tool call is gated by fine-grained, role-based access control — and every policy decision is visible in a real-time audit trail.
 
 ## What This Demonstrates
 
 Most AI agent demos ignore security. This project puts it front and center:
 
-- An AI agent (Claude) answers natural-language questions by reading documents from a sensitivity-tiered corpus
+- An AI agent (Claude Sonnet 4.6) answers natural-language questions by reading documents from a sensitivity-tiered corpus
 - Every document read and tool invocation is evaluated by the Manetu Policy Engine **before** execution
 - A **role switcher** lets you instantly see what different users can access — a viewer can only read public docs, while a developer has full access
-- A **live audit log** streams every allow/deny decision as it happens
+- A **prompt history** panel records every agent run with its policy decisions — click any past run to review the full step trace
 - A **security demo toggle** lets you disable policy enforcement to show what happens without it
+- State persists across page reloads via localStorage
 
 ## Architecture
 
@@ -18,38 +19,47 @@ Most AI agent demos ignore security. This project puts it front and center:
  User (Browser)
       |
       v
-┌─────────────────────────────────────────────────────────┐
-│  React Frontend (Vite + MUI + Zustand)                  │
-│                                                         │
-│  ┌──────────────┐ ┌──────────────┐ ┌─────────────────┐  │
-│  │ Document     │ │ Agent Task   │ │ Audit Log       │  │
-│  │ Library      │ │ Panel        │ │ Panel           │  │
-│  │ (left)       │ │ (center)     │ │ (right)         │  │
-│  └──────────────┘ └──────────────┘ └─────────────────┘  │
-└────────────────────────┬────────────────────────────────┘
-                         │ fetch /api/*
-                         v
-┌─────────────────────────────────────────────────────────┐
-│  Express Backend Proxy (Node.js)                        │
-│                                                         │
-│  POST /api/agent/run  ──> Claude API + MCP tools        │
-│  GET  /api/tools      ──> MCP tool list (filtered)      │
-│  GET  /api/audit/stream ──> SSE audit events            │
-│                                                         │
-│  Every tool call passes through:                        │
-│    ┌─────────────────────────────┐                      │
-│    │  Manetu Policy Engine (MPE) │                      │
-│    │  evaluate(role, MRN, op)    │                      │
-│    │  → allow / deny             │                      │
-│    └─────────────────────────────┘                      │
-└─────────────────────────────────────────────────────────┘
-                         │
-                         v
-┌─────────────────────────────────────────────────────────┐
-│  MCP Filesystem Server                                  │
-│  Tools: list-directory, read-file, search-files         │
-│  Corpus: 15 docs across public/internal/confidential    │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  React Frontend (Vite + MUI + Zustand)                       │
+│                                                              │
+│  ┌──────────────┐ ┌────────────────┐ ┌────────────────────┐  │
+│  │ Document     │ │ Agent Task     │ │ Prompt History     │  │
+│  │ Library      │ │ View           │ │ & Agent Steps      │  │
+│  │              │ │                │ │                    │  │
+│  │ Browse docs  │ │ Chat prompt +  │ │ List view: past    │  │
+│  │ by tier,     │ │ suggested      │ │ runs with policy   │  │
+│  │ sensitivity  │ │ prompts        │ │ allow/deny counts  │  │
+│  │ badges,      │ │                │ │                    │  │
+│  │ click to     │ │                │ │ Detail view: step  │  │
+│  │ preview      │ │                │ │ trace cards,       │  │
+│  │              │ │                │ │ policy checks      │  │
+│  └──────────────┘ └────────────────┘ └────────────────────┘  │
+└───────────────────────────┬──────────────────────────────────┘
+                            │ fetch /api/*
+                            v
+┌──────────────────────────────────────────────────────────────┐
+│  Express Backend Proxy (Node.js)                             │
+│                                                              │
+│  POST /api/agent/run  ──> Claude API + MCP tools (SSE)       │
+│  GET  /api/tools      ──> MCP tool list (MPE-filtered)       │
+│  GET  /api/docs       ──> Document list with access flags    │
+│  GET  /api/docs/content/:path ──> Document content (MPE-gated)│
+│  GET  /api/audit/stream ──> SSE audit event broadcast        │
+│                                                              │
+│  Every tool call passes through:                             │
+│    ┌─────────────────────────────┐                           │
+│    │  Manetu Policy Engine (OPA) │                           │
+│    │  evaluate(role, MRN, op)    │                           │
+│    │  → allow / deny             │                           │
+│    └─────────────────────────────┘                           │
+└──────────────────────────────────────────────────────────────┘
+                            │
+                            v
+┌──────────────────────────────────────────────────────────────┐
+│  Document Corpus (filesystem)                                │
+│  15 docs across public / internal / confidential tiers       │
+│  Tools: list-directory, read-file, keyword-search            │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ## Roles and Access
@@ -67,39 +77,62 @@ Most AI agent demos ignore security. This project puts it front and center:
 ### Prerequisites
 
 - Node.js 20+
-- Docker (for MPE — optional, not yet required for frontend dev)
+- Docker Desktop (for OPA policy engine)
+- Anthropic API key ([console.anthropic.com](https://console.anthropic.com/settings/keys))
 
 ### Install and Run
 
 ```bash
 git clone <repo-url>
-cd manetu-ui-project
+cd manetu-document-hub
 npm install
 
-# Frontend only
-npm run dev              # http://localhost:5173
+# 1. Start the policy engine
+docker compose -f docker/docker-compose.yml up -d
 
-# Frontend + backend
+# 2. Set up environment
+cp .env.example .env
+# Edit .env and add your ANTHROPIC_API_KEY
+
+# 3. Run the app
 npm run dev:all          # Vite on :5173 + Express on :3001
-
-# Backend only
-npm run server:dev       # http://localhost:3001
 ```
+
+The app will be at **http://localhost:5173**.
+
+### Running Without Docker
+
+The app works without Docker — the backend will return a clear error if OPA is unreachable when security is enabled. You can disable the policy engine via the toggle in the header to use the agent without OPA.
 
 ### Environment Variables
 
-Copy `.env.example` and fill in your keys:
-
-```bash
-cp .env.example .env
-```
-
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | Claude API key (server-side only) |
-| `MPE_BASE_URL` | Manetu Policy Engine URL (default: `http://localhost:8181`) |
+| `ANTHROPIC_API_KEY` | Claude API key (required for agent) |
+| `MPE_BASE_URL` | OPA policy engine URL (default: `http://localhost:8181`) |
 | `MCP_DOCS_PATH` | Path to document corpus (default: `./docs-corpus`) |
 | `PORT` | Backend server port (default: `3001`) |
+
+## UI Overview
+
+### Three-Panel Layout
+
+- **Left — Document Library**: Browse 15 documents organized by sensitivity tier (public/internal/confidential). Documents show sensitivity badges and lock icons based on the active role. Click to preview in a modal with full markdown rendering.
+
+- **Center — Agent Task View**: Chat interface powered by Claude Sonnet 4.6. Type a question or click a suggested prompt. The agent reads documents, respects policy checks, and streams responses. Shows task status (running/completed/failed) with stop and new task controls.
+
+- **Right — Prompt History & Agent Steps**: Master-detail view. The list shows all past prompt runs with role, timestamp, and allow/deny counts. Click any run to see the full step trace: thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer with source citations.
+
+### Header Controls
+
+- **Brand bar** — purple Manetu AI Document Hub branding
+- **Controls row** — Role switcher (5 roles with color-coded dots), Manetu Policy Engine toggle (enabled/disabled with confirmation dialog), and dark/light theme toggle
+
+### Security Demo Mode
+
+Toggle the policy engine off to see the difference:
+- **Enabled**: Every tool call is checked against OPA. Denied calls show the policy rule that blocked them.
+- **Disabled**: All tool calls bypass security. A red warning banner appears. Audit events show "BYPASSED" instead of "ALLOWED"/"DENIED".
 
 ## Document Corpus
 
@@ -131,42 +164,47 @@ npm run cypress:run                 # headless (CI)
 ```
 src/
   components/
-    dashboard/       App shell, header, panels, role switcher
-    agent/           Agent task panel, step trace (planned)
-    audit/           Audit log panel (planned)
-    docs/            Document library browser (planned)
-  hooks/             Custom React hooks
+    dashboard/       App shell, header, panels, role switcher, security toggle
+    agent/           Agent task panel, step trace cards, prompt history
+    audit/           Audit event rows, audit log panel
+    docs/            Document library, doc cards, sensitivity badges, preview modal
+  hooks/
+    useAgentRun.ts   SSE stream parser for agent runs
+    useAuditStream.ts  EventSource connection to audit SSE endpoint
+    useDocLibrary.ts   Fetches docs with role-based access flags
+    useDocContent.ts   Fetches document content for preview
   lib/
-    api.ts           Typed fetch wrapper (auto-attaches x-role header)
-    store.ts         Zustand store (role, security, theme, agent state)
-    theme.ts         MUI theme (dark/light mode)
+    api.ts           Typed fetch wrapper (auto-attaches x-role, x-security-enabled)
+    store.ts         Zustand store with localStorage persistence
+    theme.ts         MUI theme (dark/light mode, purple brand palette)
   types/
     index.ts         All domain types (single source of truth)
   pages/
     Dashboard.tsx    Main page layout
-  test/
-    setup.ts         Vitest setup (jest-dom matchers, ResizeObserver mock)
-    server.ts        MSW server for API mocking
 server/
   index.ts           Express entry point
   routes/
-    agent.ts         POST /api/agent/run (stub)
-    tools.ts         GET /api/tools (stub)
-    audit.ts         GET /api/audit/stream (stub)
+    agent.ts         POST /api/agent/run — SSE streaming agent orchestration
+    tools.ts         GET /api/tools — MPE-filtered tool list with 60s cache
+    docs.ts          GET /api/docs — doc list; GET /api/docs/content/:path — doc content
+    audit.ts         GET /api/audit/stream — persistent SSE audit broadcast
   middleware/
     roleExtract.ts   x-role header validation
   lib/
-    mpe-client.ts    Typed MPE/OPA client (evaluate + discover)
+    claude-agent.ts  Agent loop: Claude API → MPE check → tool execution → SSE emit
+    mpe-client.ts    Typed OPA client (evaluate + discover)
+    mcp-fs-client.ts Filesystem client (list, read, keyword search with frontmatter)
+    audit-bus.ts     Event bus with 50-event ring buffer
+    tool-registry.ts 6 MCP tool definitions with MRNs
 docker/
-  docker-compose.yml     OPA as policy engine on port 8181
-  docker-compose.ci.yml  CI override (quieter logging)
-  docker-entrypoint.sh   Standalone policy loader script
+  docker-compose.yml     OPA policy engine on port 8181
+  docker-compose.ci.yml  CI override
 policies/
-  docs-domain.rego   OPA Rego policy (default-deny, MRN matching)
+  docs-domain.rego   OPA Rego policy (default-deny, MRN wildcard matching)
   roles-data.json    Role grants for all 5 roles
 cypress/
   e2e/               E2E test specs
-  fixtures/          Mock API responses
+  fixtures/          Mock API responses (12 fixture files)
   support/           Custom commands (switchRole, toggleSecurity, etc.)
 docs-corpus/
   public/            5 public documents
@@ -190,39 +228,12 @@ No API keys or Docker required in CI — Cypress tests use `cy.intercept()` to m
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, TypeScript, MUI v7, Zustand |
+| Frontend | React 19, TypeScript, MUI v7, Zustand (persisted), Framer Motion |
 | Backend | Express 5, Node.js 20 |
-| AI | Claude (Anthropic SDK), Model Context Protocol |
-| Policy Engine | Manetu Policy Engine (OPA-based) |
+| AI | Claude Sonnet 4.6 (Anthropic SDK) |
+| Policy Engine | OPA (Open Policy Agent) with Rego policies |
+| Document Parsing | gray-matter (YAML frontmatter) |
+| Markdown | react-markdown + remark-gfm |
 | Testing | Vitest, React Testing Library, MSW, Cypress |
 | Build | Vite 7 |
 | CI | GitHub Actions |
-
-## Status
-
-### Completed
-- Project scaffolding and directory structure
-- TypeScript domain types (single source of truth)
-- MUI + Zustand setup with dark/light theme toggle
-- Express backend with stubbed routes and role middleware
-- Vitest + React Testing Library + MSW configuration
-- Cypress E2E configuration with fixtures and custom commands
-- Sample document corpus (15 docs across 3 sensitivity tiers)
-- GitHub Actions CI pipeline (5-stage: lint, typecheck, test, build, e2e)
-- Three-panel resizable layout with drag handles (Document Library / Agent Task / Audit Log)
-- Split header: purple brand bar + neutral controls row
-- Role switcher with color-coded dot indicators and toast notifications
-- Security demo toggle with confirmation dialog and warning banner
-- Typed API fetch wrapper with automatic `x-role` and `x-security-enabled` headers
-- Docker Compose setup with OPA as the policy engine
-- OPA Rego policies with role-based MRN access control (verified: viewer denied confidential, admin allowed)
-- MPE client library with typed evaluate/discover and custom error types (5 unit tests)
-
-### Planned
-- MCP filesystem client
-- Claude agent orchestration loop
-- Backend route implementations (tools, agent/run, audit/stream)
-- Document library browser with sensitivity badges
-- Agent task panel with step trace cards
-- Live audit log panel with allow/deny streaming
-- Full Cypress E2E test suites
