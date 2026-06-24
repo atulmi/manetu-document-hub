@@ -9,6 +9,8 @@ interface ThreePanelProps {
   left?: ReactNode;
   center?: ReactNode;
   right?: ReactNode;
+  rightTitle?: string;
+  rightAction?: ReactNode;
 }
 
 function ResizeHandle() {
@@ -42,10 +44,12 @@ function ResizeHandle() {
 function PanelCard({
   title,
   subtitle,
+  action,
   children,
 }: {
   title: string;
   subtitle?: string;
+  action?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -61,13 +65,13 @@ function PanelCard({
         boxShadow: "0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)",
       }}
     >
-      <PanelHeader title={title} subtitle={subtitle} />
+      <PanelHeader title={title} subtitle={subtitle} action={action} />
       <Box sx={{ flex: 1, overflow: "auto", p: 1 }}>{children}</Box>
     </Box>
   );
 }
 
-export function ThreePanel({ left, center, right }: ThreePanelProps) {
+export function ThreePanel({ left, center, right, rightTitle, rightAction }: ThreePanelProps) {
   const theme = useTheme();
   const stacked = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -85,7 +89,7 @@ export function ThreePanel({ left, center, right }: ThreePanelProps) {
       >
         <PanelCard title="Document Library">{left}</PanelCard>
         <PanelCard title="Agent Task View">{center}</PanelCard>
-        <PanelCard title="Prompt History & Agent Steps">{right}</PanelCard>
+        <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
       </Box>
     );
   }
@@ -111,7 +115,7 @@ export function ThreePanel({ left, center, right }: ThreePanelProps) {
 
         <Panel defaultSize="420px" minSize="280px" maxSize="600px">
           <Box sx={{ height: "100%", pl: 0.5, pr: 0.5, py: 0.5 }}>
-            <PanelCard title="Prompt History & Agent Steps">{right}</PanelCard>
+            <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
           </Box>
         </Panel>
       </Group>

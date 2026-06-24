@@ -8,14 +8,16 @@ import type { AgentStep, AuditEvent } from '../types.ts';
 
 export const agentRouter = Router();
 
-function writeSSE(res: import('express').Response, event: string, data: unknown) {
+function writeSSE(res: import('express').Response, event: string, data: unknown): boolean {
   try {
-    if (!res.writableEnded) {
+    if (!res.writableEnded && !res.destroyed) {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+      return true;
     }
   } catch {
-    // response already closed
+    // connection lost
   }
+  return false;
 }
 
 agentRouter.post('/run', roleExtract, async (req, res) => {
@@ -48,10 +50,12 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
-  let aborted = false;
-  req.on('close', () => { aborted = true; });
+  // Track client disconnect via response destroy, not request close
+  let clientGone = false;
+  res.on('close', () => { clientGone = true; });
 
   const mpeClient = buildMPEClient();
   const fsClient = buildFSClient();
@@ -66,25 +70,21 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
       mpeClient,
       fsClient,
       onStep: (step: AgentStep) => {
-        if (!aborted) writeSSE(res, 'step', step);
+        writeSSE(res, 'step', step);
       },
       onAudit: (event: AuditEvent) => {
         auditBus.emit('audit', event);
-        if (!aborted) writeSSE(res, 'audit', event);
+        writeSSE(res, 'audit', event);
       },
     });
 
-    if (!aborted) {
-      writeSSE(res, 'done', { taskId: task.id });
-    }
+    writeSSE(res, 'done', { taskId: task.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Agent run error:', err);
-    if (!aborted) {
-      writeSSE(res, 'error', { message });
-    }
+    console.error('Agent run error:', message);
+    writeSSE(res, 'error', { message });
   } finally {
-    console.log('Agent run finished, aborted:', aborted);
-    if (!aborted && !res.writableEnded) res.end();
+    console.log('Agent run finished, clientGone:', clientGone);
+    try { if (!res.writableEnded) res.end(); } catch { /* already closed */ }
   }
 });

@@ -7,7 +7,11 @@ function failTask(message: string) {
     if (!s.currentTask) return {};
     const finished = { ...s.currentTask, status: 'failed' as const, finalAnswer: message, completedAt: new Date().toISOString() };
     const history = s.taskHistory.filter((t) => t.id !== finished.id);
-    return { currentTask: finished, taskHistory: [...history, finished] };
+    return {
+      currentTask: finished,
+      taskHistory: [...history, finished],
+      auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
+    };
   });
 }
 
@@ -120,7 +124,11 @@ export function useAgentRun() {
                     completedAt: new Date().toISOString(),
                   };
                   const history = s.taskHistory.filter((t) => t.id !== finalId);
-                  return { currentTask: finished, taskHistory: [...history, finished] };
+                  return {
+                    currentTask: finished,
+                    taskHistory: [...history, finished],
+                    auditPrompts: { ...s.auditPrompts, [finalId]: s.currentTask.prompt },
+                  };
                 });
               } else if (eventType === 'error') {
                 const msg = (data as { message?: string }).message ?? 'Agent error';
@@ -141,6 +149,7 @@ export function useAgentRun() {
         return {
           currentTask: finished,
           taskHistory: s.taskHistory.some((t) => t.id === finished.id) ? s.taskHistory : [...s.taskHistory, finished],
+          auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
         };
       });
     } catch (err) {

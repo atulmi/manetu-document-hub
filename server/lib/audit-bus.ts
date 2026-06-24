@@ -21,6 +21,10 @@ class AuditBus extends EventEmitter {
   getRecentEvents(): AuditEvent[] {
     return [...this.buffer];
   }
+
+  clear(): void {
+    this.buffer = [];
+  }
 }
 
 export const auditBus = new AuditBus();

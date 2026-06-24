@@ -52,7 +52,16 @@ export function useAuditStream() {
     };
   }, [connect]);
 
-  const clear = useCallback(() => setEvents([]), []);
+  const clear = useCallback(() => {
+    setEvents([]);
+    // Clear server-side buffer and reconnect to avoid replay
+    fetch('/api/audit/clear', { method: 'DELETE' }).catch(() => {});
+    esRef.current?.close();
+    esRef.current = null;
+    setConnected(false);
+    retriesRef.current = 0;
+    setTimeout(connect, 500);
+  }, [connect]);
 
   return { events, connected, clear };
 }

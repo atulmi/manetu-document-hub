@@ -5,9 +5,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import type { DocSensitivity } from '../../types';
 
 const CONFIG: Record<DocSensitivity, { color: 'success' | 'warning' | 'error'; label: string; Icon: typeof PublicIcon }> = {
-  public:       { color: 'success', label: 'PUBLIC',       Icon: PublicIcon },
-  internal:     { color: 'warning', label: 'INTERNAL',     Icon: BusinessIcon },
-  confidential: { color: 'error',   label: 'CONFIDENTIAL', Icon: LockIcon },
+  public:       { color: 'success', label: 'Public',       Icon: PublicIcon },
+  internal:     { color: 'warning', label: 'Internal',     Icon: BusinessIcon },
+  confidential: { color: 'error',   label: 'Confidential', Icon: LockIcon },
 };
 
 interface SensitivityBadgeProps {

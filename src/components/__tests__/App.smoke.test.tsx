@@ -13,5 +13,5 @@ test('renders without crashing', () => {
   expect(screen.getByText('Manetu AI Document Hub')).toBeInTheDocument();
   expect(screen.getByText('Document Library')).toBeInTheDocument();
   expect(screen.getByText('Agent Task View')).toBeInTheDocument();
-  expect(screen.getByText('Prompt History & Agent Steps')).toBeInTheDocument();
+  expect(screen.getByText('Prompt History')).toBeInTheDocument();
 });

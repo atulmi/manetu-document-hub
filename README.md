@@ -2,16 +2,22 @@
 
 A React/TypeScript dashboard that demonstrates **AI agent orchestration** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), secured by the [Manetu Policy Engine (MPE)](https://manetu.github.io/policyengine). Every AI tool call is gated by fine-grained, role-based access control — and every policy decision is visible in a real-time audit trail.
 
-## What This Demonstrates
+> **Built with Claude** — this project was developed using [Claude Code](https://claude.ai/code) (Anthropic's AI coding agent) for implementation, architecture decisions, and iterative UI refinement.
 
-Most AI agent demos ignore security. This project puts it front and center:
+## Why This Exists
 
-- An AI agent (Claude Sonnet 4.6) answers natural-language questions by reading documents from a sensitivity-tiered corpus
-- Every document read and tool invocation is evaluated by the Manetu Policy Engine **before** execution
-- A **role switcher** lets you instantly see what different users can access — a viewer can only read public docs, while a developer has full access
-- A **prompt history** panel records every agent run with its policy decisions — click any past run to review the full step trace
-- A **security demo toggle** lets you disable policy enforcement to show what happens without it
-- State persists across page reloads via localStorage
+As AI agents become more capable — reading files, calling APIs, executing code — the question of **who can do what** becomes critical. Traditional access control (RBAC, ACLs) was designed for human users navigating predefined workflows. AI agents break that model — they chain tool calls autonomously, access resources the user never explicitly requested, and can escalate through indirect paths (e.g., asking to "summarize all documents" triggers reads across every sensitivity tier). A role that's safe for a human clicking one file at a time may be dangerously broad when an agent iterates through the entire corpus in seconds.
+
+The [Manetu Policy Engine](https://manetu.github.io/policyengine) addresses this by evaluating access at the **tool call level** using MRN-based policies (Manetu Resource Notation). Instead of blanket "this user can access this service," it answers granular questions like: *"Can a viewer-role agent invoke `read-file` on a confidential document at this moment?"* — and produces a structured audit record for every decision.
+
+This project makes that process **visible and interactive**. You can:
+
+- Watch an AI agent (Claude Sonnet 4.6) answer questions by reading documents from a sensitivity-tiered corpus
+- See every tool invocation evaluated by the policy engine **before** execution — with allow/deny decisions shown in real time
+- **Switch roles** instantly to compare what different users can access — a viewer can only read public docs, while an admin has full access
+- Browse **prompt history** with full step traces — every thinking step, tool call, MRN, policy rule, and final answer is recorded and reviewable
+- **Toggle the policy engine off** to see the difference — demonstrating exactly what the security layer prevents
+- All state persists across page reloads via localStorage
 
 ## Architecture
 

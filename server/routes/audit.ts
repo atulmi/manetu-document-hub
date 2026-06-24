@@ -4,6 +4,11 @@ import type { AuditEvent } from '../types.ts';
 
 export const auditRouter = Router();
 
+auditRouter.delete('/clear', (_req, res) => {
+  auditBus.clear();
+  res.json({ cleared: true });
+});
+
 auditRouter.get('/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');

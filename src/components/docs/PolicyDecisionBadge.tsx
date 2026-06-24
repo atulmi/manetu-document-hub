@@ -6,9 +6,9 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 type Decision = 'allow' | 'deny' | 'bypassed';
 
 const CONFIG: Record<Decision, { color: 'success' | 'error' | 'warning'; label: string; Icon: typeof CheckCircle }> = {
-  allow:    { color: 'success', label: 'ALLOWED',  Icon: CheckCircle },
-  deny:     { color: 'error',   label: 'DENIED',   Icon: Cancel },
-  bypassed: { color: 'warning', label: 'BYPASSED', Icon: WarningAmber },
+  allow:    { color: 'success', label: 'Allowed',  Icon: CheckCircle },
+  deny:     { color: 'error',   label: 'Denied',   Icon: Cancel },
+  bypassed: { color: 'warning', label: 'Bypassed', Icon: WarningAmber },
 };
 
 interface PolicyDecisionBadgeProps {
