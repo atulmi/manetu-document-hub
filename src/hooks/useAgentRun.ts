@@ -2,6 +2,14 @@ import { useRef, useCallback } from 'react';
 import { useStore } from '../lib/store';
 import type { AgentStep, AuditEvent } from '../types';
 
+function failTask(message: string) {
+  useStore.setState((s) => ({
+    currentTask: s.currentTask
+      ? { ...s.currentTask, status: 'failed', finalAnswer: message, completedAt: new Date().toISOString() }
+      : null,
+  }));
+}
+
 export function useAgentRun() {
   const abortRef = useRef<AbortController | null>(null);
   const currentTask = useStore((s) => s.currentTask);
@@ -22,8 +30,9 @@ export function useAgentRun() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    let res: Response;
     try {
-      const res = await fetch('/api/agent/run', {
+      res = await fetch('/api/agent/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,15 +42,30 @@ export function useAgentRun() {
         body: JSON.stringify({ prompt }),
         signal: controller.signal,
       });
-
-      if (!res.ok || !res.body) {
-        useStore.setState((s) => ({
-          currentTask: s.currentTask ? { ...s.currentTask, status: 'failed' } : null,
-        }));
-        return;
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        failTask('Cannot reach the backend server. Start it with: npm run server:dev');
       }
+      return;
+    }
 
-      const reader = res.body.getReader();
+    const contentType = res.headers.get('content-type') ?? '';
+    if (!res.ok || !contentType.includes('text/event-stream')) {
+      let message = `Server error (${res.status})`;
+      try {
+        if (contentType.includes('application/json')) {
+          const body = await res.json() as { error?: string };
+          if (body.error) message = body.error;
+        } else {
+          message = 'Backend server is not running. Start it with: npm run server:dev';
+        }
+      } catch { /* use default message */ }
+      failTask(message);
+      return;
+    }
+
+    try {
+      const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 
@@ -72,9 +96,8 @@ export function useAgentRun() {
                     : null,
                 }));
               } else if (eventType === 'error') {
-                useStore.setState((s) => ({
-                  currentTask: s.currentTask ? { ...s.currentTask, status: 'failed' } : null,
-                }));
+                const msg = (data as { message?: string }).message ?? 'Agent error';
+                failTask(msg);
               }
             } catch {
               // skip malformed JSON
@@ -83,11 +106,16 @@ export function useAgentRun() {
           }
         }
       }
+
+      // Stream ended — if task is still running, mark it completed
+      useStore.setState((s) => ({
+        currentTask: s.currentTask?.status === 'running'
+          ? { ...s.currentTask, status: 'completed', completedAt: new Date().toISOString() }
+          : s.currentTask,
+      }));
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
-        useStore.setState((s) => ({
-          currentTask: s.currentTask ? { ...s.currentTask, status: 'failed' } : null,
-        }));
+        failTask('Connection to agent lost unexpectedly.');
       }
     } finally {
       abortRef.current = null;
@@ -97,11 +125,7 @@ export function useAgentRun() {
   const stop = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
-    useStore.setState((s) => ({
-      currentTask: s.currentTask
-        ? { ...s.currentTask, status: 'failed', completedAt: new Date().toISOString() }
-        : null,
-    }));
+    failTask('Stopped by user.');
   }, []);
 
   return {

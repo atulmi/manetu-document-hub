@@ -111,8 +111,11 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
     startedAt: now(),
   };
 
-  const anthropic = new Anthropic();
+  const MAX_ITERATIONS = 10;
+
+  const anthropic = new Anthropic({ timeout: 30_000 });
   let stepNumber = 0;
+  let iterations = 0;
 
   const messages: Anthropic.MessageParam[] = [
     { role: 'user', content: prompt },
@@ -121,6 +124,19 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
   let continueLoop = true;
 
   while (continueLoop) {
+    iterations++;
+    if (iterations > MAX_ITERATIONS) {
+      const step: AgentStep = {
+        stepNumber: ++stepNumber,
+        type: 'final-answer',
+        content: 'I reached the maximum number of tool call iterations. Here is what I found so far based on the documents I was able to access.',
+        timestamp: now(),
+      };
+      task.steps.push(step);
+      task.finalAnswer = step.content;
+      onStep(step);
+      break;
+    }
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 4096,

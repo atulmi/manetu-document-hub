@@ -6,9 +6,10 @@ import Typography from '@mui/material/Typography';
 import Chip from '@mui/material/Chip';
 import Send from '@mui/icons-material/Send';
 import Stop from '@mui/icons-material/Stop';
+import Replay from '@mui/icons-material/Replay';
 import { useStore } from '../../lib/store';
 import { useAgentRun } from '../../hooks/useAgentRun';
-import { StepTrace } from './StepTrace';
+import { AuditLogPanel } from '../audit/AuditLogPanel';
 
 const SUGGESTIONS = [
   'What documents discuss our security policy?',
@@ -21,11 +22,18 @@ export function AgentTaskPanel() {
   const [prompt, setPrompt] = useState('');
   const { submit, stop, isRunning } = useAgentRun();
   const currentTask = useStore((s) => s.currentTask);
+  const clearTask = useStore((s) => s.clearTask);
+
+  const displayPrompt = isRunning ? (currentTask?.prompt ?? prompt) : prompt;
 
   const handleSubmit = () => {
     const text = prompt.trim();
     if (!text || isRunning) return;
     submit(text);
+  };
+
+  const handleNewTask = () => {
+    clearTask();
     setPrompt('');
   };
 
@@ -40,7 +48,7 @@ export function AgentTaskPanel() {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ px: 2, pt: 2, pb: 1, flexShrink: 0 }}>
         <TextField
-          value={prompt}
+          value={displayPrompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask the AI assistant about your documents..."
@@ -51,8 +59,11 @@ export function AgentTaskPanel() {
           disabled={isRunning}
           size="small"
           data-testid="agent-prompt-input"
-          sx={{ mb: 1 }}
+          sx={{ mb: 0.5 }}
         />
+        <Typography variant="caption" color="text.disabled" sx={{ mb: 0.5, fontSize: '0.7rem' }}>
+          Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy Engine
+        </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {isRunning ? (
             <Button
@@ -78,13 +89,20 @@ export function AgentTaskPanel() {
             </Button>
           )}
           {currentTask && (
-            <Chip
-              label={currentTask.status}
-              size="small"
-              color={currentTask.status === 'completed' ? 'success' : currentTask.status === 'failed' ? 'error' : 'info'}
-              variant="outlined"
-              sx={{ ml: 'auto', fontWeight: 600, fontSize: '0.7rem' }}
-            />
+            <>
+              <Chip
+                label={currentTask.status}
+                size="small"
+                color={currentTask.status === 'completed' ? 'success' : currentTask.status === 'failed' ? 'error' : 'info'}
+                variant="outlined"
+                sx={{ ml: 'auto', fontWeight: 600, fontSize: '0.7rem' }}
+              />
+              {!isRunning && (
+                <Button size="small" startIcon={<Replay />} onClick={handleNewTask}>
+                  New task
+                </Button>
+              )}
+            </>
           )}
         </Box>
       </Box>
@@ -109,11 +127,9 @@ export function AgentTaskPanel() {
         </Box>
       )}
 
-      {currentTask && (
-        <Box sx={{ flex: 1, overflow: 'auto', px: 2, py: 1 }}>
-          <StepTrace steps={currentTask.steps} />
-        </Box>
-      )}
+      <Box sx={{ flex: 1, overflow: 'hidden', borderTop: 1, borderColor: 'divider', mt: 1 }}>
+        <AuditLogPanel />
+      </Box>
     </Box>
   );
 }

@@ -1,4 +1,9 @@
 import 'dotenv/config';
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled rejection:', err);
+});
+
 import express from 'express';
 import cors from 'cors';
 import { agentRouter } from './routes/agent.ts';

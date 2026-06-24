@@ -56,7 +56,7 @@ export function ThreePanel({ left, center, right }: ThreePanelProps) {
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         <PanelSlot title="Document Library">{left}</PanelSlot>
         <PanelSlot title="Agent Task View">{center}</PanelSlot>
-        <PanelSlot title="Audit Log">{right}</PanelSlot>
+        <PanelSlot title="Agent Steps">{right}</PanelSlot>
       </Box>
     );
   }
@@ -76,8 +76,8 @@ export function ThreePanel({ left, center, right }: ThreePanelProps) {
 
         <ResizeHandle />
 
-        <Panel defaultSize="320px" minSize="200px" maxSize="500px">
-          <PanelSlot title="Audit Log">{right}</PanelSlot>
+        <Panel defaultSize="420px" minSize="280px" maxSize="600px">
+          <PanelSlot title="Agent Steps">{right}</PanelSlot>
         </Panel>
       </Group>
     </Box>
