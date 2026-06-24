@@ -144,18 +144,27 @@ function ListView({
               No prompt runs yet.
             </Typography>
             <Typography variant="body2" color="text.disabled">
-              Submit a prompt in the Agent Task View to see the AI agent's
-              reasoning steps and policy decisions here.
+              Submit a prompt in the Agent Task View. Each run will appear here
+              — click on it to view the AI agent's reasoning steps, tool calls,
+              and policy check results.
             </Typography>
           </Box>
         ) : (
-          groups.map((group) => (
-            <PromptRow
-              key={group.taskId}
-              group={group}
-              onClick={() => onSelect(group.taskId)}
-            />
-          ))
+          <>
+            <Box sx={{ px: 1.5, py: 0.75, bgcolor: "action.hover" }}>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+                Click a prompt to view its AI agent steps and policy checks
+              </Typography>
+            </Box>
+            <Divider />
+            {groups.map((group) => (
+              <PromptRow
+                key={group.taskId}
+                group={group}
+                onClick={() => onSelect(group.taskId)}
+              />
+            ))}
+          </>
         )}
       </Box>
     </Box>
