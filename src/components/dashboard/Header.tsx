@@ -38,6 +38,9 @@ export function Header() {
           bgcolor: 'background.paper',
           borderBottom: 1,
           borderColor: 'divider',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         <Tooltip title="Simulate different user roles to see how access policies change what the AI agent can do" arrow>

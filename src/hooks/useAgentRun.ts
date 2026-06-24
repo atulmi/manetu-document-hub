@@ -6,7 +6,8 @@ function failTask(message: string) {
   useStore.setState((s) => {
     if (!s.currentTask) return {};
     const finished = { ...s.currentTask, status: 'failed' as const, finalAnswer: message, completedAt: new Date().toISOString() };
-    return { currentTask: finished, taskHistory: [...s.taskHistory, finished] };
+    const history = s.taskHistory.filter((t) => t.id !== finished.id);
+    return { currentTask: finished, taskHistory: [...history, finished] };
   });
 }
 
@@ -90,23 +91,36 @@ export function useAgentRun() {
               } else if (eventType === 'audit') {
                 const auditData = data as unknown as AuditEvent;
                 // Sync client task ID with backend task ID on first audit event
-                useStore.setState((s) => ({
-                  currentTask: s.currentTask && s.currentTask.id !== auditData.agentTaskId
-                    ? { ...s.currentTask, id: auditData.agentTaskId }
-                    : s.currentTask,
-                }));
+                useStore.setState((s) => {
+                  if (!s.currentTask || s.currentTask.id === auditData.agentTaskId) return {};
+                  const oldId = s.currentTask.id;
+                  const newPrompts = { ...s.auditPrompts };
+                  if (newPrompts[oldId]) {
+                    newPrompts[auditData.agentTaskId] = newPrompts[oldId];
+                    delete newPrompts[oldId];
+                  }
+                  return {
+                    currentTask: { ...s.currentTask, id: auditData.agentTaskId },
+                    auditPrompts: newPrompts,
+                    taskHistory: s.taskHistory.map((t) =>
+                      t.id === oldId ? { ...t, id: auditData.agentTaskId } : t
+                    ),
+                  };
+                });
                 appendAuditEvent(auditData);
               } else if (eventType === 'done') {
                 const backendTaskId = (data as { taskId?: string }).taskId;
                 useStore.setState((s) => {
                   if (!s.currentTask) return {};
+                  const finalId = backendTaskId ?? s.currentTask.id;
                   const finished = {
                     ...s.currentTask,
-                    ...(backendTaskId && { id: backendTaskId }),
+                    id: finalId,
                     status: 'completed' as const,
                     completedAt: new Date().toISOString(),
                   };
-                  return { currentTask: finished, taskHistory: [...s.taskHistory, finished] };
+                  const history = s.taskHistory.filter((t) => t.id !== finalId);
+                  return { currentTask: finished, taskHistory: [...history, finished] };
                 });
               } else if (eventType === 'error') {
                 const msg = (data as { message?: string }).message ?? 'Agent error';

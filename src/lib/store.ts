@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { PaletteMode } from '@mui/material/styles';
 import type { UserRole, AgentTask, AgentStep, AuditEvent, DocMeta } from '../types';
 
@@ -33,7 +34,10 @@ interface AgentSlice {
   setViewingTaskId: (id: string | null) => void;
 }
 
-export const useStore = create<RoleSlice & SecuritySlice & ThemeSlice & DocSlice & AgentSlice>()(
+type StoreState = RoleSlice & SecuritySlice & ThemeSlice & DocSlice & AgentSlice;
+
+export const useStore = create<StoreState>()(
+  persist(
   (set) => ({
     activeRole: 'viewer',
     refetchTrigger: 0,
@@ -78,5 +82,21 @@ export const useStore = create<RoleSlice & SecuritySlice & ThemeSlice & DocSlice
     })),
     clearAudit: () => set({ auditEvents: [], auditPrompts: {}, taskHistory: [] }),
     setViewingTaskId: (id) => set({ viewingTaskId: id }),
-  })
+  }),
+  {
+    name: 'manetu-ui-store',
+    partialize: (state) => ({
+      taskHistory: state.taskHistory,
+      auditEvents: state.auditEvents,
+      auditPrompts: state.auditPrompts,
+      themeMode: state.themeMode,
+      activeRole: state.activeRole,
+      securityEnabled: state.securityEnabled,
+    }) as unknown as StoreState,
+    merge: (persisted, current) => ({
+      ...current,
+      ...(persisted as Partial<StoreState>),
+    }),
+  },
+  )
 );
