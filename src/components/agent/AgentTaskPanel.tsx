@@ -127,7 +127,7 @@ export function AgentTaskPanel() {
         </Box>
       )}
 
-      <Box sx={{ flex: 1, overflow: 'hidden', borderTop: 1, borderColor: 'divider', mt: 1 }}>
+      <Box sx={{ flex: 1, overflow: 'hidden', borderTop: 1, borderColor: 'divider', mt: 3 }}>
         <AuditLogPanel />
       </Box>
     </Box>

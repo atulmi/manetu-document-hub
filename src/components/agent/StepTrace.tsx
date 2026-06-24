@@ -20,14 +20,22 @@ function formatElapsed(startedAt: string, completedAt?: string): string {
 
 export function StepTrace({ task }: StepTraceProps) {
   const { steps, status, startedAt, completedAt, finalAnswer } = task;
+  const topRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const prevTaskId = useRef(task.id);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [steps.length, status]);
+    if (task.id !== prevTaskId.current) {
+      prevTaskId.current = task.id;
+      topRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } else if (status === 'running') {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [task.id, steps.length, status]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <div ref={topRef} />
       {status === 'running' && steps.length === 0 && (
         <StatusMessage type="connecting" message="Connecting to Claude Sonnet 4.6..." />
       )}
