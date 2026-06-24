@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import { useMediaQuery, useTheme } from "@mui/material";
-import DragHandle from "@mui/icons-material/DragIndicator";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { PanelHeader } from "./PanelHeader";
 
@@ -18,24 +19,51 @@ function ResizeHandle() {
     <Separator>
       <Box
         sx={{
-          width: 8,
+          width: 12,
           height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "col-resize",
-          transition: "background-color 0.15s",
-          "&:hover": { bgcolor: "action.hover" },
-          "&[data-resize-handle-active]": { bgcolor: "action.selected" },
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: "50%",
+            width: "1px",
+            bgcolor: "divider",
+            transform: "translateX(-50%)",
+          },
+          "&:hover::before, &[data-resize-handle-active]::before": {
+            bgcolor: "primary.main",
+            width: "2px",
+          },
+          "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator": {
+            opacity: 1,
+          },
         }}
       >
-        <DragHandle
+        <Box
+          className="resize-indicator"
           sx={{
-            fontSize: 14,
-            color: "text.disabled",
-            transform: "rotate(90deg)",
+            display: "flex",
+            alignItems: "center",
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
+            borderRadius: 1,
+            px: 0,
+            py: 0.25,
+            opacity: 0.6,
+            transition: "opacity 0.15s",
+            zIndex: 1,
           }}
-        />
+        >
+          <ChevronLeft sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }} />
+          <ChevronRight sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }} />
+        </Box>
       </Box>
     </Separator>
   );

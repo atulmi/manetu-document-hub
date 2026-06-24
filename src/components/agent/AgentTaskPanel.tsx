@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -6,7 +6,6 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import Send from "@mui/icons-material/Send";
 import Stop from "@mui/icons-material/Stop";
-import Replay from "@mui/icons-material/Replay";
 import { useStore } from "../../lib/store";
 import { useAgentRun } from "../../hooks/useAgentRun";
 
@@ -21,7 +20,15 @@ export function AgentTaskPanel() {
   const [prompt, setPrompt] = useState("");
   const { submit, stop, isRunning } = useAgentRun();
   const currentTask = useStore((s) => s.currentTask);
-  const clearTask = useStore((s) => s.clearTask);
+  const wasRunning = useRef(false);
+
+  // Clear prompt when task finishes (currentTask becomes null)
+  useEffect(() => {
+    if (wasRunning.current && !currentTask) {
+      setPrompt("");
+    }
+    wasRunning.current = currentTask?.status === "running";
+  }, [currentTask]);
 
   const displayPrompt = isRunning ? (currentTask?.prompt ?? prompt) : prompt;
 
@@ -29,11 +36,6 @@ export function AgentTaskPanel() {
     const text = prompt.trim();
     if (!text || isRunning) return;
     submit(text);
-  };
-
-  const handleNewTask = () => {
-    clearTask();
-    setPrompt("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -92,35 +94,18 @@ export function AgentTaskPanel() {
               Ask
             </Button>
           )}
-          {currentTask && (
-            <>
-              <Chip
-                label={currentTask.status}
-                size="small"
-                color={
-                  currentTask.status === "completed"
-                    ? "success"
-                    : currentTask.status === "failed"
-                      ? "error"
-                      : "info"
-                }
-                variant="outlined"
-                sx={{ ml: "auto", fontWeight: 600, fontSize: "0.7rem" }}
-              />
-              {!isRunning && (
-                <Button
-                  size="small"
-                  startIcon={<Replay />}
-                  onClick={handleNewTask}
-                >
-                  New task
-                </Button>
-              )}
-            </>
+          {isRunning && (
+            <Chip
+              label="running"
+              size="small"
+              color="info"
+              variant="outlined"
+              sx={{ ml: "auto", fontWeight: 600, fontSize: "0.7rem" }}
+            />
           )}
         </Box>
 
-        {!currentTask && (
+        {!isRunning && (
           <Box sx={{ pt: 1 }}>
             <Typography
               variant="caption"

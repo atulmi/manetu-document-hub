@@ -8,7 +8,8 @@ function failTask(message: string) {
     const finished = { ...s.currentTask, status: 'failed' as const, finalAnswer: message, completedAt: new Date().toISOString() };
     const history = s.taskHistory.filter((t) => t.id !== finished.id);
     return {
-      currentTask: finished,
+      currentTask: null,
+      viewingTaskId: finished.id,
       taskHistory: [...history, finished],
       auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
     };
@@ -125,7 +126,8 @@ export function useAgentRun() {
                   };
                   const history = s.taskHistory.filter((t) => t.id !== finalId);
                   return {
-                    currentTask: finished,
+                    currentTask: null,
+                    viewingTaskId: finalId,
                     taskHistory: [...history, finished],
                     auditPrompts: { ...s.auditPrompts, [finalId]: s.currentTask.prompt },
                   };
@@ -147,7 +149,8 @@ export function useAgentRun() {
         if (s.currentTask?.status !== 'running') return {};
         const finished = { ...s.currentTask, status: 'completed' as const, completedAt: new Date().toISOString() };
         return {
-          currentTask: finished,
+          currentTask: null,
+          viewingTaskId: finished.id,
           taskHistory: s.taskHistory.some((t) => t.id === finished.id) ? s.taskHistory : [...s.taskHistory, finished],
           auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
         };

@@ -4,20 +4,25 @@ A React/TypeScript dashboard that demonstrates **AI agent orchestration** via th
 
 > **Built with Claude** — this project was developed using [Claude Code](https://claude.ai/code) (Anthropic's AI coding agent) for implementation, architecture decisions, and iterative UI refinement.
 
-## Why This Exists
+## Why This Project Matters
 
-As AI agents become more capable — reading files, calling APIs, executing code — the question of **who can do what** becomes critical. Traditional access control (RBAC, ACLs) was designed for human users navigating predefined workflows. AI agents break that model — they chain tool calls autonomously, access resources the user never explicitly requested, and can escalate through indirect paths (e.g., asking to "summarize all documents" triggers reads across every sensitivity tier). A role that's safe for a human clicking one file at a time may be dangerously broad when an agent iterates through the entire corpus in seconds.
+This project makes AI agent security **visible and interactive**. You can watch every tool call get checked by the Manetu Policy Engine (MPE) in real time, switch roles to see access change instantly, and toggle security off to see exactly what the MPE policy layer prevents.
 
-The [Manetu Policy Engine](https://manetu.github.io/policyengine) addresses this by evaluating access at the **tool call level** using MRN-based policies (Manetu Resource Notation). Instead of blanket "this user can access this service," it answers granular questions like: *"Can a viewer-role agent invoke `read-file` on a confidential document at this moment?"* — and produces a structured audit record for every decision.
+- **Watch** an AI agent (Claude Sonnet 4.6) answer questions by reading documents across sensitivity tiers
+- **See** every tool invocation evaluated **before** execution — with allow/deny decisions in real time
+- **Switch roles** instantly — a viewer can only read public docs, while an admin has full access
+- **Browse prompt history** — every thinking step, tool call, MRN, policy rule, and final answer is recorded
+- **Toggle security off** to compare — demonstrating exactly what the policy engine blocks
 
-This project makes that process **visible and interactive**. You can:
+### The Problem
 
-- Watch an AI agent (Claude Sonnet 4.6) answer questions by reading documents from a sensitivity-tiered corpus
-- See every tool invocation evaluated by the policy engine **before** execution — with allow/deny decisions shown in real time
-- **Switch roles** instantly to compare what different users can access — a viewer can only read public docs, while an admin has full access
-- Browse **prompt history** with full step traces — every thinking step, tool call, MRN, policy rule, and final answer is recorded and reviewable
-- **Toggle the policy engine off** to see the difference — demonstrating exactly what the security layer prevents
-- All state persists across page reloads via localStorage
+Traditional access control (RBAC, ACLs) was designed for humans navigating predefined workflows. AI agents break that model: they chain tool calls autonomously, access resources the user never explicitly requested, and can escalate through indirect paths.
+
+Asking to "summarize all documents" triggers reads across every sensitivity tier — a role that's safe for a human clicking one file at a time becomes dangerously broad when an agent iterates the entire corpus in seconds.
+
+### The Solution
+
+The [Manetu Policy Engine](https://manetu.github.io/policyengine) evaluates access at the **tool call level** using MRN-based policies (Manetu Resource Notation). Instead of blanket "this user can access this service," it answers: _"Can a viewer-role agent invoke `read-file` on a confidential document right now?"_ — and produces a structured audit record for every decision.
 
 ## Architecture
 
@@ -70,13 +75,13 @@ This project makes that process **visible and interactive**. You can:
 
 ## Roles and Access
 
-| Role | Public Docs | Internal Docs | Confidential Docs |
-|------|:-----------:|:-------------:|:-----------------:|
-| Viewer | Read | Denied | Denied |
-| Developer | Read | Read | Read |
-| Data Analyst | Read | Read | Denied |
-| Auditor | Read | Read | Read (read-only) |
-| Admin | Full | Full | Full |
+| Role         | Public Docs | Internal Docs | Confidential Docs |
+| ------------ | :---------: | :-----------: | :---------------: |
+| Viewer       |    Read     |    Denied     |      Denied       |
+| Developer    |    Read     |     Read      |       Read        |
+| Data Analyst |    Read     |     Read      |      Denied       |
+| Auditor      |    Read     |     Read      | Read (read-only)  |
+| Admin        |    Full     |     Full      |       Full        |
 
 ## Quick Start
 
@@ -112,12 +117,12 @@ The app works without Docker — the backend will return a clear error if OPA is
 
 ### Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `ANTHROPIC_API_KEY` | Claude API key (required for agent) |
-| `MPE_BASE_URL` | OPA policy engine URL (default: `http://localhost:8181`) |
-| `MCP_DOCS_PATH` | Path to document corpus (default: `./docs-corpus`) |
-| `PORT` | Backend server port (default: `3001`) |
+| Variable            | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| `ANTHROPIC_API_KEY` | Claude API key (required for agent)                      |
+| `MPE_BASE_URL`      | OPA policy engine URL (default: `http://localhost:8181`) |
+| `MCP_DOCS_PATH`     | Path to document corpus (default: `./docs-corpus`)       |
+| `PORT`              | Backend server port (default: `3001`)                    |
 
 ## UI Overview
 
@@ -137,6 +142,7 @@ The app works without Docker — the backend will return a clear error if OPA is
 ### Security Demo Mode
 
 Toggle the policy engine off to see the difference:
+
 - **Enabled**: Every tool call is checked against OPA. Denied calls show the policy rule that blocked them.
 - **Disabled**: All tool calls bypass security. A red warning banner appears. Audit events show "BYPASSED" instead of "ALLOWED"/"DENIED".
 
@@ -144,11 +150,11 @@ Toggle the policy engine off to see the difference:
 
 15 realistic fake company documents in `docs-corpus/`:
 
-| Tier | Count | Examples |
-|------|-------|---------|
-| **Public** | 5 | Company overview, product announcement, engineering blog, security FAQ, job postings |
-| **Internal** | 5 | Team wiki, 2026 roadmap, incident postmortem, hiring pipeline, AI strategy draft |
-| **Confidential** | 5 | Q3 financials, board update, M&A analysis, compensation bands, security audit |
+| Tier             | Count | Examples                                                                             |
+| ---------------- | ----- | ------------------------------------------------------------------------------------ |
+| **Public**       | 5     | Company overview, product announcement, engineering blog, security FAQ, job postings |
+| **Internal**     | 5     | Team wiki, 2026 roadmap, incident postmortem, hiring pipeline, AI strategy draft     |
+| **Confidential** | 5     | Q3 financials, board update, M&A analysis, compensation bands, security audit        |
 
 Each document has YAML frontmatter with `title`, `sensitivity`, `category`, `author`, `date`, and `excerpt`.
 
@@ -232,14 +238,14 @@ No API keys or Docker required in CI — Cypress tests use `cy.intercept()` to m
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, MUI v7, Zustand (persisted), Framer Motion |
-| Backend | Express 5, Node.js 20 |
-| AI | Claude Sonnet 4.6 (Anthropic SDK) |
-| Policy Engine | OPA (Open Policy Agent) with Rego policies |
-| Document Parsing | gray-matter (YAML frontmatter) |
-| Markdown | react-markdown + remark-gfm |
-| Testing | Vitest, React Testing Library, MSW, Cypress |
-| Build | Vite 7 |
-| CI | GitHub Actions |
+| Layer            | Technology                                                       |
+| ---------------- | ---------------------------------------------------------------- |
+| Frontend         | React 19, TypeScript, MUI v7, Zustand (persisted), Framer Motion |
+| Backend          | Express 5, Node.js 20                                            |
+| AI               | Claude Sonnet 4.6 (Anthropic SDK)                                |
+| Policy Engine    | OPA (Open Policy Agent) with Rego policies                       |
+| Document Parsing | gray-matter (YAML frontmatter)                                   |
+| Markdown         | react-markdown + remark-gfm                                      |
+| Testing          | Vitest, React Testing Library, MSW, Cypress                      |
+| Build            | Vite 7                                                           |
+| CI               | GitHub Actions                                                   |

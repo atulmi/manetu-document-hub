@@ -1,14 +1,20 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import ChevronLeft from "@mui/icons-material/ChevronLeft";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import { useStore } from "../../lib/store";
 import { useAuditStream } from "../../hooks/useAuditStream";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { AuditEvent } from "../../types";
-import { useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 interface PromptGroup {
   taskId: string;
@@ -42,6 +48,8 @@ function PromptRow({
     <Box
       onClick={onClick}
       sx={{
+        display: "flex",
+        alignItems: "center",
         px: 1.5,
         py: 1,
         cursor: "pointer",
@@ -51,55 +59,83 @@ function PromptRow({
         transition: "background-color 0.15s",
       }}
     >
-      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }} noWrap>
-        {group.prompt}
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 0.75,
-          flexWrap: "wrap",
-        }}
-      >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ fontSize: "0.7rem" }}
-        >
-          {group.role} · {date} {time}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }} noWrap>
+          {group.prompt}
         </Typography>
-        {group.allowCount > 0 && (
-          <Chip
-            label={`${group.allowCount} allowed`}
-            size="small"
-            color="success"
-            variant="filled"
-            sx={{ height: 18, fontSize: "0.6rem" }}
-          />
-        )}
-        {group.denyCount > 0 && (
-          <Chip
-            label={`${group.denyCount} denied`}
-            size="small"
-            color="error"
-            variant="filled"
-            sx={{ height: 18, fontSize: "0.6rem" }}
-          />
-        )}
-        {group.bypassedCount > 0 && (
-          <Chip
-            label={`${group.bypassedCount} bypassed`}
-            size="small"
-            color="warning"
-            variant="filled"
-            sx={{ height: 18, fontSize: "0.6rem" }}
-          />
-        )}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontSize: "0.7rem" }}
+          >
+            {group.role} · {date} {time}
+          </Typography>
+          {group.allowCount > 0 && (
+            <Chip
+              label={`${group.allowCount} allowed`}
+              size="small"
+              color="success"
+              variant="filled"
+              sx={{ height: 18, fontSize: "0.6rem" }}
+            />
+          )}
+          {group.denyCount > 0 && (
+            <Chip
+              label={`${group.denyCount} denied`}
+              size="small"
+              color="error"
+              variant="filled"
+              sx={{ height: 18, fontSize: "0.6rem" }}
+            />
+          )}
+          {group.bypassedCount > 0 && (
+            <Chip
+              label={`${group.bypassedCount} bypassed`}
+              size="small"
+              color="warning"
+              variant="filled"
+              sx={{ height: 18, fontSize: "0.6rem" }}
+            />
+          )}
+          {group.status === "failed" && (
+            <Chip
+              label="stopped"
+              size="small"
+              color="error"
+              variant="outlined"
+              sx={{ height: 18, fontSize: "0.6rem" }}
+            />
+          )}
+          {group.status === "completed" && (
+            <Chip
+              label="completed"
+              size="small"
+              color="success"
+              variant="outlined"
+              sx={{ height: 18, fontSize: "0.6rem" }}
+            />
+          )}
+        </Box>
       </Box>
+      <ChevronRight
+        sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0, ml: 0.5 }}
+      />
     </Box>
   );
 }
+
+const PAGE_SIZE = 10;
+
+type StatusFilter = "all" | "completed" | "failed";
+type DecisionFilter = "all" | "allowed" | "denied" | "bypassed";
 
 function ListView({
   groups,
@@ -108,6 +144,35 @@ function ListView({
   groups: PromptGroup[];
   onSelect: (taskId: string) => void;
 }) {
+  const [page, setPage] = useState(0);
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [decisionFilter, setDecisionFilter] = useState<DecisionFilter>("all");
+
+  const ALL_ROLES = ["viewer", "developer", "data-analyst", "auditor", "admin"];
+
+  const filtered = useMemo(() => {
+    return groups.filter((g) => {
+      if (roleFilter !== "all" && g.role !== roleFilter) return false;
+      if (statusFilter !== "all" && g.status !== statusFilter) return false;
+      if (decisionFilter === "allowed" && g.allowCount === 0) return false;
+      if (decisionFilter === "denied" && g.denyCount === 0) return false;
+      if (decisionFilter === "bypassed" && g.bypassedCount === 0) return false;
+      return true;
+    });
+  }, [groups, roleFilter, statusFilter, decisionFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const paged = filtered.slice(
+    safePage * PAGE_SIZE,
+    (safePage + 1) * PAGE_SIZE,
+  );
+
+  useEffect(() => {
+    setPage(0);
+  }, [roleFilter, statusFilter, decisionFilter]);
+
   if (groups.length === 0) {
     return (
       <Box sx={{ p: 2 }}>
@@ -115,28 +180,200 @@ function ListView({
           No prompt runs yet.
         </Typography>
         <Typography variant="body2" color="text.disabled">
-          Submit a prompt in the Agent Task View. Each run will appear here
-          — click to view the AI agent's reasoning steps, tool calls,
-          and policy check results.
+          Submit a prompt in the Agent Task View. Each run will appear here —
+          click to view the AI agent's reasoning steps, tool calls, and policy
+          check results.
         </Typography>
       </Box>
     );
   }
 
+  const hasActiveFilters =
+    roleFilter !== "all" || statusFilter !== "all" || decisionFilter !== "all";
+  const selectSx = {
+    minWidth: 100,
+    ".MuiSelect-select": { py: 0.5, fontSize: "0.75rem" },
+    bgcolor: "action.hover",
+  };
+
   return (
-    <Box sx={{ flex: 1, overflow: "auto" }}>
-      <Box sx={{ px: 1.5, py: 1, mb: 0.5 }}>
-        <Typography variant="caption" color="text.secondary">
-          Click a prompt to view its AI agent steps and policy checks
-        </Typography>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Filters */}
+      <Box
+        sx={{
+          px: 1.5,
+          mb: 1.5,
+          flexShrink: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          flexWrap: "wrap",
+        }}
+      >
+        <Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.65rem",
+              display: "block",
+              mb: 0.25,
+            }}
+          >
+            User role
+          </Typography>
+          <FormControl size="small">
+            <Select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              sx={selectSx}
+            >
+              <MenuItem value="all">All roles</MenuItem>
+              {ALL_ROLES.map((r) => (
+                <MenuItem key={r} value={r}>
+                  {r}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+        <Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.65rem",
+              display: "block",
+              mb: 0.25,
+            }}
+          >
+            Job status
+          </Typography>
+          <FormControl size="small">
+            <Select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              sx={selectSx}
+            >
+              <MenuItem value="all">All statuses</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="failed">Stopped</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        <Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              fontWeight: 600,
+              fontSize: "0.65rem",
+              display: "block",
+              mb: 0.25,
+            }}
+          >
+            Policy decision
+          </Typography>
+          <FormControl size="small">
+            <Select
+              value={decisionFilter}
+              onChange={(e) =>
+                setDecisionFilter(e.target.value as DecisionFilter)
+              }
+              sx={selectSx}
+            >
+              <MenuItem value="all">All decisions</MenuItem>
+              <MenuItem value="allowed">Has allowed</MenuItem>
+              <MenuItem value="denied">Has denied</MenuItem>
+              <MenuItem value="bypassed">Has bypassed</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        {hasActiveFilters && (
+          <Typography
+            variant="caption"
+            color="text.disabled"
+            sx={{ fontSize: "0.65rem" }}
+          >
+            {filtered.length} of {groups.length}
+          </Typography>
+        )}
       </Box>
-      {groups.map((group) => (
-        <PromptRow
-          key={group.taskId}
-          group={group}
-          onClick={() => onSelect(group.taskId)}
-        />
-      ))}
+      <Divider />
+      {/* List */}
+      <Box sx={{ flex: 1, overflow: "auto" }}>
+        {paged.length === 0 ? (
+          <Box sx={{ p: 2 }}>
+            <Typography variant="body2" color="text.disabled">
+              No runs match the selected filters.
+            </Typography>
+          </Box>
+        ) : (
+          paged.map((group) => (
+            <PromptRow
+              key={group.taskId}
+              group={group}
+              onClick={() => onSelect(group.taskId)}
+            />
+          ))
+        )}
+      </Box>
+      {groups.length > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 0.5,
+            py: 0.75,
+            borderTop: 1,
+            borderColor: "divider",
+            flexShrink: 0,
+          }}
+        >
+          <IconButton
+            size="small"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            <ChevronLeft sx={{ fontSize: 18 }} />
+          </IconButton>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <Box
+              key={i}
+              onClick={() => setPage(i)}
+              sx={{
+                width: 28,
+                height: 28,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 1,
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+                bgcolor: page === i ? "primary.main" : "transparent",
+                color: page === i ? "primary.contrastText" : "text.secondary",
+                "&:hover": {
+                  bgcolor: page === i ? "primary.dark" : "action.hover",
+                },
+                transition: "background-color 0.15s",
+              }}
+            >
+              {i + 1}
+            </Box>
+          ))}
+          <IconButton
+            size="small"
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <ChevronRight sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Box>
+      )}
     </Box>
   );
 }
@@ -239,7 +476,7 @@ function DetailView({
                     display: "block",
                   }}
                 >
-                  Policy checks ({group.events.length} total  )
+                  Policy checks ({group.events.length} total )
                 </Typography>
                 <Box
                   sx={{
@@ -315,10 +552,11 @@ export function AgentStepsPanel() {
     for (const event of allEvents) {
       let group = groupMap.get(event.agentTaskId);
       if (!group) {
-        const taskPrompt = auditPrompts[event.agentTaskId]
-          ?? taskHistory.find((t) => t.id === event.agentTaskId)?.prompt
-          ?? (currentTask?.id === event.agentTaskId ? currentTask.prompt : null)
-          ?? "Unknown prompt";
+        const taskPrompt =
+          auditPrompts[event.agentTaskId] ??
+          taskHistory.find((t) => t.id === event.agentTaskId)?.prompt ??
+          (currentTask?.id === event.agentTaskId ? currentTask.prompt : null) ??
+          "Unknown prompt";
         group = {
           taskId: event.agentTaskId,
           prompt: taskPrompt,
@@ -338,8 +576,10 @@ export function AgentStepsPanel() {
       if (event.decision === "bypassed") group.bypassedCount++;
     }
 
-    return [...groupMap.values()]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return [...groupMap.values()].sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
   }, [sseEvents, storeEvents, auditPrompts, taskHistory, currentTask]);
 
   const selectedGroup = viewingTaskId
@@ -353,7 +593,11 @@ export function AgentStepsPanel() {
       (() => {
         const group = groups.find((g) => g.taskId === viewingTaskId);
         if (!group) return null;
-        return taskHistory.find((t) => t.prompt === group.prompt && t.role === group.role) ?? null;
+        return (
+          taskHistory.find(
+            (t) => t.prompt === group.prompt && t.role === group.role,
+          ) ?? null
+        );
       })())
     : null;
 
@@ -369,12 +613,7 @@ export function AgentStepsPanel() {
   }
 
   // List view
-  return (
-    <ListView
-      groups={groups}
-      onSelect={setViewingTaskId}
-    />
-  );
+  return <ListView groups={groups} onSelect={setViewingTaskId} />;
 }
 
 export function useAgentStepsHeader() {
@@ -397,7 +636,8 @@ export function useAgentStepsHeader() {
     setViewingTaskId(null);
   };
 
-  const subtitle = count > 0 ? `${count} run${count !== 1 ? "s" : ""}` : undefined;
+  const subtitle =
+    count > 0 ? `${count} run${count !== 1 ? "s" : ""}` : undefined;
 
   return { count, subtitle, handleClear };
 }
