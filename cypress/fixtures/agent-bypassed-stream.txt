@@ -1,0 +1,14 @@
+event: step
+data: {"type":"thinking","stepNumber":1,"content":"Security is disabled, I can access all documents.","timestamp":"2026-01-01T00:00:00Z"}
+
+event: audit
+data: {"id":"a3","decision":"bypassed","resource":"mrn:mcp:filesystem:tool:read-file","principal":"viewer","operation":"invoke","policyRule":"security-disabled","agentTaskId":"task_003","timestamp":"2026-01-01T00:00:01Z"}
+
+event: step
+data: {"type":"tool-call","stepNumber":2,"content":"Tool read-file executed successfully","timestamp":"2026-01-01T00:00:01Z","toolCall":{"toolName":"read-file","mrn":"mrn:mcp:filesystem:tool:read-file","args":{"path":"confidential/q3-financials.md"},"policyDecision":{"decision":"allow","principal":"viewer","resource":"mrn:mcp:filesystem:tool:read-file","operation":"invoke","rule":"security-disabled","reason":"Policy engine disabled"},"result":"Q3 revenue was $4.2M","durationMs":8}}
+
+event: step
+data: {"type":"final-answer","stepNumber":3,"content":"The Q3 financial results show revenue of $4.2M with 34% ARR growth.","timestamp":"2026-01-01T00:00:03Z"}
+
+event: done
+data: {"taskId":"task_003"}

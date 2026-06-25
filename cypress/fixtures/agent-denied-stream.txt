@@ -1,0 +1,14 @@
+event: step
+data: {"type":"thinking","stepNumber":1,"content":"I'll try to read the Q3 financial results.","timestamp":"2026-01-01T00:00:00Z"}
+
+event: audit
+data: {"id":"a2","decision":"deny","resource":"mrn:mcp:filesystem:tool:read-file","principal":"viewer","operation":"invoke","policyRule":"default-deny","agentTaskId":"task_002","timestamp":"2026-01-01T00:00:01Z"}
+
+event: step
+data: {"type":"tool-call","stepNumber":2,"content":"Tool read-file denied: Access denied by policy engine: default-deny","timestamp":"2026-01-01T00:00:01Z","toolCall":{"toolName":"read-file","mrn":"mrn:mcp:filesystem:tool:read-file","args":{"path":"confidential/q3-financials.md"},"policyDecision":{"decision":"deny","principal":"viewer","resource":"mrn:mcp:filesystem:tool:read-file","operation":"invoke","rule":"default-deny","reason":"No matching rule"},"error":"Access denied by policy engine: default-deny","durationMs":5}}
+
+event: step
+data: {"type":"final-answer","stepNumber":3,"content":"I'm unable to access the Q3 financial results. This document is restricted for the viewer role. You would need a higher-access role such as developer or admin.","timestamp":"2026-01-01T00:00:03Z"}
+
+event: done
+data: {"taskId":"task_002"}

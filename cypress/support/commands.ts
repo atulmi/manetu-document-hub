@@ -6,30 +6,30 @@ declare global {
       switchRole(role: UserRole): Chainable<void>;
       toggleSecurity(enabled: boolean): Chainable<void>;
       submitAgentTask(prompt: string): Chainable<void>;
-      waitForAuditEvent(decision: 'allow' | 'deny'): Chainable<JQuery<HTMLElement>>;
+      waitForAuditEvent(decision: 'allow' | 'deny' | 'bypassed'): Chainable<JQuery<HTMLElement>>;
     }
   }
 }
 
 Cypress.Commands.add('switchRole', (role: UserRole) => {
-  cy.get('[data-testid="role-switcher"]').click();
+  cy.get('[data-testid="role-switcher"]').find('[role="combobox"]').click();
   cy.get(`[data-testid="role-option-${role}"]`).click();
 });
 
 Cypress.Commands.add('toggleSecurity', (enabled: boolean) => {
-  cy.get('[data-testid="security-toggle"]').then(($toggle) => {
-    const isChecked = $toggle.attr('aria-checked') === 'true';
+  cy.get('[data-testid="security-toggle"]').find('input[role="switch"]').then(($switch) => {
+    const isChecked = $switch.is(':checked');
     if (isChecked !== enabled) {
-      cy.wrap($toggle).click();
+      cy.get('[data-testid="security-toggle"]').find('input[role="switch"]').click({ force: true });
     }
   });
 });
 
 Cypress.Commands.add('submitAgentTask', (prompt: string) => {
-  cy.get('[data-testid="agent-prompt-input"]').clear().type(prompt);
+  cy.get('[data-testid="agent-prompt-input"]').find('textarea').first().clear().type(prompt);
   cy.get('[data-testid="agent-submit-button"]').click();
 });
 
-Cypress.Commands.add('waitForAuditEvent', (decision: 'allow' | 'deny') => {
+Cypress.Commands.add('waitForAuditEvent', (decision: 'allow' | 'deny' | 'bypassed') => {
   return cy.get(`[data-testid="audit-event-${decision}"]`, { timeout: 10000 });
 });

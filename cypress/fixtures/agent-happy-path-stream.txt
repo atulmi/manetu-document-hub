@@ -1,0 +1,14 @@
+event: step
+data: {"type":"thinking","stepNumber":1,"content":"I'll list the available documents first.","timestamp":"2026-01-01T00:00:00Z"}
+
+event: audit
+data: {"id":"a1","decision":"allow","resource":"mrn:mcp:filesystem:tool:list-directory","principal":"viewer","operation":"invoke","policyRule":"viewer-list-directory","agentTaskId":"task_001","timestamp":"2026-01-01T00:00:01Z"}
+
+event: step
+data: {"type":"tool-call","stepNumber":2,"content":"Tool list-directory executed successfully","timestamp":"2026-01-01T00:00:01Z","toolCall":{"toolName":"list-directory","mrn":"mrn:mcp:filesystem:tool:list-directory","args":{"path":"."},"policyDecision":{"decision":"allow","principal":"viewer","resource":"mrn:mcp:filesystem:tool:list-directory","operation":"invoke","rule":"viewer-list-directory"},"result":"5 documents found","durationMs":12}}
+
+event: step
+data: {"type":"final-answer","stepNumber":3,"content":"Based on the available documents, here is a summary of the public documents accessible to your role.","timestamp":"2026-01-01T00:00:05Z"}
+
+event: done
+data: {"taskId":"task_001"}

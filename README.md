@@ -26,51 +26,32 @@ The [Manetu Policy Engine](https://manetu.github.io/policyengine) evaluates acce
 
 ## Architecture
 
-```
- User (Browser)
-      |
-      v
-┌──────────────────────────────────────────────────────────────┐
-│  React Frontend (Vite + MUI + Zustand)                       │
-│                                                              │
-│  ┌──────────────┐ ┌────────────────┐ ┌────────────────────┐  │
-│  │ Document     │ │ Agent Task     │ │ Prompt History     │  │
-│  │ Library      │ │ View           │ │ & Agent Steps      │  │
-│  │              │ │                │ │                    │  │
-│  │ Browse docs  │ │ Chat prompt +  │ │ List view: past    │  │
-│  │ by tier,     │ │ suggested      │ │ runs with policy   │  │
-│  │ sensitivity  │ │ prompts        │ │ allow/deny counts  │  │
-│  │ badges,      │ │                │ │                    │  │
-│  │ click to     │ │                │ │ Detail view: step  │  │
-│  │ preview      │ │                │ │ trace cards,       │  │
-│  │              │ │                │ │ policy checks      │  │
-│  └──────────────┘ └────────────────┘ └────────────────────┘  │
-└───────────────────────────┬──────────────────────────────────┘
-                            │ fetch /api/*
-                            v
-┌──────────────────────────────────────────────────────────────┐
-│  Express Backend Proxy (Node.js)                             │
-│                                                              │
-│  POST /api/agent/run  ──> Claude API + MCP tools (SSE)       │
-│  GET  /api/tools      ──> MCP tool list (MPE-filtered)       │
-│  GET  /api/docs       ──> Document list with access flags    │
-│  GET  /api/docs/content/:path ──> Document content (MPE-gated)│
-│  GET  /api/audit/stream ──> SSE audit event broadcast        │
-│                                                              │
-│  Every tool call passes through:                             │
-│    ┌─────────────────────────────┐                           │
-│    │  Manetu Policy Engine (OPA) │                           │
-│    │  evaluate(role, MRN, op)    │                           │
-│    │  → allow / deny             │                           │
-│    └─────────────────────────────┘                           │
-└──────────────────────────────────────────────────────────────┘
-                            │
-                            v
-┌──────────────────────────────────────────────────────────────┐
-│  Document Corpus (filesystem)                                │
-│  15 docs across public / internal / confidential tiers       │
-│  Tools: list-directory, read-file, keyword-search            │
-└──────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+  subgraph Browser
+    UI["React UI<br/>Document Library + Agent Panel + Prompt History"]
+  end
+  subgraph "Express Backend"
+    API[Node.js Proxy]
+    CLAUDE[Claude Agent Loop]
+    MPE_CLIENT[MPE Client]
+    FS_CLIENT[MCP Filesystem Client]
+  end
+  subgraph Docker
+    MPE[("Manetu Policy Engine<br/>(OPA) :8181")]
+  end
+  DOCS[("docs-corpus/<br/>15 documents")]
+  ANTHROPIC[("Anthropic API<br/>Claude Sonnet 4.6")]
+
+  UI -->|"POST /api/agent/run (SSE)"| API
+  UI -->|"GET /api/docs"| API
+  UI -->|"GET /api/audit/stream (SSE)"| API
+  API --> CLAUDE
+  CLAUDE -->|"tool call"| FS_CLIENT
+  FS_CLIENT -->|"evaluate(role, MRN, op)"| MPE_CLIENT
+  MPE_CLIENT -->|"POST /v1/data/docs/authz"| MPE
+  FS_CLIENT -->|"read/list/search"| DOCS
+  CLAUDE -->|"messages API"| ANTHROPIC
 ```
 
 ## Roles and Access
