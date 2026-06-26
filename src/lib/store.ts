@@ -36,6 +36,19 @@ interface AgentSlice {
 
 type StoreState = RoleSlice & SecuritySlice & ThemeSlice & DocSlice & AgentSlice;
 
+const MAX_TASK_HISTORY = 100;
+
+function trimHistory(history: import('../types').AgentTask[], auditEvents: import('../types').AuditEvent[], auditPrompts: Record<string, string>) {
+  if (history.length <= MAX_TASK_HISTORY) return { taskHistory: history, auditEvents, auditPrompts };
+  const trimmed = history.slice(-MAX_TASK_HISTORY);
+  const keepIds = new Set(trimmed.map((t) => t.id));
+  return {
+    taskHistory: trimmed,
+    auditEvents: auditEvents.filter((e) => keepIds.has(e.agentTaskId)),
+    auditPrompts: Object.fromEntries(Object.entries(auditPrompts).filter(([k]) => keepIds.has(k))),
+  };
+}
+
 export const useStore = create<StoreState>()(
   persist(
   (set) => ({
@@ -74,12 +87,13 @@ export const useStore = create<StoreState>()(
         ? { ...s.auditPrompts, [event.agentTaskId]: s.currentTask.prompt }
         : s.auditPrompts,
     })),
-    clearTask: () => set((s) => ({
-      currentTask: null,
-      taskHistory: s.currentTask
-        ? [...s.taskHistory, s.currentTask]
-        : s.taskHistory,
-    })),
+    clearTask: () => set((s) => {
+      const newHistory = s.currentTask ? [...s.taskHistory, s.currentTask] : s.taskHistory;
+      return {
+        currentTask: null,
+        ...trimHistory(newHistory, s.auditEvents, s.auditPrompts),
+      };
+    }),
     clearAudit: () => set({ auditEvents: [], auditPrompts: {}, taskHistory: [] }),
     setViewingTaskId: (id) => set({ viewingTaskId: id }),
   }),

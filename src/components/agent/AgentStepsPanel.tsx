@@ -7,10 +7,13 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import Tooltip from "@mui/material/Tooltip";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
+import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
 import { useStore } from "../../lib/store";
 import { useAuditStream } from "../../hooks/useAuditStream";
+import { exportSingleRun } from "../../lib/export-txt";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { AuditEvent } from "../../types";
@@ -31,9 +34,11 @@ interface PromptGroup {
 function PromptRow({
   group,
   onClick,
+  onExport,
 }: {
   group: PromptGroup;
   onClick: () => void;
+  onExport: () => void;
 }) {
   const time = new Date(group.timestamp).toLocaleTimeString([], {
     hour: "2-digit",
@@ -125,8 +130,17 @@ function PromptRow({
           )}
         </Box>
       </Box>
+      <Tooltip title="Export this run">
+        <IconButton
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onExport(); }}
+          sx={{ flexShrink: 0, ml: 0.5 }}
+        >
+          <FileDownloadOutlined sx={{ fontSize: 16, color: "text.disabled" }} />
+        </IconButton>
+      </Tooltip>
       <ChevronRight
-        sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0, ml: 0.5 }}
+        sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0 }}
       />
     </Box>
   );
@@ -316,6 +330,11 @@ function ListView({
               key={group.taskId}
               group={group}
               onClick={() => onSelect(group.taskId)}
+              onExport={() => {
+                const { taskHistory, auditEvents } = useStore.getState();
+                const task = taskHistory.find((t) => t.id === group.taskId);
+                if (task) exportSingleRun(task, auditEvents);
+              }}
             />
           ))
         )}
