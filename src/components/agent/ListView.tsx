@@ -86,10 +86,18 @@ export function ListView({
           textAlign: "center",
         }}
       >
-        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontWeight: 600 }}
+        >
           No prompt runs yet
         </Typography>
-        <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 320 }}>
+        <Typography
+          variant="body2"
+          color="text.disabled"
+          sx={{ maxWidth: 320 }}
+        >
           Submit a prompt in the Agent Task View. Each run will appear here —
           click to view the AI agent's reasoning steps, tool calls, and policy
           check results.
@@ -110,8 +118,8 @@ export function ListView({
       <Box
         sx={{
           px: 1.5,
-          mb: 1.5,
-          mt: 1.5,
+          mb: 1,
+          mt: 0.75,
           flexShrink: 0,
           display: "flex",
           alignItems: "center",

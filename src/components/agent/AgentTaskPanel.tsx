@@ -23,13 +23,21 @@ const SUGGESTIONS_SECONDARY = [
   "Summarize the incident report from November",
 ];
 
+const chipSx = {
+  cursor: "pointer",
+  fontSize: "0.75rem",
+  "&:hover": {
+    bgcolor: "rgba(99,102,241,0.12) !important",
+    borderColor: "rgba(99,102,241,0.4) !important",
+  },
+} as const;
+
 export function AgentTaskPanel() {
   const [prompt, setPrompt] = useState("");
   const { submit, stop, isRunning } = useAgentRun();
   const currentTask = useStore((s) => s.currentTask);
   const wasRunning = useRef(false);
 
-  // Clear prompt when task finishes (currentTask becomes null)
   useEffect(() => {
     if (wasRunning.current && !currentTask) {
       setPrompt("");
@@ -53,31 +61,30 @@ export function AgentTaskPanel() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Box sx={{ px: 1.5, pt: 1.5, pb: 1, flexShrink: 0 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%", overflow: "auto" }}>
+      <Box sx={{ p: 2 }}>
         <TextField
           value={displayPrompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask the AI assistant about your documents..."
           multiline
-          minRows={4}
-          maxRows={8}
+          minRows={6}
+          maxRows={12}
           fullWidth
           disabled={isRunning}
           size="small"
           data-testid="agent-prompt-input"
-          sx={{ mb: 0.5 }}
+          sx={{ mb: 1 }}
         />
         <Typography
           variant="caption"
           color="text.disabled"
           sx={{ mb: 0.5, fontSize: "0.7rem" }}
         >
-          Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy
-          Engine
+          Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy Engine
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
           {isRunning ? (
             <Button
               variant="outlined"
@@ -112,61 +119,37 @@ export function AgentTaskPanel() {
           )}
         </Box>
 
-        <Box sx={{ pt: 1 }}>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 2, mb: 1, display: "block" }}
-          >
-            Try asking:
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-            {SUGGESTIONS_PRIMARY.map((s) => (
-              <Chip
-                key={s}
-                label={s}
-                size="small"
-                variant="outlined"
-                disabled={isRunning}
-                onClick={() => setPrompt(s)}
-                sx={{
-                  cursor: isRunning ? "default" : "pointer",
-                  fontSize: "0.75rem",
-                  "&:hover": {
-                    bgcolor: "rgba(99,102,241,0.12) !important",
-                    borderColor: "rgba(99,102,241,0.4) !important",
-                  },
-                }}
-              />
-            ))}
-          </Box>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 3, mb: 1, display: "block" }}
-          >
-            Or try these (may trigger policy denials depending on role):
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-            {SUGGESTIONS_SECONDARY.map((s) => (
-              <Chip
-                key={s}
-                label={s}
-                size="small"
-                variant="outlined"
-                disabled={isRunning}
-                onClick={() => setPrompt(s)}
-                sx={{
-                  cursor: isRunning ? "default" : "pointer",
-                  fontSize: "0.75rem",
-                  "&:hover": {
-                    bgcolor: "rgba(99,102,241,0.12) !important",
-                    borderColor: "rgba(99,102,241,0.4) !important",
-                  },
-                }}
-              />
-            ))}
-          </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
+          Try asking:
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+          {SUGGESTIONS_PRIMARY.map((s) => (
+            <Chip
+              key={s}
+              label={s}
+              size="small"
+              variant="outlined"
+              disabled={isRunning}
+              onClick={() => setPrompt(s)}
+              sx={isRunning ? { ...chipSx, cursor: "default" } : chipSx}
+            />
+          ))}
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 2.5, mb: 1, display: "block" }}>
+          Or try these (may trigger policy denials depending on role):
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+          {SUGGESTIONS_SECONDARY.map((s) => (
+            <Chip
+              key={s}
+              label={s}
+              size="small"
+              variant="outlined"
+              disabled={isRunning}
+              onClick={() => setPrompt(s)}
+              sx={isRunning ? { ...chipSx, cursor: "default" } : chipSx}
+            />
+          ))}
         </Box>
       </Box>
     </Box>

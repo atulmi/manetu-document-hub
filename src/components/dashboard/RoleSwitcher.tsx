@@ -7,14 +7,15 @@ import Typography from '@mui/material/Typography';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { useStore } from '../../lib/store';
+import { ROLE_COLORS } from '../../lib/role-permissions';
 import type { UserRole } from '../../types';
 
-const ROLES: { value: UserRole; label: string; dotColor: string }[] = [
-  { value: 'viewer',       label: 'Viewer',        dotColor: '#29b6f6' },
-  { value: 'developer',    label: 'Developer',     dotColor: '#6366f1' },
-  { value: 'data-analyst', label: 'Data Analyst',  dotColor: '#6366f1' },
-  { value: 'auditor',      label: 'Auditor',       dotColor: '#f59e0b' },
-  { value: 'admin',        label: 'Admin',         dotColor: '#ef4444' },
+const ROLES: { value: UserRole; label: string }[] = [
+  { value: 'viewer',       label: 'Viewer' },
+  { value: 'developer',    label: 'Developer' },
+  { value: 'data-analyst', label: 'Data Analyst' },
+  { value: 'auditor',      label: 'Auditor' },
+  { value: 'admin',        label: 'Admin' },
 ];
 
 function roleLabel(role: UserRole): string {
@@ -49,7 +50,7 @@ export function RoleSwitcher() {
             const r = ROLES.find((r) => r.value === val)!;
             return (
               <>
-                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: r.dotColor, flexShrink: 0 }} />
+                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: ROLE_COLORS[r.value], flexShrink: 0 }} />
                 <Typography variant="body2" sx={{ fontWeight: 600, color: 'inherit' }}>
                   {r.label}
                 </Typography>
@@ -67,7 +68,7 @@ export function RoleSwitcher() {
                 ...(i > 0 && { borderTop: 1, borderColor: 'divider' }),
               }}
             >
-              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: r.dotColor, flexShrink: 0 }} />
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: ROLE_COLORS[r.value], flexShrink: 0 }} />
               <Typography variant="body2">{r.label}</Typography>
             </MenuItem>
           ))}
