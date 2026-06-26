@@ -56,13 +56,27 @@ graph LR
 
 ## Roles and Access
 
-| Role         | Public Docs | Internal Docs | Confidential Docs |
-| ------------ | :---------: | :-----------: | :---------------: |
-| Viewer       |    Read     |    Denied     |      Denied       |
-| Developer    |    Read     |     Read      |       Read        |
-| Data Analyst |    Read     |     Read      |      Denied       |
-| Auditor      |    Read     |     Read      | Read (read-only)  |
-| Admin        |    Full     |     Full      |       Full        |
+### Document Access by Sensitivity Tier
+
+| Role | Public | Internal | Confidential |
+|------|:------:|:--------:|:------------:|
+| Viewer | Read | Denied | Denied |
+| Developer | Read | Read | Denied |
+| Data Analyst | Read | Read | Denied |
+| Auditor | Read | Read | Read (read-only) |
+| Admin | Full | Full | Full |
+
+### Tool Permissions
+
+| Role | list-directory | read-file | keyword-search |
+|------|:--------------:|:---------:|:--------------:|
+| Viewer | Yes | No | No |
+| Developer | Yes | Yes | Yes |
+| Data Analyst | Yes | Yes | Yes |
+| Auditor | Yes | Yes | No |
+| Admin | Yes | Yes | Yes |
+
+Tool access is enforced at the MRN level. Even if a role has `read-file` permission, the document's sensitivity tier is checked separately — a developer with `read-file` access will still be denied when attempting to read a confidential document.
 
 ## Quick Start
 

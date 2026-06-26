@@ -119,12 +119,6 @@
         "rule": "auditor-read-file",
         "reason": "Auditor can read files"
       },
-      {
-        "mrn": "mrn:mcp:docs:tool:keyword-search",
-        "operations": ["invoke"],
-        "rule": "auditor-keyword-search",
-        "reason": "Auditor can search documents"
-      }
     ]
   },
 

@@ -65,6 +65,10 @@ export function StepTrace({ task }: StepTraceProps) {
         ))}
       </AnimatePresence>
 
+      {status === 'running' && steps.length > 0 && (
+        <StatusMessage type="running" message={`Processing — ${steps.length} step${steps.length !== 1 ? 's' : ''} so far`} />
+      )}
+
       {status === 'completed' && (
         <StatusMessage
           type="completed"

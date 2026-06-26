@@ -46,17 +46,19 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           px: 1,
           py: 0.5,
           cursor: 'pointer',
-          borderRadius: 1,
-          bgcolor: allLocked ? 'error.main' : 'action.hover',
-          opacity: allLocked ? 0.15 : 1,
-          '&:hover': { bgcolor: allLocked ? 'error.main' : 'action.selected' },
+          borderRadius: 0,
+          borderBottom: 1,
+          borderColor: 'divider',
+          bgcolor: 'action.hover',
+          '&:hover': { bgcolor: 'action.selected' },
         }}
       >
         <Icon sx={{ fontSize: 16, color: 'text.secondary' }} />
         <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
           {FOLDER_LABELS[sensitivity]}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        {allLocked && <Lock sx={{ fontSize: 14, color: 'error.main' }} />}
+        <Typography variant="caption" color={allLocked ? 'error.main' : 'text.secondary'}>
           {accessibleCount}/{totalCount}
         </Typography>
         <IconButton size="small" sx={{ p: 0 }}>

@@ -26,7 +26,7 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
   const card = (
     <motion.div
       layout
-      animate={{ opacity: doc.accessible ? 1 : 0.45, filter: doc.accessible ? 'blur(0px)' : 'blur(0.5px)' }}
+      animate={{ opacity: doc.accessible ? 1 : 0.6 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
     >
       <ButtonBase
@@ -35,44 +35,50 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
           display: 'block',
           width: '100%',
           textAlign: 'left',
-          borderRadius: 1,
+          borderRadius: 0,
           p: 1,
-          mb: 0.5,
           cursor: doc.accessible ? 'pointer' : 'not-allowed',
           bgcolor: selected ? 'action.selected' : 'transparent',
           '&:hover': { bgcolor: selected ? 'action.selected' : 'action.hover' },
+          borderBottom: 1,
+          borderColor: 'divider',
           transition: 'background-color 0.15s',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: doc.accessible ? 0.25 : 0 }}>
+          {!doc.accessible && <Lock sx={{ fontSize: 14, color: 'text.disabled' }} />}
           <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }} noWrap>
             {doc.title}
           </Typography>
-          {!doc.accessible && <Lock sx={{ fontSize: 14, color: 'text.disabled' }} />}
-        </Box>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            lineHeight: 1.4,
-          }}
-        >
-          {doc.excerpt}
-        </Typography>
-        <Box sx={{ mt: 0.5 }}>
           <SensitivityBadge sensitivity={doc.sensitivity} />
         </Box>
+        {doc.accessible && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              lineHeight: 1.4,
+            }}
+          >
+            {doc.excerpt}
+          </Typography>
+        )}
+        {!doc.accessible && (
+          <Typography variant="caption" color="text.disabled" sx={{ fontStyle: 'italic', fontSize: '0.7rem' }}>
+            Restricted — insufficient role permissions
+          </Typography>
+        )}
       </ButtonBase>
     </motion.div>
   );
 
   if (!doc.accessible) {
     return (
-      <Tooltip title={`Access restricted for current role`} arrow placement="right">
+      <Tooltip title="Access restricted for current role" arrow placement="right">
         {card}
       </Tooltip>
     );

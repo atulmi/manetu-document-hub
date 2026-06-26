@@ -9,11 +9,18 @@ import Stop from "@mui/icons-material/Stop";
 import { useStore } from "../../lib/store";
 import { useAgentRun } from "../../hooks/useAgentRun";
 
-const SUGGESTIONS = [
+const SUGGESTIONS_PRIMARY = [
+  "List all public documents available",
   "What documents discuss our security policy?",
   "Summarize the Q3 financial results",
   "What is the product roadmap for 2026?",
-  "List all public documents available",
+];
+
+const SUGGESTIONS_SECONDARY = [
+  "Read the board update from December",
+  "Search for documents about hiring",
+  "What compensation bands are available?",
+  "Summarize the incident report from November",
 ];
 
 export function AgentTaskPanel() {
@@ -54,8 +61,8 @@ export function AgentTaskPanel() {
           onKeyDown={handleKeyDown}
           placeholder="Ask the AI assistant about your documents..."
           multiline
-          minRows={2}
-          maxRows={4}
+          minRows={4}
+          maxRows={8}
           fullWidth
           disabled={isRunning}
           size="small"
@@ -114,7 +121,27 @@ export function AgentTaskPanel() {
             Try asking:
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-            {SUGGESTIONS.map((s) => (
+            {SUGGESTIONS_PRIMARY.map((s) => (
+              <Chip
+                key={s}
+                label={s}
+                size="small"
+                variant="outlined"
+                disabled={isRunning}
+                onClick={() => setPrompt(s)}
+                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem" }}
+              />
+            ))}
+          </Box>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1.5, mb: 0.75, display: "block" }}
+          >
+            Or try these (may trigger policy denials depending on role):
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+            {SUGGESTIONS_SECONDARY.map((s) => (
               <Chip
                 key={s}
                 label={s}

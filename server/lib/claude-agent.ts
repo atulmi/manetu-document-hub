@@ -183,6 +183,30 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
             resource: mrn,
             operation: 'invoke',
           });
+
+          // For read-file, also check resource-level access based on sensitivity tier
+          if (policyDecision.decision === 'allow' && toolName === 'read-file') {
+            const filePath = args['path'] as string | undefined;
+            if (filePath) {
+              const tier = filePath.split('/')[0];
+              const tierMrns: Record<string, string> = {
+                public: 'mrn:mcp:docs:resource:public:*',
+                internal: 'mrn:mcp:docs:resource:internal:*',
+                confidential: 'mrn:mcp:docs:resource:confidential:*',
+              };
+              const tierMrn = tierMrns[tier];
+              if (tierMrn) {
+                const tierDecision = await mpeClient.evaluate({
+                  principal: role,
+                  resource: tierMrn,
+                  operation: 'read',
+                });
+                if (tierDecision.decision === 'deny') {
+                  policyDecision = tierDecision;
+                }
+              }
+            }
+          }
         } else {
           policyDecision = {
             decision: 'allow',
