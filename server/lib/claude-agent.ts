@@ -20,6 +20,7 @@ export interface AgentRunOptions {
   onAudit: (event: AuditEvent) => void;
   mpeClient: MPEClient;
   fsClient: MCPFilesystemClient;
+  signal?: AbortSignal;
 }
 
 const SYSTEM_PROMPT = `You are a document intelligence assistant. You help users find and understand company documents.
@@ -100,7 +101,7 @@ async function executeTool(
 }
 
 export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
-  const { prompt, role, securityEnabled, onStep, onAudit, mpeClient, fsClient } = opts;
+  const { prompt, role, securityEnabled, onStep, onAudit, mpeClient, fsClient, signal } = opts;
   const taskId = randomUUID();
   const task: AgentTask = {
     id: taskId,
@@ -124,6 +125,11 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
   let continueLoop = true;
 
   while (continueLoop) {
+    if (signal?.aborted) {
+      task.status = 'failed';
+      break;
+    }
+
     iterations++;
     if (iterations > MAX_ITERATIONS) {
       const step: AgentStep = {

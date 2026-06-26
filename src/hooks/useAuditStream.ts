@@ -10,6 +10,7 @@ export function useAuditStream() {
   const [connected, setConnected] = useState(false);
   const retriesRef = useRef(0);
   const esRef = useRef<EventSource | null>(null);
+  const seenIds = useRef(new Set<string>());
 
   const connect = useCallback(() => {
     const es = new EventSource('/api/audit/stream');
@@ -23,6 +24,8 @@ export function useAuditStream() {
     es.addEventListener('audit', (e) => {
       try {
         const event = JSON.parse(e.data) as AuditEvent;
+        if (seenIds.current.has(event.id)) return;
+        seenIds.current.add(event.id);
         setEvents((prev) => {
           const next = [event, ...prev];
           return next.length > MAX_EVENTS ? next.slice(0, MAX_EVENTS) : next;
@@ -54,7 +57,7 @@ export function useAuditStream() {
 
   const clear = useCallback(() => {
     setEvents([]);
-    // Clear server-side buffer and reconnect to avoid replay
+    seenIds.current.clear();
     fetch('/api/audit/clear', { method: 'DELETE' }).catch(() => {});
     esRef.current?.close();
     esRef.current = null;

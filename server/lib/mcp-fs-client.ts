@@ -2,7 +2,7 @@
 // TODO: replace with MCP stdio client when MCP SDK stdio transport is stable.
 
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import matter from 'gray-matter';
 import type { DocMeta, DocSensitivity } from '../types.ts';
 
@@ -52,14 +52,23 @@ export class MCPFilesystemClient {
     this.docsRoot = docsRoot ?? DOCS_ROOT;
   }
 
+  private assertContained(targetPath: string): string {
+    const resolved = resolve(targetPath);
+    const root = resolve(this.docsRoot);
+    if (!resolved.startsWith(root + '/') && !resolved.startsWith(root + '\\') && resolved !== root) {
+      throw new Error(`Path traversal blocked: ${targetPath} resolves outside document corpus`);
+    }
+    return resolved;
+  }
+
   async listDirectory(dirPath: string = '.'): Promise<DocMeta[]> {
-    const absDir = join(this.docsRoot, dirPath);
+    const absDir = this.assertContained(join(this.docsRoot, dirPath));
     const files = await walkMarkdown(absDir);
     return Promise.all(files.map(parseDocMeta));
   }
 
   async readFile(filePath: string): Promise<string> {
-    const absPath = join(this.docsRoot, filePath);
+    const absPath = this.assertContained(join(this.docsRoot, filePath));
     return readFile(absPath, 'utf-8');
   }
 

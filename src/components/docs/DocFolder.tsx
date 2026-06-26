@@ -23,6 +23,7 @@ const FOLDER_LABELS: Record<DocSensitivity, string> = {
   confidential: 'Confidential',
 };
 
+
 interface DocFolderProps {
   sensitivity: DocSensitivity;
   totalCount: number;
@@ -43,13 +44,13 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           display: 'flex',
           alignItems: 'center',
           gap: 1,
-          px: 1,
-          py: 0.5,
+          px: 1.5,
+          py: 0.75,
           cursor: 'pointer',
           borderRadius: 0,
           borderBottom: 1,
           borderColor: 'divider',
-          bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#e8eaed',
+          bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#d5d7da',
           '&:hover': { bgcolor: '#6366f1 !important', color: '#fff !important', '& *': { color: '#fff !important' } },
         }}
       >

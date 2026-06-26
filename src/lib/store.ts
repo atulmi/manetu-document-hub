@@ -30,7 +30,7 @@ interface AgentSlice {
   appendStep: (step: AgentStep) => void;
   appendAuditEvent: (event: AuditEvent) => void;
   clearTask: () => void;
-  clearAudit: () => void;
+  clearAllHistory: () => void;
   deleteTaskById: (id: string) => void;
   setViewingTaskId: (id: string | null) => void;
 }
@@ -95,7 +95,7 @@ export const useStore = create<StoreState>()(
         ...trimHistory(newHistory, s.auditEvents, s.auditPrompts),
       };
     }),
-    clearAudit: () => set({ auditEvents: [], auditPrompts: {}, taskHistory: [] }),
+    clearAllHistory: () => set({ auditEvents: [], auditPrompts: {}, taskHistory: [] }),
     deleteTaskById: (id) => set((s) => ({
       taskHistory: s.taskHistory.filter((t) => t.id !== id),
       auditEvents: s.auditEvents.filter((e) => e.agentTaskId !== id),

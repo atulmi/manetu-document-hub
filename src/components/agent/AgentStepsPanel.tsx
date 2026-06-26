@@ -724,7 +724,7 @@ export function AgentStepsPanel() {
 export function useAgentStepsHeader() {
   const taskHistory = useStore((s) => s.taskHistory);
   const storeEvents = useStore((s) => s.auditEvents);
-  const clearAudit = useStore((s) => s.clearAudit);
+  const clearAllHistory = useStore((s) => s.clearAllHistory);
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
   const { events: sseEvents, clear: clearSSE } = useAuditStream();
 
@@ -736,7 +736,7 @@ export function useAgentStepsHeader() {
   }, [taskHistory, storeEvents, sseEvents]);
 
   const handleClear = () => {
-    clearAudit();
+    clearAllHistory();
     clearSSE();
     setViewingTaskId(null);
   };

@@ -1,20 +1,38 @@
 [
   {
-    "id": "doc-001",
-    "title": "Public README",
-    "path": "public/readme.md",
+    "id": "public-company-overview",
+    "title": "Acme Corp: Who We Are",
+    "path": "public/company-overview.md",
     "sensitivity": "public",
-    "excerpt": "Welcome to the AI Document Hub. This project demonstrates policy-controlled AI agent access.",
+    "excerpt": "An overview of Acme Corp's mission, products, and team.",
     "sizeBytes": 2048,
     "accessible": true
   },
   {
-    "id": "doc-002",
-    "title": "API Documentation",
-    "path": "public/api-docs.md",
+    "id": "public-security-faq",
+    "title": "Our Approach to Data Security",
+    "path": "public/security-faq.md",
     "sensitivity": "public",
-    "excerpt": "REST API endpoints for the document management system. Base URL: http://localhost:3001/api",
+    "excerpt": "Frequently asked questions about how Acme Corp secures customer data.",
     "sizeBytes": 4096,
     "accessible": true
+  },
+  {
+    "id": "internal-roadmap",
+    "title": "Product Roadmap: 2026 Priorities",
+    "path": "internal/roadmap-2026.md",
+    "sensitivity": "internal",
+    "excerpt": "Planned features and strategic priorities for DataVault in 2026.",
+    "sizeBytes": 6144,
+    "accessible": false
+  },
+  {
+    "id": "confidential-financials",
+    "title": "Q3 2025 Financial Summary",
+    "path": "confidential/q3-financials.md",
+    "sensitivity": "confidential",
+    "excerpt": "Q3 2025 financial results including revenue, ARR, burn rate.",
+    "sizeBytes": 8192,
+    "accessible": false
   }
 ]

@@ -14,10 +14,13 @@ import { useStore } from '../../lib/store';
 export function SecurityToggle() {
   const securityEnabled = useStore((s) => s.securityEnabled);
   const toggleSecurity = useStore((s) => s.toggleSecurity);
-  const clearTask = useStore((s) => s.clearTask);
+  const currentTask = useStore((s) => s.currentTask);
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const isRunning = currentTask?.status === 'running';
+
   const handleToggle = () => {
+    if (isRunning) return;
     if (securityEnabled) {
       setDialogOpen(true);
     } else {
@@ -27,7 +30,6 @@ export function SecurityToggle() {
 
   const handleConfirm = () => {
     toggleSecurity();
-    clearTask();
     setDialogOpen(false);
   };
 
@@ -39,6 +41,7 @@ export function SecurityToggle() {
           <Switch
             checked={securityEnabled}
             onChange={handleToggle}
+            disabled={isRunning}
             color={securityEnabled ? 'success' : 'error'}
             size="small"
           />

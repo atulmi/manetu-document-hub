@@ -16,7 +16,9 @@ const CACHE_TTL_MS = 60_000;
 
 toolsRouter.get('/', roleExtract, async (req, res) => {
   const role = req.role!;
-  const cached = cache.get(role);
+  const securityEnabled = req.headers['x-security-enabled'] !== 'false';
+  const cacheKey = `${role}:${securityEnabled}`;
+  const cached = cache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) {
     res.json(cached.data);
     return;
@@ -39,7 +41,7 @@ toolsRouter.get('/', roleExtract, async (req, res) => {
       }),
     );
 
-    cache.set(role, { data: results, expiresAt: Date.now() + CACHE_TTL_MS });
+    cache.set(cacheKey, { data: results, expiresAt: Date.now() + CACHE_TTL_MS });
     res.json(results);
   } catch (err) {
     if (err instanceof MPEConnectionError) {

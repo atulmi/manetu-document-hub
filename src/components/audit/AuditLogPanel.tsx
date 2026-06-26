@@ -120,7 +120,7 @@ export function AuditLogPanel() {
   const { events: sseEvents, connected, clear: clearSSE } = useAuditStream();
   const storeEvents = useStore((s) => s.auditEvents);
   const auditPrompts = useStore((s) => s.auditPrompts);
-  const clearAudit = useStore((s) => s.clearAudit);
+  const clearAllHistory = useStore((s) => s.clearAllHistory);
   const viewingTaskId = useStore((s) => s.viewingTaskId);
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
 
@@ -163,7 +163,7 @@ export function AuditLogPanel() {
 
   const handleClear = () => {
     clearSSE();
-    clearAudit();
+    clearAllHistory();
     setViewingTaskId(null);
   };
 

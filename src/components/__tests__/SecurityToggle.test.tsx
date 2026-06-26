@@ -46,7 +46,7 @@ test('cancelling the dialog leaves security enabled', async () => {
   expect(screen.getByText('Enabled')).toBeInTheDocument();
 });
 
-test('confirming the dialog disables security and clears agent state', async () => {
+test('confirming the dialog disables security', async () => {
   const user = userEvent.setup();
   render(<SecurityToggle />, { wrapper: Wrapper });
 
@@ -54,8 +54,22 @@ test('confirming the dialog disables security and clears agent state', async () 
   await user.click(screen.getByTestId('security-dialog-confirm'));
 
   expect(useStore.getState().securityEnabled).toBe(false);
-  expect(useStore.getState().currentTask).toBeNull();
   expect(screen.getByText('Disabled')).toBeInTheDocument();
+});
+
+test('toggle is disabled while agent task is running', () => {
+  useStore.setState({
+    currentTask: {
+      id: 'test',
+      prompt: 'test',
+      role: 'viewer',
+      status: 'running',
+      steps: [],
+      startedAt: new Date().toISOString(),
+    },
+  });
+  render(<SecurityToggle />, { wrapper: Wrapper });
+  expect(screen.getByRole('switch')).toBeDisabled();
 });
 
 test('toggling back on does not show dialog', async () => {

@@ -6,6 +6,11 @@ const BUFFER_SIZE = 50;
 class AuditBus extends EventEmitter {
   private buffer: AuditEvent[] = [];
 
+  constructor() {
+    super();
+    this.setMaxListeners(50);
+  }
+
   emit(event: 'audit', data: AuditEvent): boolean;
   emit(event: string, ...args: unknown[]): boolean {
     if (event === 'audit') {

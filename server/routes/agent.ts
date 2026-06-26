@@ -53,9 +53,8 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
-  // Track client disconnect via response destroy, not request close
-  let clientGone = false;
-  res.on('close', () => { clientGone = true; });
+  const abortController = new AbortController();
+  res.on('close', () => { abortController.abort(); });
 
   const mpeClient = buildMPEClient();
   const fsClient = buildFSClient();
@@ -69,6 +68,7 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
       securityEnabled,
       mpeClient,
       fsClient,
+      signal: abortController.signal,
       onStep: (step: AgentStep) => {
         writeSSE(res, 'step', step);
       },
@@ -84,7 +84,7 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
     console.error('Agent run error:', message);
     writeSSE(res, 'error', { message });
   } finally {
-    console.log('Agent run finished, clientGone:', clientGone);
+    console.log('Agent run finished, aborted:', abortController.signal.aborted);
     try { if (!res.writableEnded) res.end(); } catch { /* already closed */ }
   }
 });
