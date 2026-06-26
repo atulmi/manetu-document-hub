@@ -39,15 +39,13 @@ export function buildTheme(mode: PaletteMode) {
         styleOverrides: {
           root: {
             '&:hover': {
-              backgroundColor: '#6366f1',
-              color: '#fff',
+              backgroundColor: 'rgba(99,102,241,0.08)',
             },
             '&.Mui-selected': {
               backgroundColor: 'rgba(99,102,241,0.15)',
             },
             '&.Mui-selected:hover': {
-              backgroundColor: '#6366f1',
-              color: '#fff',
+              backgroundColor: 'rgba(99,102,241,0.18)',
             },
           },
         },

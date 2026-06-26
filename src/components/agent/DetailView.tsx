@@ -2,7 +2,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import Replay from "@mui/icons-material/Replay";
 import { useStore } from "../../lib/store";
 import { relativeTime } from "../../lib/format-time";
 import { StepTrace } from "./StepTrace";
@@ -13,12 +15,15 @@ export function DetailView({
   group,
   task,
   onBack,
+  onRerun,
 }: {
   group: PromptGroup;
   task: ReturnType<typeof useStore.getState>["currentTask"];
   onBack: () => void;
+  onRerun?: (prompt: string) => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
+  const isRunning = task?.status === "running";
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -83,6 +88,16 @@ export function DetailView({
             )}
           </Box>
         </Box>
+        {onRerun && !isRunning && (
+          <Button
+            size="small"
+            startIcon={<Replay sx={{ fontSize: 14 }} />}
+            onClick={() => onRerun(group.prompt)}
+            sx={{ fontSize: "0.7rem", flexShrink: 0, mt: 0.25 }}
+          >
+            Re-run
+          </Button>
+        )}
       </Box>
 
       {/* Step trace + policy checks */}
@@ -101,7 +116,7 @@ export function DetailView({
                     display: "block",
                   }}
                 >
-                  Policy checks ({group.events.length} total )
+                  Policy checks ({group.events.length} total)
                 </Typography>
                 <Box
                   sx={{
@@ -119,9 +134,30 @@ export function DetailView({
             )}
           </>
         ) : (
-          <Typography variant="body2" color="text.disabled">
-            Step details not available for this run.
-          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              py: 6,
+              gap: 1,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Step details not available for this run.
+            </Typography>
+            {onRerun && (
+              <Button
+                size="small"
+                startIcon={<Replay sx={{ fontSize: 14 }} />}
+                onClick={() => onRerun(group.prompt)}
+                sx={{ fontSize: "0.75rem" }}
+              >
+                Re-run this prompt
+              </Button>
+            )}
+          </Box>
         )}
       </Box>
     </Box>

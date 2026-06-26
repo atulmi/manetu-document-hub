@@ -37,7 +37,7 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
   const allLocked = accessibleCount === 0;
 
   return (
-    <Box sx={{ mb: 0.5 }}>
+    <Box sx={{ px: 1, pt: 0.75 }}>
       <Box
         onClick={() => setOpen((o) => !o)}
         sx={{
@@ -47,11 +47,9 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           px: 1.5,
           py: 0.75,
           cursor: 'pointer',
-          borderRadius: 0,
-          borderBottom: 1,
-          borderColor: 'divider',
-          bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#d5d7da',
-          '&:hover': { bgcolor: '#6366f1 !important', color: '#fff !important', '& *': { color: '#fff !important' } },
+          borderRadius: 1.5,
+          bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e8eaed',
+          '&:hover': { bgcolor: 'rgba(99,102,241,0.08) !important' },
         }}
       >
         <Icon sx={{ fontSize: 16, color: 'text.secondary' }} />

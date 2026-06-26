@@ -8,6 +8,7 @@ import AccessTime from "@mui/icons-material/AccessTime";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import Replay from "@mui/icons-material/Replay";
 import { relativeTime } from "../../lib/format-time";
 import { memo } from "react";
 import type { PromptGroup } from "./prompt-group";
@@ -17,11 +18,13 @@ export const PromptRow = memo(function PromptRow({
   onClick,
   onExport,
   onDelete,
+  onRerun,
 }: {
   group: PromptGroup;
   onClick: () => void;
   onExport: () => void;
   onDelete: () => void;
+  onRerun: () => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
 
@@ -34,7 +37,7 @@ export const PromptRow = memo(function PromptRow({
         px: 1.5,
         py: 1,
         cursor: "pointer",
-        "&:hover": { bgcolor: "#6366f1 !important", color: "#fff !important", "& *": { color: "#fff !important" } },
+        "&:hover": { bgcolor: "rgba(99,102,241,0.08) !important" },
         borderBottom: 1,
         borderColor: "divider",
         transition: "none",
@@ -119,6 +122,18 @@ export const PromptRow = memo(function PromptRow({
           )}
         </Box>
       </Box>
+      <Tooltip title="Re-run with current role">
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRerun();
+          }}
+          sx={{ flexShrink: 0, ml: 0.5 }}
+        >
+          <Replay sx={{ fontSize: 16, color: "text.disabled" }} />
+        </IconButton>
+      </Tooltip>
       <Tooltip title="Export this run">
         <IconButton
           size="small"
@@ -126,7 +141,7 @@ export const PromptRow = memo(function PromptRow({
             e.stopPropagation();
             onExport();
           }}
-          sx={{ flexShrink: 0, ml: 0.5 }}
+          sx={{ flexShrink: 0 }}
         >
           <FileDownloadOutlined sx={{ fontSize: 16, color: "text.disabled" }} />
         </IconButton>

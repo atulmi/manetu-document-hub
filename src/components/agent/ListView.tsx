@@ -13,12 +13,13 @@ import Button from "@mui/material/Button";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import { useStore } from "../../lib/store";
 import { exportSingleRun } from "../../lib/export-txt";
 import { ALL_ROLES } from "../../types";
 import { PromptRow } from "./PromptRow";
 import type { PromptGroup } from "./prompt-group";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 
 const PAGE_SIZE = 10;
 
@@ -28,9 +29,11 @@ type DecisionFilter = "all" | "allowed" | "denied" | "bypassed";
 export function ListView({
   groups,
   onSelect,
+  onRerun,
 }: {
   groups: PromptGroup[];
   onSelect: (taskId: string) => void;
+  onRerun: (prompt: string) => void;
 }) {
   const [page, setPage] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -60,13 +63,33 @@ export function ListView({
     setPage(0);
   }, [roleFilter, statusFilter, decisionFilter]);
 
+  const hasActiveFilters =
+    roleFilter !== "all" || statusFilter !== "all" || decisionFilter !== "all";
+
+  const resetFilters = useCallback(() => {
+    setRoleFilter("all");
+    setStatusFilter("all");
+    setDecisionFilter("all");
+  }, []);
+
   if (groups.length === 0) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
-          No prompt runs yet.
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 6,
+          px: 3,
+          gap: 1,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
+          No prompt runs yet
         </Typography>
-        <Typography variant="body2" color="text.disabled">
+        <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 320 }}>
           Submit a prompt in the Agent Task View. Each run will appear here —
           click to view the AI agent's reasoning steps, tool calls, and policy
           check results.
@@ -75,8 +98,6 @@ export function ListView({
     );
   }
 
-  const hasActiveFilters =
-    roleFilter !== "all" || statusFilter !== "all" || decisionFilter !== "all";
   const selectSx = {
     minWidth: 100,
     ".MuiSelect-select": { py: 0.5, fontSize: "0.75rem" },
@@ -183,23 +204,50 @@ export function ListView({
           </FormControl>
         </Box>
         {hasActiveFilters && (
-          <Typography
-            variant="caption"
-            color="text.disabled"
-            sx={{ fontSize: "0.65rem" }}
-          >
-            {filtered.length} of {groups.length}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography
+              variant="caption"
+              color="text.disabled"
+              sx={{ fontSize: "0.65rem" }}
+            >
+              {filtered.length} of {groups.length}
+            </Typography>
+            <Button
+              size="small"
+              startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
+              onClick={resetFilters}
+              sx={{ fontSize: "0.65rem", minWidth: 0, textTransform: "none" }}
+            >
+              Reset
+            </Button>
+          </Box>
         )}
       </Box>
       <Divider />
       {/* List */}
       <Box sx={{ flex: 1, overflow: "auto" }}>
         {paged.length === 0 ? (
-          <Box sx={{ p: 2 }}>
-            <Typography variant="body2" color="text.disabled">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              py: 6,
+              gap: 1,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
               No runs match the selected filters.
             </Typography>
+            <Button
+              size="small"
+              startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
+              onClick={resetFilters}
+              sx={{ fontSize: "0.75rem" }}
+            >
+              Reset filters
+            </Button>
           </Box>
         ) : (
           paged.map((group) => (
@@ -213,6 +261,7 @@ export function ListView({
                 if (task) exportSingleRun(task, auditEvents);
               }}
               onDelete={() => setPendingDeleteId(group.taskId)}
+              onRerun={() => onRerun(group.prompt)}
             />
           ))
         )}

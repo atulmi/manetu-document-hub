@@ -44,14 +44,14 @@ export function DocLibrary({ onSelectDoc }: DocLibraryProps) {
 
   if (error) {
     return (
-      <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Typography color="error" variant="body2" sx={{ fontWeight: 600 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 6, px: 3, gap: 1, textAlign: 'center' }}>
+        <Typography color="error" variant="body1" sx={{ fontWeight: 600 }}>
           Unable to load documents
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 280 }}>
           {error}
         </Typography>
-        <Button size="small" variant="outlined" onClick={refetch} sx={{ alignSelf: 'flex-start', mt: 0.5 }}>
+        <Button size="small" variant="outlined" onClick={refetch} sx={{ mt: 0.5 }}>
           Retry
         </Button>
       </Box>

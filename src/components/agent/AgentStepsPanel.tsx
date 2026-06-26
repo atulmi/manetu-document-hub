@@ -1,9 +1,10 @@
 import { useStore } from "../../lib/store";
 import { useAuditStream } from "../../hooks/useAuditStream";
+import { useAgentRun } from "../../hooks/useAgentRun";
 import { ListView } from "./ListView";
 import { DetailView } from "./DetailView";
 import type { PromptGroup } from "./prompt-group";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useCallback } from "react";
 
 export function AgentStepsPanel() {
   const currentTask = useStore((s) => s.currentTask);
@@ -13,12 +14,21 @@ export function AgentStepsPanel() {
   const auditPrompts = useStore((s) => s.auditPrompts);
   const storeEvents = useStore((s) => s.auditEvents);
   const { events: sseEvents } = useAuditStream();
+  const { submit, isRunning } = useAgentRun();
 
   useEffect(() => {
     if (currentTask?.status === "running" && currentTask.id) {
       setViewingTaskId(currentTask.id);
     }
   }, [currentTask?.id, currentTask?.status, setViewingTaskId]);
+
+  const handleRerun = useCallback(
+    (prompt: string) => {
+      if (isRunning) return;
+      submit(prompt);
+    },
+    [submit, isRunning],
+  );
 
   const groups = useMemo(() => {
     const seen = new Set<string>();
@@ -106,11 +116,18 @@ export function AgentStepsPanel() {
         group={selectedGroup}
         task={selectedTask}
         onBack={() => setViewingTaskId(null)}
+        onRerun={handleRerun}
       />
     );
   }
 
-  return <ListView groups={groups} onSelect={setViewingTaskId} />;
+  return (
+    <ListView
+      groups={groups}
+      onSelect={setViewingTaskId}
+      onRerun={handleRerun}
+    />
+  );
 }
 
 export function useAgentStepsHeader() {
