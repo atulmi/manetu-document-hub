@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Badge from "@mui/material/Badge";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
 import Close from "@mui/icons-material/Close";
@@ -71,20 +70,7 @@ export function CenterPanel() {
           }}
         >
           <Tab label="New Prompt" />
-          <Tab
-            label={
-              <Badge
-                badgeContent={count}
-                color="primary"
-                max={99}
-                sx={{ "& .MuiBadge-badge": { fontSize: "0.6rem", height: 16, minWidth: 16 } }}
-              >
-                <Box component="span" sx={{ pr: count > 0 ? 1.5 : 0 }}>
-                  Prompt History
-                </Box>
-              </Badge>
-            }
-          />
+          <Tab label={count > 0 ? `Prompt History (${count})` : "Prompt History"} />
         </Tabs>
       </Box>
       <Box sx={{ flex: 1, overflow: "auto", display: tab === 0 ? "flex" : "none", flexDirection: "column" }}>
@@ -122,7 +108,6 @@ export function CenterPanel() {
             <DetailView
               group={selectedGroup}
               task={selectedTask}
-              onRerun={handleRerun}
             />
           </>
         )}

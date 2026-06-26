@@ -1,19 +1,22 @@
 import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
 import Build from '@mui/icons-material/Build';
 import Lock from '@mui/icons-material/Lock';
 import { PolicyDecisionBadge } from '../docs/PolicyDecisionBadge';
+import { ROLE_COLORS } from '../../lib/role-permissions';
 import { useStore } from '../../lib/store';
-import type { AgentStep } from '../../types';
+import type { AgentStep, UserRole } from '../../types';
 
 interface ToolCallCardProps {
   step: AgentStep;
+  role: UserRole;
 }
 
-export const ToolCallCard = memo(function ToolCallCard({ step }: ToolCallCardProps) {
+export const ToolCallCard = memo(function ToolCallCard({ step, role }: ToolCallCardProps) {
   const selectDoc = useStore((s) => s.selectDoc);
   const tc = step.toolCall;
   if (!tc) return null;
@@ -21,6 +24,7 @@ export const ToolCallCard = memo(function ToolCallCard({ step }: ToolCallCardPro
   const denied = tc.policyDecision.decision === 'deny';
   const isReadFile = tc.toolName === 'read-file';
   const filePath = tc.args['path'] as string | undefined;
+  const roleColor = ROLE_COLORS[role] ?? '#6366f1';
 
   const handleViewDoc = () => {
     if (filePath) {
@@ -42,6 +46,12 @@ export const ToolCallCard = memo(function ToolCallCard({ step }: ToolCallCardPro
         <Typography variant="caption" sx={{ fontWeight: 600 }}>
           Step {step.stepNumber} · Tool Call
         </Typography>
+        <Chip
+          label={role}
+          size="small"
+          variant="filled"
+          sx={{ height: 16, fontSize: '0.55rem', fontWeight: 700, bgcolor: roleColor, color: '#fff' }}
+        />
         <Box sx={{ flex: 1 }} />
         <PolicyDecisionBadge decision={tc.policyDecision.decision} />
       </Box>

@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import ArrowBack from "@mui/icons-material/ArrowBack";
@@ -152,21 +153,32 @@ export function DetailView({
               alignItems: "center",
               justifyContent: "center",
               py: 6,
-              gap: 1,
+              gap: 1.5,
             }}
           >
-            <Typography variant="body2" color="text.secondary">
-              Step details not available for this run.
-            </Typography>
-            {onRerun && (
-              <Button
-                size="small"
-                startIcon={<Replay sx={{ fontSize: 14 }} />}
-                onClick={() => onRerun(group.prompt)}
-                sx={{ fontSize: "0.75rem" }}
-              >
-                Re-run this prompt
-              </Button>
+            {group.status === "running" || group.status === "completed" ? (
+              <>
+                <CircularProgress size={28} sx={{ color: "primary.main" }} />
+                <Typography variant="body2" color="text.secondary">
+                  Waiting for agent steps...
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  Step details not available for this run.
+                </Typography>
+                {onRerun && (
+                  <Button
+                    size="small"
+                    startIcon={<Replay sx={{ fontSize: 14 }} />}
+                    onClick={() => onRerun(group.prompt)}
+                    sx={{ fontSize: "0.75rem" }}
+                  >
+                    Re-run this prompt
+                  </Button>
+                )}
+              </>
             )}
           </Box>
         )}

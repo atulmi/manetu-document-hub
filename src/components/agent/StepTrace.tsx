@@ -22,7 +22,7 @@ function formatElapsed(startedAt: string, completedAt?: string): string {
 }
 
 export function StepTrace({ task, onRetry }: StepTraceProps) {
-  const { steps, status, startedAt, completedAt, finalAnswer } = task;
+  const { steps, status, startedAt, completedAt, finalAnswer, role } = task;
   const topRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevTaskId = useRef(task.id);
@@ -56,10 +56,10 @@ export function StepTrace({ task, onRetry }: StepTraceProps) {
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             {step.type === 'thinking' && (
-              <ThinkingCard step={step} collapsed={i < steps.length - 1} />
+              <ThinkingCard step={step} role={role} collapsed={i < steps.length - 1} />
             )}
             {step.type === 'tool-call' && (
-              <ToolCallCard step={step} />
+              <ToolCallCard step={step} role={role} />
             )}
             {step.type === 'final-answer' && (
               <FinalAnswerCard step={step} priorSteps={steps.slice(0, i)} />
