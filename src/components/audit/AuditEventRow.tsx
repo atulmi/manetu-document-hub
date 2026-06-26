@@ -22,7 +22,7 @@ export const AuditEventRow = memo(function AuditEventRow({ event }: AuditEventRo
         px: 1.5,
         py: 0.5,
         '&:hover': { bgcolor: 'action.hover' },
-        transition: 'background-color 0.15s',
+        transition: 'none',
       }}
     >
       <PolicyDecisionBadge decision={event.decision} size="sm" />

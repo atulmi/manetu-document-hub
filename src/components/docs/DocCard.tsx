@@ -41,12 +41,14 @@ export const DocCard = memo(function DocCard({ doc, selected, onSelect, onLocked
           minHeight: 44,
           cursor: doc.accessible ? 'pointer' : 'not-allowed',
           bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'transparent',
-          '&:hover': {
-            bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.15)',
-          },
+          '&:hover': doc.accessible ? {
+            bgcolor: '#6366f1 !important',
+            color: '#fff !important',
+            '& *': { color: '#fff !important' },
+          } : {},
           borderBottom: 1,
           borderColor: 'divider',
-          transition: 'background-color 0.15s',
+          transition: 'none',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: doc.accessible ? 0.25 : 0 }}>

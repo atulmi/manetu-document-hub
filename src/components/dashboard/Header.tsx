@@ -62,7 +62,7 @@ export function Header() {
 
   return (
     <Box sx={{ flexShrink: 0 }}>
-      <AppBar position="static" elevation={0} sx={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}>
+      <AppBar position="static" elevation={0} sx={(t) => ({ background: t.palette.mode === 'dark' ? 'linear-gradient(135deg, #1e2040 0%, #171930 100%)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' })}>
         <Toolbar variant="dense" sx={{ height: 40, minHeight: 40 }}>
           <Shield sx={{ mr: 1, fontSize: 20, color: 'primary.contrastText' }} />
           <Typography variant="h6" noWrap sx={{ fontWeight: 700, fontSize: '0.9rem' }}>

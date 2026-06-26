@@ -11,8 +11,8 @@ export function buildTheme(mode: PaletteMode) {
       success: { main: '#22c55e' },
       ...(dark
         ? {
-            background: { default: '#0f1117', paper: '#1a1d2e' },
-            divider: 'rgba(255,255,255,0.1)',
+            background: { default: '#0a0b10', paper: '#1e2235' },
+            divider: 'rgba(255,255,255,0.12)',
           }
         : {
             background: { default: '#f0f2f5', paper: '#ffffff' },
@@ -35,6 +35,23 @@ export function buildTheme(mode: PaletteMode) {
           root: { backgroundImage: 'none' },
         },
       },
+      MuiMenuItem: {
+        styleOverrides: {
+          root: {
+            '&:hover': {
+              backgroundColor: '#6366f1',
+              color: '#fff',
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(99,102,241,0.15)',
+            },
+            '&.Mui-selected:hover': {
+              backgroundColor: '#6366f1',
+              color: '#fff',
+            },
+          },
+        },
+      },
       MuiButton: {
         styleOverrides: {
           root: { textTransform: 'none', fontWeight: 600, minHeight: 36 },
@@ -51,7 +68,6 @@ export function buildTheme(mode: PaletteMode) {
         styleOverrides: {
           root: {
             backgroundImage: 'none',
-            backgroundColor: dark ? '#141726' : undefined,
           },
         },
       },

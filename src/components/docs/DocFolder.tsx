@@ -50,7 +50,7 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           borderBottom: 1,
           borderColor: 'divider',
           bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#e8eaed',
-          '&:hover': { bgcolor: 'rgba(99,102,241,0.15)' },
+          '&:hover': { bgcolor: '#6366f1 !important', color: '#fff !important', '& *': { color: '#fff !important' } },
         }}
       >
         <Icon sx={{ fontSize: 16, color: 'text.secondary' }} />

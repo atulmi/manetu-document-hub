@@ -62,10 +62,10 @@ const PromptRow = memo(function PromptRow({
         px: 1.5,
         py: 1,
         cursor: "pointer",
-        "&:hover": { bgcolor: "rgba(99,102,241,0.12)" },
+        "&:hover": { bgcolor: "#6366f1 !important", color: "#fff !important", "& *": { color: "#fff !important" } },
         borderBottom: 1,
         borderColor: "divider",
-        transition: "background-color 0.15s",
+        transition: "none",
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -82,11 +82,21 @@ const PromptRow = memo(function PromptRow({
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Person sx={{ fontSize: 12, color: "text.disabled" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontSize: "0.7rem" }}
+            >
               {group.role}
             </Typography>
-            <AccessTime sx={{ fontSize: 12, color: "text.disabled", ml: 0.5 }} />
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+            <AccessTime
+              sx={{ fontSize: 12, color: "text.disabled", ml: 0.5 }}
+            />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontSize: "0.7rem" }}
+            >
               {timeLabel}
             </Typography>
           </Box>
@@ -140,7 +150,10 @@ const PromptRow = memo(function PromptRow({
       <Tooltip title="Export this run">
         <IconButton
           size="small"
-          onClick={(e) => { e.stopPropagation(); onExport(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onExport();
+          }}
           sx={{ flexShrink: 0, ml: 0.5 }}
         >
           <FileDownloadOutlined sx={{ fontSize: 16, color: "text.disabled" }} />
@@ -149,7 +162,10 @@ const PromptRow = memo(function PromptRow({
       <Tooltip title="Delete this run">
         <IconButton
           size="small"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
           sx={{ flexShrink: 0 }}
         >
           <DeleteOutline sx={{ fontSize: 16, color: "text.disabled" }} />
@@ -234,6 +250,7 @@ function ListView({
         sx={{
           px: 1.5,
           mb: 1.5,
+          mt: 1.5,
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
@@ -365,9 +382,10 @@ function ListView({
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "flex-start",
             gap: 0.5,
             py: 0.75,
+            px: 1,
             borderTop: 1,
             borderColor: "divider",
             flexShrink: 0,
@@ -397,9 +415,10 @@ function ListView({
                 bgcolor: page === i ? "primary.main" : "transparent",
                 color: page === i ? "primary.contrastText" : "text.secondary",
                 "&:hover": {
-                  bgcolor: page === i ? "primary.dark" : "rgba(99,102,241,0.15)",
+                  bgcolor:
+                    page === i ? "primary.dark" : "rgba(99,102,241,0.15)",
                 },
-                transition: "background-color 0.15s",
+                transition: "none",
               }}
             >
               {i + 1}
@@ -423,15 +442,30 @@ function ListView({
         aria-labelledby="delete-run-dialog-title"
         PaperProps={{ sx: { borderRadius: 2, overflow: "hidden" } }}
       >
-        <Box sx={{ bgcolor: "primary.main", color: "primary.contrastText", px: 3, py: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box
+          sx={{
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            px: 3,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+          }}
+        >
           <DeleteOutline />
-          <Typography id="delete-run-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <Typography
+            id="delete-run-dialog-title"
+            variant="subtitle1"
+            sx={{ fontWeight: 700 }}
+          >
             Delete this prompt run?
           </Typography>
         </Box>
         <DialogContent sx={{ pt: 2.5, pb: 1 }}>
           <DialogContentText sx={{ color: "text.primary", lineHeight: 1.7 }}>
-            This will permanently delete this prompt run and its agent steps and policy checks.
+            This will permanently delete this prompt run and its agent steps and
+            policy checks.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
@@ -442,7 +476,8 @@ function ListView({
             variant="outlined"
             color="error"
             onClick={() => {
-              if (pendingDeleteId) useStore.getState().deleteTaskById(pendingDeleteId);
+              if (pendingDeleteId)
+                useStore.getState().deleteTaskById(pendingDeleteId);
               setPendingDeleteId(null);
             }}
           >
@@ -478,7 +513,8 @@ function DetailView({
           flexShrink: 0,
           borderBottom: 1,
           borderColor: "divider",
-          bgcolor: (t: import("@mui/material").Theme) => t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#e8eaed",
+          bgcolor: (t: import("@mui/material").Theme) =>
+            t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#e8eaed",
         }}
       >
         <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>

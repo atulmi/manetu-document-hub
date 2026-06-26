@@ -75,7 +75,7 @@ export function AgentTaskPanel() {
           sx={{ mb: 0.5, fontSize: "0.7rem" }}
         >
           Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy
-          Engine · Enter to submit, Shift+Enter for new line
+          Engine
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {isRunning ? (
@@ -116,7 +116,7 @@ export function AgentTaskPanel() {
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ mb: 0.75, display: "block" }}
+            sx={{ mt: 2, mb: 1, display: "block" }}
           >
             Try asking:
           </Typography>
@@ -129,14 +129,21 @@ export function AgentTaskPanel() {
                 variant="outlined"
                 disabled={isRunning}
                 onClick={() => setPrompt(s)}
-                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem", "&:hover": { bgcolor: "rgba(99,102,241,0.15)" } }}
+                sx={{
+                  cursor: isRunning ? "default" : "pointer",
+                  fontSize: "0.75rem",
+                  "&:hover": {
+                    bgcolor: "#6366f1 !important",
+                    color: "#fff !important",
+                  },
+                }}
               />
             ))}
           </Box>
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ mt: 1.5, mb: 0.75, display: "block" }}
+            sx={{ mt: 3, mb: 1, display: "block" }}
           >
             Or try these (may trigger policy denials depending on role):
           </Typography>
@@ -149,7 +156,14 @@ export function AgentTaskPanel() {
                 variant="outlined"
                 disabled={isRunning}
                 onClick={() => setPrompt(s)}
-                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem", "&:hover": { bgcolor: "rgba(99,102,241,0.15)" } }}
+                sx={{
+                  cursor: isRunning ? "default" : "pointer",
+                  fontSize: "0.75rem",
+                  "&:hover": {
+                    bgcolor: "#6366f1 !important",
+                    color: "#fff !important",
+                  },
+                }}
               />
             ))}
           </Box>

@@ -27,6 +27,23 @@ function ResizeHandle() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "col-resize",
+          position: "relative",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            left: "50%",
+            width: "1px",
+            bgcolor: "primary.main",
+            opacity: 0.6,
+            transform: "translateX(-50%)",
+            transition: "opacity 0.15s, width 0.15s",
+          },
+          "&:hover::before, &[data-resize-handle-active]::before": {
+            opacity: 1,
+            width: "2px",
+          },
           "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator":
             {
               opacity: 1,
@@ -38,20 +55,22 @@ function ResizeHandle() {
           sx={{
             display: "flex",
             alignItems: "center",
-            bgcolor: "primary.main",
+            bgcolor: "background.paper",
+            border: 1,
+            borderColor: "divider",
             borderRadius: 1,
             px: 0,
             py: 0.25,
-            opacity: 0.7,
+            opacity: 0.5,
             transition: "opacity 0.15s",
             zIndex: 1,
           }}
         >
           <ChevronLeft
-            sx={{ fontSize: 14, color: "primary.contrastText", mx: -0.5 }}
+            sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }}
           />
           <ChevronRight
-            sx={{ fontSize: 14, color: "primary.contrastText", mx: -0.5 }}
+            sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }}
           />
         </Box>
       </Box>
@@ -138,7 +157,7 @@ export function ThreePanel({
     <Box sx={{ flex: 1, overflow: "hidden", p: 1 }}>
       <Group orientation="horizontal" style={{ height: "100%" }}>
         <Panel defaultSize="25%" minSize="20%">
-          <Box sx={{ height: "100%", pr: 1, pl: 1, py: 1 }}>
+          <Box sx={{ height: "100%", pr: 1.5, pl: 1, py: 1 }}>
             <PanelCard title="Document Library">{left}</PanelCard>
           </Box>
         </Panel>
@@ -146,7 +165,7 @@ export function ThreePanel({
         <ResizeHandle />
 
         <Panel defaultSize="34%" minSize="25%">
-          <Box sx={{ height: "100%", px: 1, py: 1 }}>
+          <Box sx={{ height: "100%", px: 1.5, py: 1 }}>
             <PanelCard title="Agent Task View">{center}</PanelCard>
           </Box>
         </Panel>
@@ -154,7 +173,7 @@ export function ThreePanel({
         <ResizeHandle />
 
         <Panel defaultSize="33%" minSize="25%">
-          <Box sx={{ height: "100%", pl: 1, pr: 1, py: 1 }}>
+          <Box sx={{ height: "100%", pl: 1.5, pr: 1, py: 1 }}>
             <PanelCard
               title={rightTitle ?? "Prompt History"}
               action={rightAction}
