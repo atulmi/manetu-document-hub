@@ -3,15 +3,16 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import Person from "@mui/icons-material/Person";
 import AccessTime from "@mui/icons-material/AccessTime";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import Replay from "@mui/icons-material/Replay";
 import { relativeTime } from "../../lib/format-time";
+import { ROLE_COLORS } from "../../lib/role-permissions";
 import { memo } from "react";
 import type { PromptGroup } from "./prompt-group";
+import type { UserRole } from "../../types";
 
 export const PromptRow = memo(function PromptRow({
   group,
@@ -27,6 +28,7 @@ export const PromptRow = memo(function PromptRow({
   onRerun: () => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
+  const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#6366f1";
 
   return (
     <Box
@@ -56,17 +58,7 @@ export const PromptRow = memo(function PromptRow({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Person sx={{ fontSize: 12, color: "text.disabled" }} />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontSize: "0.7rem" }}
-            >
-              {group.role}
-            </Typography>
-            <AccessTime
-              sx={{ fontSize: 12, color: "text.disabled", ml: 0.5 }}
-            />
+            <AccessTime sx={{ fontSize: 12, color: "text.disabled" }} />
             <Typography
               variant="caption"
               color="text.secondary"
@@ -80,7 +72,7 @@ export const PromptRow = memo(function PromptRow({
               label={`${group.allowCount} allowed`}
               size="small"
               color="success"
-              variant="filled"
+              variant="outlined"
               sx={{ height: 18, fontSize: "0.6rem" }}
             />
           )}
@@ -89,7 +81,7 @@ export const PromptRow = memo(function PromptRow({
               label={`${group.denyCount} denied`}
               size="small"
               color="error"
-              variant="filled"
+              variant="outlined"
               sx={{ height: 18, fontSize: "0.6rem" }}
             />
           )}
@@ -98,7 +90,7 @@ export const PromptRow = memo(function PromptRow({
               label={`${group.bypassedCount} bypassed`}
               size="small"
               color="warning"
-              variant="filled"
+              variant="outlined"
               sx={{ height: 18, fontSize: "0.6rem" }}
             />
           )}
@@ -120,6 +112,18 @@ export const PromptRow = memo(function PromptRow({
               sx={{ height: 18, fontSize: "0.6rem" }}
             />
           )}
+          <Chip
+            label={group.role}
+            size="small"
+            variant="filled"
+            sx={{
+              height: 18,
+              fontSize: "0.6rem",
+              fontWeight: 700,
+              bgcolor: roleColor,
+              color: "#fff",
+            }}
+          />
         </Box>
       </Box>
       <Tooltip title="Re-run with current role">

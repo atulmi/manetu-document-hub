@@ -7,9 +7,11 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import Replay from "@mui/icons-material/Replay";
 import { useStore } from "../../lib/store";
 import { relativeTime } from "../../lib/format-time";
+import { ROLE_COLORS } from "../../lib/role-permissions";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { PromptGroup } from "./prompt-group";
+import type { UserRole } from "../../types";
 
 export function DetailView({
   group,
@@ -19,11 +21,12 @@ export function DetailView({
 }: {
   group: PromptGroup;
   task: ReturnType<typeof useStore.getState>["currentTask"];
-  onBack: () => void;
+  onBack?: () => void;
   onRerun?: (prompt: string) => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
   const isRunning = task?.status === "running";
+  const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#6366f1";
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -42,9 +45,11 @@ export function DetailView({
             t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#e8eaed",
         }}
       >
-        <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
-          <ArrowBack sx={{ fontSize: 18 }} />
-        </IconButton>
+        {onBack && (
+          <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
+            <ArrowBack sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="body2" sx={{ fontWeight: 700 }}>
             {group.prompt}
@@ -52,19 +57,25 @@ export function DetailView({
           <Box
             sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}
           >
+            <Chip
+              label={group.role}
+              size="small"
+              variant="filled"
+              sx={{ height: 18, fontSize: "0.6rem", fontWeight: 700, bgcolor: roleColor, color: "#fff" }}
+            />
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ fontSize: "0.7rem" }}
             >
-              {group.role} · {timeLabel}
+              {timeLabel}
             </Typography>
             {group.allowCount > 0 && (
               <Chip
                 label={`${group.allowCount} allowed`}
                 size="small"
                 color="success"
-                variant="filled"
+                variant="outlined"
                 sx={{ height: 18, fontSize: "0.6rem" }}
               />
             )}
@@ -73,7 +84,7 @@ export function DetailView({
                 label={`${group.denyCount} denied`}
                 size="small"
                 color="error"
-                variant="filled"
+                variant="outlined"
                 sx={{ height: 18, fontSize: "0.6rem" }}
               />
             )}
@@ -82,7 +93,7 @@ export function DetailView({
                 label={`${group.bypassedCount} bypassed`}
                 size="small"
                 color="warning"
-                variant="filled"
+                variant="outlined"
                 sx={{ height: 18, fontSize: "0.6rem" }}
               />
             )}

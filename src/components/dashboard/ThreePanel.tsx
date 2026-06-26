@@ -6,12 +6,11 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { PanelHeader } from "./PanelHeader";
 
-interface ThreePanelProps {
+interface TwoPanelProps {
   left?: ReactNode;
-  center?: ReactNode;
   right?: ReactNode;
+  leftTitle?: string;
   rightTitle?: string;
-  rightAction?: ReactNode;
 }
 
 function ResizeHandle() {
@@ -80,15 +79,9 @@ function ResizeHandle() {
 
 function PanelCard({
   title,
-  subtitle,
-  action,
-  shadow,
   children,
 }: {
   title: string;
-  subtitle?: string;
-  action?: ReactNode;
-  shadow?: string;
   children?: ReactNode;
 }) {
   return (
@@ -103,23 +96,21 @@ function PanelCard({
         borderColor: "divider",
         borderRadius: 1.5,
         boxShadow:
-          shadow ??
           "0 1px 1px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.16)",
       }}
     >
-      <PanelHeader title={title} subtitle={subtitle} action={action} />
+      <PanelHeader title={title} />
       <Box sx={{ flex: 1, overflow: "auto" }}>{children}</Box>
     </Box>
   );
 }
 
-export function ThreePanel({
+export function TwoPanel({
   left,
-  center,
   right,
+  leftTitle,
   rightTitle,
-  rightAction,
-}: ThreePanelProps) {
+}: TwoPanelProps) {
   const theme = useTheme();
   const stacked = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -135,19 +126,15 @@ export function ThreePanel({
           gap: 1.5,
         }}
       >
-        <Box sx={{ minHeight: 300 }}>
-          <PanelCard title="Agent Task View">{center}</PanelCard>
-        </Box>
-        <Box sx={{ minHeight: 250 }}>
-          <PanelCard
-            title={rightTitle ?? "Prompt History"}
-            action={rightAction}
-          >
+        <Box sx={{ minHeight: 400 }}>
+          <PanelCard title={rightTitle ?? "Agent Task View"}>
             {right}
           </PanelCard>
         </Box>
         <Box sx={{ minHeight: 300 }}>
-          <PanelCard title="Document Library">{left}</PanelCard>
+          <PanelCard title={leftTitle ?? "Document Library"}>
+            {left}
+          </PanelCard>
         </Box>
       </Box>
     );
@@ -156,28 +143,19 @@ export function ThreePanel({
   return (
     <Box sx={{ flex: 1, overflow: "hidden", p: 1 }}>
       <Group orientation="horizontal" style={{ height: "100%" }}>
-        <Panel defaultSize="25%" minSize="20%">
+        <Panel defaultSize="28%" minSize="18%">
           <Box sx={{ height: "100%", pr: 1.5, pl: 1, py: 1 }}>
-            <PanelCard title="Document Library">{left}</PanelCard>
+            <PanelCard title={leftTitle ?? "Document Library"}>
+              {left}
+            </PanelCard>
           </Box>
         </Panel>
 
         <ResizeHandle />
 
-        <Panel defaultSize="34%" minSize="25%">
-          <Box sx={{ height: "100%", px: 1.5, py: 1 }}>
-            <PanelCard title="Agent Task View">{center}</PanelCard>
-          </Box>
-        </Panel>
-
-        <ResizeHandle />
-
-        <Panel defaultSize="33%" minSize="25%">
+        <Panel defaultSize="72%" minSize="40%">
           <Box sx={{ height: "100%", pl: 1.5, pr: 1, py: 1 }}>
-            <PanelCard
-              title={rightTitle ?? "Prompt History"}
-              action={rightAction}
-            >
+            <PanelCard title={rightTitle ?? "Agent Task View"}>
               {right}
             </PanelCard>
           </Box>
