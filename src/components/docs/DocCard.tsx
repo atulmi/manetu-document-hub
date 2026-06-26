@@ -37,6 +37,7 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
           textAlign: 'left',
           borderRadius: 0,
           p: 1,
+          minHeight: 44,
           cursor: doc.accessible ? 'pointer' : 'not-allowed',
           bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'transparent',
           '&:hover': { bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.15)' },

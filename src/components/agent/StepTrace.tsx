@@ -34,7 +34,7 @@ export function StepTrace({ task }: StepTraceProps) {
   }, [task.id, steps.length, status]);
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
       <div ref={topRef} />
       {status === 'running' && steps.length === 0 && (
         <StatusMessage type="connecting" message="Connecting to Claude Sonnet 4.6..." />

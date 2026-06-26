@@ -58,11 +58,12 @@ export function SecurityToggle() {
         data-testid="security-dialog"
         maxWidth="xs"
         fullWidth
+        aria-labelledby="security-dialog-title"
         PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden' } }}
       >
         <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <WarningAmber />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <Typography id="security-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
             Disable policy engine?
           </Typography>
         </Box>

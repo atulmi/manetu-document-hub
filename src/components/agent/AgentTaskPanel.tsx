@@ -54,7 +54,7 @@ export function AgentTaskPanel() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Box sx={{ px: 2, pt: 2, pb: 1, flexShrink: 0 }}>
+      <Box sx={{ px: 1.5, pt: 1.5, pb: 1, flexShrink: 0 }}>
         <TextField
           value={displayPrompt}
           onChange={(e) => setPrompt(e.target.value)}

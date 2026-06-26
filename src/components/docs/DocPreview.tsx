@@ -71,11 +71,12 @@ export function DocPreview() {
       onClose={handleClose}
       maxWidth="md"
       fullWidth
+      aria-labelledby="doc-preview-title"
       PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden', maxHeight: '85vh' } }}
     >
       <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Description />
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }} noWrap>
+        <Typography id="doc-preview-title" variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }} noWrap>
           {selectedDoc?.title}
         </Typography>
         {selectedDoc && <SensitivityBadge sensitivity={selectedDoc.sensitivity} />}

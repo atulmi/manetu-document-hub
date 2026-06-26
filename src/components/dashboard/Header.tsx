@@ -76,8 +76,9 @@ export function Header() {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: 2,
-          px: 2,
+          flexWrap: 'wrap',
+          gap: { xs: 1, sm: 2 },
+          px: { xs: 1, sm: 2 },
           py: 0.75,
           bgcolor: 'background.paper',
           borderBottom: 1,

@@ -37,7 +37,14 @@ export function buildTheme(mode: PaletteMode) {
       },
       MuiButton: {
         styleOverrides: {
-          root: { textTransform: 'none', fontWeight: 600 },
+          root: { textTransform: 'none', fontWeight: 600, minHeight: 36 },
+          sizeSmall: { minHeight: 32 },
+        },
+      },
+      MuiIconButton: {
+        styleOverrides: {
+          root: { minWidth: 36, minHeight: 36 },
+          sizeSmall: { minWidth: 32, minHeight: 32 },
         },
       },
       MuiAppBar: {

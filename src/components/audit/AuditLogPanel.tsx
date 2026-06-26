@@ -36,7 +36,7 @@ function AuditTaskAccordion({
       sx={{
         border: 1,
         borderColor: isOpen ? "primary.main" : "divider",
-        borderRadius: 1,
+        borderRadius: 1.5,
         overflow: "hidden",
       }}
     >

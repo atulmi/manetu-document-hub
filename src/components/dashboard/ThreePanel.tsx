@@ -16,8 +16,10 @@ interface ThreePanelProps {
 
 function ResizeHandle() {
   return (
-    <Separator>
+    <Separator aria-label="Resize panel">
       <Box
+        role="separator"
+        aria-orientation="vertical"
         sx={{
           width: 12,
           height: "100%",
@@ -25,21 +27,6 @@ function ResizeHandle() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "col-resize",
-          position: "relative",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: "50%",
-            width: "1px",
-            bgcolor: "divider",
-            transform: "translateX(-50%)",
-          },
-          "&:hover::before, &[data-resize-handle-active]::before": {
-            bgcolor: "primary.main",
-            width: "2px",
-          },
           "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator": {
             opacity: 1,
           },
@@ -73,11 +60,13 @@ function PanelCard({
   title,
   subtitle,
   action,
+  shadow,
   children,
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
+  shadow?: string;
   children?: ReactNode;
 }) {
   return (
@@ -88,13 +77,14 @@ function PanelCard({
         height: "100%",
         overflow: "hidden",
         bgcolor: "background.paper",
-        border: "1px solid rgba(0,0,0,0.2)",
+        border: 1,
+        borderColor: "divider",
         borderRadius: 1.5,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)",
+        boxShadow: shadow ?? "0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)",
       }}
     >
       <PanelHeader title={title} subtitle={subtitle} action={action} />
-      <Box sx={{ flex: 1, overflow: "auto", p: 1 }}>{children}</Box>
+      <Box sx={{ flex: 1, overflow: "auto" }}>{children}</Box>
     </Box>
   );
 }
@@ -115,9 +105,15 @@ export function ThreePanel({ left, center, right, rightTitle, rightAction }: Thr
           gap: 1.5,
         }}
       >
-        <PanelCard title="Document Library">{left}</PanelCard>
-        <PanelCard title="Agent Task View">{center}</PanelCard>
-        <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
+        <Box sx={{ minHeight: 300 }}>
+          <PanelCard title="Agent Task View">{center}</PanelCard>
+        </Box>
+        <Box sx={{ minHeight: 250 }}>
+          <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
+        </Box>
+        <Box sx={{ minHeight: 300 }}>
+          <PanelCard title="Document Library">{left}</PanelCard>
+        </Box>
       </Box>
     );
   }
@@ -143,7 +139,7 @@ export function ThreePanel({ left, center, right, rightTitle, rightAction }: Thr
 
         <Panel defaultSize="420px" minSize="280px" maxSize="600px">
           <Box sx={{ height: "100%", pl: 0.5, pr: 0.5, py: 0.5 }}>
-            <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
+            <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction} shadow="-4px 0 14px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)">{right}</PanelCard>
           </Box>
         </Panel>
       </Group>

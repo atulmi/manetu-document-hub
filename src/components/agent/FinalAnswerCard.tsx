@@ -27,7 +27,7 @@ export function FinalAnswerCard({ step, priorSteps }: FinalAnswerCardProps) {
     .map((s) => s.toolCall!.args['path'] as string);
 
   return (
-    <Box sx={{ border: 1, borderColor: 'success.main', borderRadius: 1, borderLeftWidth: 3 }}>
+    <Box sx={{ border: 1, borderColor: 'success.main', borderRadius: 1.5, borderLeftWidth: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1 }}>
         <CheckCircle sx={{ fontSize: 18, color: 'success.main' }} />
         <Typography variant="caption" sx={{ fontWeight: 600 }}>

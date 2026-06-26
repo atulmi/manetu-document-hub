@@ -98,6 +98,7 @@ export function Dashboard() {
         onClose={() => setConfirmOpen(false)}
         maxWidth="xs"
         fullWidth
+        aria-labelledby="clear-dialog-title"
         PaperProps={{ sx: { borderRadius: 2, overflow: "hidden" } }}
       >
         <Box
@@ -112,7 +113,7 @@ export function Dashboard() {
           }}
         >
           <DeleteOutline />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <Typography id="clear-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
             Clear all history?
           </Typography>
         </Box>

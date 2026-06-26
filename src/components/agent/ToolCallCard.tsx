@@ -35,7 +35,7 @@ export function ToolCallCard({ step }: ToolCallCardProps) {
   };
 
   return (
-    <Box sx={{ border: 1, borderColor: denied ? 'error.main' : 'success.main', borderRadius: 1, borderLeftWidth: 3 }}>
+    <Box sx={{ border: 1, borderColor: denied ? 'error.main' : 'success.main', borderRadius: 1.5, borderLeftWidth: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1 }}>
         {denied ? <Lock sx={{ fontSize: 18, color: 'error.main' }} /> : <Build sx={{ fontSize: 18, color: 'text.secondary' }} />}
         <Typography variant="caption" sx={{ fontWeight: 600 }}>

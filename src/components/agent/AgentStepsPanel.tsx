@@ -260,6 +260,7 @@ function ListView({
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
               sx={selectSx}
+              aria-label="Filter by user role"
             >
               <MenuItem value="all">All roles</MenuItem>
               {ALL_ROLES.map((r) => (
@@ -288,6 +289,7 @@ function ListView({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
               sx={selectSx}
+              aria-label="Filter by job status"
             >
               <MenuItem value="all">All statuses</MenuItem>
               <MenuItem value="completed">Completed</MenuItem>
@@ -311,6 +313,7 @@ function ListView({
           <FormControl size="small">
             <Select
               value={decisionFilter}
+              aria-label="Filter by policy decision"
               onChange={(e) =>
                 setDecisionFilter(e.target.value as DecisionFilter)
               }
@@ -418,11 +421,12 @@ function ListView({
         onClose={() => setPendingDeleteId(null)}
         maxWidth="xs"
         fullWidth
+        aria-labelledby="delete-run-dialog-title"
         PaperProps={{ sx: { borderRadius: 2, overflow: "hidden" } }}
       >
         <Box sx={{ bgcolor: "primary.main", color: "primary.contrastText", px: 3, py: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
           <DeleteOutline />
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+          <Typography id="delete-run-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
             Delete this prompt run?
           </Typography>
         </Box>
@@ -482,7 +486,7 @@ function DetailView({
           flexShrink: 0,
           borderBottom: 1,
           borderColor: "divider",
-          bgcolor: "action.hover",
+          bgcolor: (t: import("@mui/material").Theme) => t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#e8eaed",
         }}
       >
         <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>

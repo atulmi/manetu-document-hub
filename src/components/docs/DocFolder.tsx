@@ -49,7 +49,7 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           borderRadius: 0,
           borderBottom: 1,
           borderColor: 'divider',
-          bgcolor: 'action.hover',
+          bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#e8eaed',
           '&:hover': { bgcolor: 'rgba(99,102,241,0.15)' },
         }}
       >
