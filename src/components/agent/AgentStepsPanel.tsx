@@ -8,9 +8,15 @@ import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Tooltip from "@mui/material/Tooltip";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import { useStore } from "../../lib/store";
 import { useAuditStream } from "../../hooks/useAuditStream";
 import { exportSingleRun } from "../../lib/export-txt";
@@ -35,10 +41,12 @@ function PromptRow({
   group,
   onClick,
   onExport,
+  onDelete,
 }: {
   group: PromptGroup;
   onClick: () => void;
   onExport: () => void;
+  onDelete: () => void;
 }) {
   const time = new Date(group.timestamp).toLocaleTimeString([], {
     hour: "2-digit",
@@ -139,6 +147,15 @@ function PromptRow({
           <FileDownloadOutlined sx={{ fontSize: 16, color: "text.disabled" }} />
         </IconButton>
       </Tooltip>
+      <Tooltip title="Delete this run">
+        <IconButton
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          sx={{ flexShrink: 0 }}
+        >
+          <DeleteOutline sx={{ fontSize: 16, color: "text.disabled" }} />
+        </IconButton>
+      </Tooltip>
       <ChevronRight
         sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0 }}
       />
@@ -162,6 +179,7 @@ function ListView({
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [decisionFilter, setDecisionFilter] = useState<DecisionFilter>("all");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const ALL_ROLES = ["viewer", "developer", "data-analyst", "auditor", "admin"];
 
@@ -335,6 +353,7 @@ function ListView({
                 const task = taskHistory.find((t) => t.id === group.taskId);
                 if (task) exportSingleRun(task, auditEvents);
               }}
+              onDelete={() => setPendingDeleteId(group.taskId)}
             />
           ))
         )}
@@ -393,6 +412,41 @@ function ListView({
           </IconButton>
         </Box>
       )}
+
+      <Dialog
+        open={pendingDeleteId !== null}
+        onClose={() => setPendingDeleteId(null)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 2, overflow: "hidden" } }}
+      >
+        <Box sx={{ bgcolor: "primary.main", color: "primary.contrastText", px: 3, py: 2, display: "flex", alignItems: "center", gap: 1.5 }}>
+          <DeleteOutline />
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Delete this prompt run?
+          </Typography>
+        </Box>
+        <DialogContent sx={{ pt: 2.5, pb: 1 }}>
+          <DialogContentText sx={{ color: "text.primary", lineHeight: 1.7 }}>
+            This will permanently delete this prompt run and its agent steps and policy checks.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button variant="outlined" onClick={() => setPendingDeleteId(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              if (pendingDeleteId) useStore.getState().deleteTaskById(pendingDeleteId);
+              setPendingDeleteId(null);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

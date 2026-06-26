@@ -74,7 +74,7 @@ export function RoleSwitcher() {
         </Select>
       </FormControl>
 
-      <Snackbar open={toast} autoHideDuration={2000} onClose={() => setToast(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+      <Snackbar open={toast} autoHideDuration={5000} onClose={() => setToast(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert severity="info" variant="filled" onClose={() => setToast(false)}>
           Switched to {roleLabel(activeRole)} — refreshing access...
         </Alert>

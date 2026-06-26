@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import Snackbar from '@mui/material/Snackbar';
@@ -17,7 +18,7 @@ interface DocLibraryProps {
 }
 
 export function DocLibrary({ onSelectDoc }: DocLibraryProps) {
-  const { docs, loading, error } = useDocLibrary();
+  const { docs, loading, error, refetch } = useDocLibrary();
   const activeRole = useStore((s) => s.activeRole);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -50,6 +51,9 @@ export function DocLibrary({ onSelectDoc }: DocLibraryProps) {
         <Typography variant="caption" color="text.secondary">
           {error}
         </Typography>
+        <Button size="small" variant="outlined" onClick={refetch} sx={{ alignSelf: 'flex-start', mt: 0.5 }}>
+          Retry
+        </Button>
       </Box>
     );
   }
@@ -83,7 +87,7 @@ export function DocLibrary({ onSelectDoc }: DocLibraryProps) {
 
       <Snackbar
         open={toast !== null}
-        autoHideDuration={3000}
+        autoHideDuration={5000}
         onClose={() => setToast(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

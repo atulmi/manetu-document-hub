@@ -31,6 +31,7 @@ interface AgentSlice {
   appendAuditEvent: (event: AuditEvent) => void;
   clearTask: () => void;
   clearAudit: () => void;
+  deleteTaskById: (id: string) => void;
   setViewingTaskId: (id: string | null) => void;
 }
 
@@ -95,6 +96,12 @@ export const useStore = create<StoreState>()(
       };
     }),
     clearAudit: () => set({ auditEvents: [], auditPrompts: {}, taskHistory: [] }),
+    deleteTaskById: (id) => set((s) => ({
+      taskHistory: s.taskHistory.filter((t) => t.id !== id),
+      auditEvents: s.auditEvents.filter((e) => e.agentTaskId !== id),
+      auditPrompts: Object.fromEntries(Object.entries(s.auditPrompts).filter(([k]) => k !== id)),
+      viewingTaskId: s.viewingTaskId === id ? null : s.viewingTaskId,
+    })),
     setViewingTaskId: (id) => set({ viewingTaskId: id }),
   }),
   {

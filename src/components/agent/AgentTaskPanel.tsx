@@ -39,7 +39,7 @@ export function AgentTaskPanel() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -68,7 +68,7 @@ export function AgentTaskPanel() {
           sx={{ mb: 0.5, fontSize: "0.7rem" }}
         >
           Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy
-          Engine
+          Engine · Enter to submit, Shift+Enter for new line
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {isRunning ? (
@@ -105,29 +105,28 @@ export function AgentTaskPanel() {
           )}
         </Box>
 
-        {!isRunning && (
-          <Box sx={{ pt: 1 }}>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mb: 0.75, display: "block" }}
-            >
-              Try asking:
-            </Typography>
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
-              {SUGGESTIONS.map((s) => (
-                <Chip
-                  key={s}
-                  label={s}
-                  size="small"
-                  variant="outlined"
-                  onClick={() => setPrompt(s)}
-                  sx={{ cursor: "pointer", fontSize: "0.75rem" }}
-                />
-              ))}
-            </Box>
+        <Box sx={{ pt: 1 }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mb: 0.75, display: "block" }}
+          >
+            Try asking:
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
+            {SUGGESTIONS.map((s) => (
+              <Chip
+                key={s}
+                label={s}
+                size="small"
+                variant="outlined"
+                disabled={isRunning}
+                onClick={() => setPrompt(s)}
+                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem" }}
+              />
+            ))}
           </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );

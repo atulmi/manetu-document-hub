@@ -15,7 +15,7 @@ export function PanelHeader({ title, subtitle, action }: PanelHeaderProps) {
       flexShrink: 0,
       bgcolor: t.palette.mode === 'dark' ? 'rgba(99,102,241,0.35)' : '#8385f5',
     })}>
-      <Box sx={{ display: 'flex', alignItems: 'center', px: 2, py: subtitle ? 0.75 : 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', px: 2, minHeight: 40 }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle2" sx={{ color: '#fff', fontWeight: 600, lineHeight: 1.3 }}>
             {title}
