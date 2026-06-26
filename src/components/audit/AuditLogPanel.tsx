@@ -141,9 +141,11 @@ export function AuditLogPanel() {
     for (const event of allEvents) {
       let group = groupMap.get(event.agentTaskId);
       if (!group) {
+        const prompt = auditPrompts[event.agentTaskId];
+        if (!prompt) continue;
         group = {
           taskId: event.agentTaskId,
-          prompt: auditPrompts[event.agentTaskId] ?? "Unknown prompt",
+          prompt,
           events: [],
           allowCount: 0,
           denyCount: 0,

@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import { useMediaQuery, useTheme } from "@mui/material";
-import ChevronLeft from "@mui/icons-material/ChevronLeft";
-import ChevronRight from "@mui/icons-material/ChevronRight";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { PanelHeader } from "./PanelHeader";
 
@@ -27,52 +25,21 @@ function ResizeHandle() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "col-resize",
-          position: "relative",
-          "&::before": {
-            content: '""',
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: "50%",
-            width: "1px",
-            bgcolor: "primary.main",
-            opacity: 0.6,
-            transform: "translateX(-50%)",
-            transition: "opacity 0.15s, width 0.15s",
-          },
-          "&:hover::before, &[data-resize-handle-active]::before": {
-            opacity: 1,
-            width: "2px",
-          },
           "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator":
-            {
-              opacity: 1,
-            },
+            { opacity: 1 },
         }}
       >
         <Box
           className="resize-indicator"
           sx={{
-            display: "flex",
-            alignItems: "center",
-            bgcolor: "background.paper",
-            border: 1,
-            borderColor: "divider",
-            borderRadius: 1,
-            px: 0,
-            py: 0.25,
-            opacity: 0.5,
+            width: 4,
+            height: 32,
+            borderRadius: 2,
+            bgcolor: "primary.main",
+            opacity: 0,
             transition: "opacity 0.15s",
-            zIndex: 1,
           }}
-        >
-          <ChevronLeft
-            sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }}
-          />
-          <ChevronRight
-            sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }}
-          />
-        </Box>
+        />
       </Box>
     </Separator>
   );
@@ -82,13 +49,11 @@ function PanelCard({
   title,
   subtitle,
   action,
-  shadow,
   children,
 }: {
   title: string;
   subtitle?: string;
   action?: ReactNode;
-  shadow?: string;
   children?: ReactNode;
 }) {
   return (
@@ -99,16 +64,21 @@ function PanelCard({
         height: "100%",
         overflow: "hidden",
         bgcolor: "background.paper",
-        border: 1,
-        borderColor: "divider",
+        border: "1px solid rgba(99,102,241,0.2)",
         borderRadius: 1.5,
-        boxShadow:
-          shadow ??
-          "0 1px 1px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.16)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15)",
       }}
     >
       <PanelHeader title={title} subtitle={subtitle} action={action} />
-      <Box sx={{ flex: 1, overflow: "auto" }}>{children}</Box>
+      <Box sx={{ flex: 1, overflow: "auto", p: 1 }}>{children}</Box>
+      <Box
+        sx={{
+          height: 5,
+          bgcolor: "primary.main",
+          flexShrink: 0,
+          borderRadius: "0 0 6px 6px",
+        }}
+      />
     </Box>
   );
 }
@@ -157,23 +127,23 @@ export function ThreePanel({
     <Box sx={{ flex: 1, overflow: "hidden", p: 1 }}>
       <Group orientation="horizontal" style={{ height: "100%" }}>
         <Panel defaultSize="25%" minSize="20%">
-          <Box sx={{ height: "100%", pr: 1.5, pl: 1, py: 1 }}>
+          <Box sx={{ height: "100%", pr: 1, pl: 1, py: 1 }}>
             <PanelCard title="Document Library">{left}</PanelCard>
           </Box>
         </Panel>
 
         <ResizeHandle />
 
-        <Panel defaultSize="34%" minSize="25%">
-          <Box sx={{ height: "100%", px: 1.5, py: 1 }}>
+        <Panel defaultSize="45%" minSize="25%">
+          <Box sx={{ height: "100%", px: 1, py: 1 }}>
             <PanelCard title="Agent Task View">{center}</PanelCard>
           </Box>
         </Panel>
 
         <ResizeHandle />
 
-        <Panel defaultSize="33%" minSize="25%">
-          <Box sx={{ height: "100%", pl: 1.5, pr: 1, py: 1 }}>
+        <Panel defaultSize="30%" minSize="20%">
+          <Box sx={{ height: "100%", pl: 1, pr: 1, py: 1 }}>
             <PanelCard
               title={rightTitle ?? "Prompt History"}
               action={rightAction}

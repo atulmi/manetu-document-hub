@@ -66,7 +66,8 @@ export function AgentStepsPanel() {
           auditPrompts[event.agentTaskId] ??
           taskHistory.find((t) => t.id === event.agentTaskId)?.prompt ??
           (currentTask?.id === event.agentTaskId ? currentTask.prompt : null) ??
-          "Unknown prompt";
+          null;
+        if (taskPrompt === null) continue;
         group = {
           taskId: event.agentTaskId,
           prompt: taskPrompt,
@@ -116,7 +117,6 @@ export function AgentStepsPanel() {
         group={selectedGroup}
         task={selectedTask}
         onBack={() => setViewingTaskId(null)}
-        onRerun={handleRerun}
       />
     );
   }
