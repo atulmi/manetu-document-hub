@@ -1,5 +1,6 @@
 // Roles
 export type UserRole = 'developer' | 'data-analyst' | 'viewer' | 'auditor' | 'admin';
+export const ALL_ROLES: UserRole[] = ['viewer', 'developer', 'data-analyst', 'auditor', 'admin'];
 
 // Document sensitivity
 export type DocSensitivity = 'public' | 'internal' | 'confidential';

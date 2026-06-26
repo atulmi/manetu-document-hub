@@ -1,13 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
+import { ALL_ROLES } from '../types.ts';
 import type { UserRole } from '../types.ts';
 
-const VALID_ROLES: ReadonlySet<string> = new Set<UserRole>([
-  'developer',
-  'data-analyst',
-  'viewer',
-  'auditor',
-  'admin',
-]);
+const VALID_ROLES: ReadonlySet<string> = new Set(ALL_ROLES);
 
 declare global {
   namespace Express {

@@ -4,6 +4,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material'
 import './index.css'
 import { buildTheme } from './lib/theme'
 import { useStore } from './lib/store'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import App from './App.tsx'
 
 function Root() {
@@ -17,7 +18,9 @@ function Root() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

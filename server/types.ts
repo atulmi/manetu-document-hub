@@ -1,3 +1,4 @@
+export { ALL_ROLES } from '../src/types/index.ts';
 export type {
   UserRole,
   DocSensitivity,

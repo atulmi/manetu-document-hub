@@ -12,7 +12,7 @@ import { docsRouter } from './routes/docs.ts';
 import { auditRouter } from './routes/audit.ts';
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:5173' }));
 app.use(express.json());
 
 app.use('/api/agent', agentRouter);
