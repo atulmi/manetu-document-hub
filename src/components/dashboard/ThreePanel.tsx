@@ -27,9 +27,10 @@ function ResizeHandle() {
           alignItems: "center",
           justifyContent: "center",
           cursor: "col-resize",
-          "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator": {
-            opacity: 1,
-          },
+          "&:hover .resize-indicator, &[data-resize-handle-active] .resize-indicator":
+            {
+              opacity: 1,
+            },
         }}
       >
         <Box
@@ -37,19 +38,21 @@ function ResizeHandle() {
           sx={{
             display: "flex",
             alignItems: "center",
-            bgcolor: "background.paper",
-            border: 1,
-            borderColor: "divider",
+            bgcolor: "primary.main",
             borderRadius: 1,
             px: 0,
             py: 0.25,
-            opacity: 0.6,
+            opacity: 0.7,
             transition: "opacity 0.15s",
             zIndex: 1,
           }}
         >
-          <ChevronLeft sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }} />
-          <ChevronRight sx={{ fontSize: 14, color: "text.secondary", mx: -0.5 }} />
+          <ChevronLeft
+            sx={{ fontSize: 14, color: "primary.contrastText", mx: -0.5 }}
+          />
+          <ChevronRight
+            sx={{ fontSize: 14, color: "primary.contrastText", mx: -0.5 }}
+          />
         </Box>
       </Box>
     </Separator>
@@ -80,7 +83,9 @@ function PanelCard({
         border: 1,
         borderColor: "divider",
         borderRadius: 1.5,
-        boxShadow: shadow ?? "0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)",
+        boxShadow:
+          shadow ??
+          "0 1px 1px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.16)",
       }}
     >
       <PanelHeader title={title} subtitle={subtitle} action={action} />
@@ -89,7 +94,13 @@ function PanelCard({
   );
 }
 
-export function ThreePanel({ left, center, right, rightTitle, rightAction }: ThreePanelProps) {
+export function ThreePanel({
+  left,
+  center,
+  right,
+  rightTitle,
+  rightAction,
+}: ThreePanelProps) {
   const theme = useTheme();
   const stacked = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -109,7 +120,12 @@ export function ThreePanel({ left, center, right, rightTitle, rightAction }: Thr
           <PanelCard title="Agent Task View">{center}</PanelCard>
         </Box>
         <Box sx={{ minHeight: 250 }}>
-          <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction}>{right}</PanelCard>
+          <PanelCard
+            title={rightTitle ?? "Prompt History"}
+            action={rightAction}
+          >
+            {right}
+          </PanelCard>
         </Box>
         <Box sx={{ minHeight: 300 }}>
           <PanelCard title="Document Library">{left}</PanelCard>
@@ -121,25 +137,30 @@ export function ThreePanel({ left, center, right, rightTitle, rightAction }: Thr
   return (
     <Box sx={{ flex: 1, overflow: "hidden", p: 1 }}>
       <Group orientation="horizontal" style={{ height: "100%" }}>
-        <Panel defaultSize="256px" minSize="180px" maxSize="400px">
-          <Box sx={{ height: "100%", pr: 0.5, pl: 0.5, py: 0.5 }}>
+        <Panel defaultSize="25%" minSize="20%">
+          <Box sx={{ height: "100%", pr: 1, pl: 1, py: 1 }}>
             <PanelCard title="Document Library">{left}</PanelCard>
           </Box>
         </Panel>
 
         <ResizeHandle />
 
-        <Panel minSize="300px">
-          <Box sx={{ height: "100%", px: 0.5, py: 0.5 }}>
+        <Panel defaultSize="34%" minSize="25%">
+          <Box sx={{ height: "100%", px: 1, py: 1 }}>
             <PanelCard title="Agent Task View">{center}</PanelCard>
           </Box>
         </Panel>
 
         <ResizeHandle />
 
-        <Panel defaultSize="420px" minSize="280px" maxSize="600px">
-          <Box sx={{ height: "100%", pl: 0.5, pr: 0.5, py: 0.5 }}>
-            <PanelCard title={rightTitle ?? "Prompt History"} action={rightAction} shadow="-4px 0 14px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)">{right}</PanelCard>
+        <Panel defaultSize="33%" minSize="25%">
+          <Box sx={{ height: "100%", pl: 1, pr: 1, py: 1 }}>
+            <PanelCard
+              title={rightTitle ?? "Prompt History"}
+              action={rightAction}
+            >
+              {right}
+            </PanelCard>
           </Box>
         </Panel>
       </Group>

@@ -7,6 +7,8 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import Person from "@mui/icons-material/Person";
+import AccessTime from "@mui/icons-material/AccessTime";
 import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -20,10 +22,11 @@ import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import { useStore } from "../../lib/store";
 import { useAuditStream } from "../../hooks/useAuditStream";
 import { exportSingleRun } from "../../lib/export-txt";
+import { relativeTime } from "../../lib/format-time";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { AuditEvent } from "../../types";
-import { useState, useMemo, useEffect } from "react";
+import { memo, useState, useMemo, useEffect } from "react";
 
 interface PromptGroup {
   taskId: string;
@@ -37,7 +40,7 @@ interface PromptGroup {
   bypassedCount: number;
 }
 
-function PromptRow({
+const PromptRow = memo(function PromptRow({
   group,
   onClick,
   onExport,
@@ -48,14 +51,7 @@ function PromptRow({
   onExport: () => void;
   onDelete: () => void;
 }) {
-  const time = new Date(group.timestamp).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const date = new Date(group.timestamp).toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-  });
+  const timeLabel = relativeTime(group.timestamp);
 
   return (
     <Box
@@ -84,13 +80,16 @@ function PromptRow({
             flexWrap: "wrap",
           }}
         >
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ fontSize: "0.7rem" }}
-          >
-            {group.role} · {date} {time}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Person sx={{ fontSize: 12, color: "text.disabled" }} />
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+              {group.role}
+            </Typography>
+            <AccessTime sx={{ fontSize: 12, color: "text.disabled", ml: 0.5 }} />
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
+              {timeLabel}
+            </Typography>
+          </Box>
           {group.allowCount > 0 && (
             <Chip
               label={`${group.allowCount} allowed`}
@@ -161,7 +160,7 @@ function PromptRow({
       />
     </Box>
   );
-}
+});
 
 const PAGE_SIZE = 10;
 
@@ -464,14 +463,7 @@ function DetailView({
   task: ReturnType<typeof useStore.getState>["currentTask"];
   onBack: () => void;
 }) {
-  const time = new Date(group.timestamp).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const date = new Date(group.timestamp).toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-  });
+  const timeLabel = relativeTime(group.timestamp);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -504,7 +496,7 @@ function DetailView({
               color="text.secondary"
               sx={{ fontSize: "0.7rem" }}
             >
-              {group.role} · {date} {time}
+              {group.role} · {timeLabel}
             </Typography>
             {group.allowCount > 0 && (
               <Chip
@@ -538,7 +530,7 @@ function DetailView({
       </Box>
 
       {/* Step trace + policy checks */}
-      <Box sx={{ flex: 1, overflow: "auto", p: 1.5 }}>
+      <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
         {task ? (
           <>
             <StepTrace task={task} />

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { PolicyDecisionBadge } from '../docs/PolicyDecisionBadge';
@@ -7,7 +8,7 @@ interface AuditEventRowProps {
   event: AuditEvent;
 }
 
-export function AuditEventRow({ event }: AuditEventRowProps) {
+export const AuditEventRow = memo(function AuditEventRow({ event }: AuditEventRowProps) {
   const toolName = event.resource.split(':').pop() ?? event.resource;
   const time = new Date(event.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -40,4 +41,4 @@ export function AuditEventRow({ event }: AuditEventRowProps) {
       </Typography>
     </Box>
   );
-}
+});

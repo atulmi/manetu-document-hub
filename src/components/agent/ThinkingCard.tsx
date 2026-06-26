@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Collapse from '@mui/material/Collapse';
@@ -13,11 +13,11 @@ interface ThinkingCardProps {
   collapsed?: boolean;
 }
 
-export function ThinkingCard({ step, collapsed = false }: ThinkingCardProps) {
+export const ThinkingCard = memo(function ThinkingCard({ step, collapsed = false }: ThinkingCardProps) {
   const [expanded, setExpanded] = useState(!collapsed);
 
   return (
-    <Box sx={(t) => ({ border: 1, borderColor: 'divider', borderRadius: 1.5, bgcolor: t.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#e8eaed', boxShadow: '0 4px 14px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.2)' })}>
+    <Box sx={(t) => ({ border: 1, borderColor: 'divider', borderRadius: 1.5, bgcolor: t.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : '#e8eaed', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' })}>
       <Box
         onClick={() => setExpanded((e) => !e)}
         sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1, cursor: 'pointer' }}
@@ -40,4 +40,4 @@ export function ThinkingCard({ step, collapsed = false }: ThinkingCardProps) {
       </Collapse>
     </Box>
   );
-}
+});

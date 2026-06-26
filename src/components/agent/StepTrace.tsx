@@ -1,5 +1,7 @@
 import { useRef, useEffect } from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Replay from '@mui/icons-material/Replay';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { AgentStep, AgentTask } from '../../types';
 import { ThinkingCard } from './ThinkingCard';
@@ -9,6 +11,7 @@ import { StatusMessage } from './StatusMessage';
 
 interface StepTraceProps {
   task: AgentTask;
+  onRetry?: (prompt: string) => void;
 }
 
 function formatElapsed(startedAt: string, completedAt?: string): string {
@@ -18,7 +21,7 @@ function formatElapsed(startedAt: string, completedAt?: string): string {
   return `${seconds}s`;
 }
 
-export function StepTrace({ task }: StepTraceProps) {
+export function StepTrace({ task, onRetry }: StepTraceProps) {
   const { steps, status, startedAt, completedAt, finalAnswer } = task;
   const topRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -80,6 +83,11 @@ export function StepTrace({ task }: StepTraceProps) {
         <StatusMessage
           type="failed"
           message={finalAnswer ?? `Agent failed after ${formatElapsed(startedAt, completedAt)}`}
+          action={onRetry ? (
+            <Button size="small" startIcon={<Replay />} onClick={() => onRetry(task.prompt)} sx={{ fontSize: '0.7rem' }}>
+              Retry
+            </Button>
+          ) : undefined}
         />
       )}
 

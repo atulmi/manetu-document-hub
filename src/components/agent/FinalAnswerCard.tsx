@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -21,7 +22,7 @@ interface FinalAnswerCardProps {
   priorSteps: AgentStep[];
 }
 
-export function FinalAnswerCard({ step, priorSteps }: FinalAnswerCardProps) {
+export const FinalAnswerCard = memo(function FinalAnswerCard({ step, priorSteps }: FinalAnswerCardProps) {
   const sources = priorSteps
     .filter((s) => s.type === 'tool-call' && s.toolCall?.toolName === 'read-file' && s.toolCall.policyDecision.decision === 'allow')
     .map((s) => s.toolCall!.args['path'] as string);
@@ -57,4 +58,4 @@ export function FinalAnswerCard({ step, priorSteps }: FinalAnswerCardProps) {
       )}
     </Box>
   );
-}
+});

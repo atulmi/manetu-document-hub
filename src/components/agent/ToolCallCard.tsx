@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -12,7 +13,7 @@ interface ToolCallCardProps {
   step: AgentStep;
 }
 
-export function ToolCallCard({ step }: ToolCallCardProps) {
+export const ToolCallCard = memo(function ToolCallCard({ step }: ToolCallCardProps) {
   const selectDoc = useStore((s) => s.selectDoc);
   const tc = step.toolCall;
   if (!tc) return null;
@@ -75,7 +76,7 @@ export function ToolCallCard({ step }: ToolCallCardProps) {
       </Box>
     </Box>
   );
-}
+});
 
 function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (

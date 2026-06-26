@@ -13,7 +13,9 @@ export function PanelHeader({ title, subtitle, action }: PanelHeaderProps) {
   return (
     <Box sx={(t) => ({
       flexShrink: 0,
-      bgcolor: t.palette.mode === 'dark' ? 'rgba(99,102,241,0.35)' : '#8385f5',
+      background: t.palette.mode === 'dark'
+        ? 'linear-gradient(135deg, rgba(99,102,241,0.35) 0%, rgba(79,70,229,0.35) 100%)'
+        : 'linear-gradient(135deg, #8385f5 0%, #7071e8 100%)',
     })}>
       <Box sx={{ display: 'flex', alignItems: 'center', px: 2, minHeight: 40 }}>
         <Box sx={{ flex: 1 }}>

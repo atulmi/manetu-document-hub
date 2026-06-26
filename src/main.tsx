@@ -1,6 +1,7 @@
 import { StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider, CssBaseline } from '@mui/material'
+import './index.css'
 import { buildTheme } from './lib/theme'
 import { useStore } from './lib/store'
 import App from './App.tsx'

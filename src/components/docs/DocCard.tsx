@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
@@ -14,7 +15,7 @@ interface DocCardProps {
   onLockedClick: (doc: DocMeta) => void;
 }
 
-export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps) {
+export const DocCard = memo(function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps) {
   const handleClick = () => {
     if (doc.accessible) {
       onSelect(doc);
@@ -40,7 +41,9 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
           minHeight: 44,
           cursor: doc.accessible ? 'pointer' : 'not-allowed',
           bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'transparent',
-          '&:hover': { bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.15)' },
+          '&:hover': {
+            bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.15)',
+          },
           borderBottom: 1,
           borderColor: 'divider',
           transition: 'background-color 0.15s',
@@ -86,4 +89,4 @@ export function DocCard({ doc, selected, onSelect, onLockedClick }: DocCardProps
   }
 
   return card;
-}
+});
