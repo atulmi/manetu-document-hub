@@ -11,7 +11,7 @@ describe('Role switcher updates document library', () => {
     cy.contains('Acme Corp').should('be.visible');
   });
 
-  it('switching from viewer to admin triggers doc refetch', () => {
+  it('switching from viewer to data-analyst triggers doc refetch', () => {
     cy.intercept('GET', '/api/docs*', { fixture: 'doc-list-analyst.json' }).as('getDocsAnalyst');
     cy.switchRole('data-analyst');
     cy.wait('@getDocsAnalyst');
@@ -25,5 +25,10 @@ describe('Role switcher updates document library', () => {
     cy.intercept('GET', '/api/docs*', { fixture: 'doc-list-analyst.json' });
     cy.switchRole('data-analyst');
     cy.contains('Switched to Data Analyst').should('be.visible');
+  });
+
+  it('controls bar shows Role and Policy Engine labels', () => {
+    cy.contains('Role').should('be.visible');
+    cy.contains('Manetu Policy Engine').should('be.visible');
   });
 });

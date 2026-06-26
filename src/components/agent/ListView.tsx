@@ -14,12 +14,14 @@ import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
+import HistoryIcon from "@mui/icons-material/History";
+import { EmptyState } from "../shared/EmptyState";
 import { useStore } from "../../lib/store";
 import { exportSingleRun } from "../../lib/export-txt";
 import { ALL_ROLES } from "../../types";
 import { PromptRow } from "./PromptRow";
 import type { PromptGroup } from "./prompt-group";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 const PAGE_SIZE = 10;
 
@@ -36,9 +38,22 @@ export function ListView({
   onRerun: (prompt: string) => void;
 }) {
   const [page, setPage] = useState(0);
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [decisionFilter, setDecisionFilter] = useState<DecisionFilter>("all");
+  const [roleFilter, setRoleFilterRaw] = useState<string>("all");
+  const [statusFilter, setStatusFilterRaw] = useState<StatusFilter>("all");
+  const [decisionFilter, setDecisionFilterRaw] =
+    useState<DecisionFilter>("all");
+  const setRoleFilter = (v: string) => {
+    setRoleFilterRaw(v);
+    setPage(0);
+  };
+  const setStatusFilter = (v: StatusFilter) => {
+    setStatusFilterRaw(v);
+    setPage(0);
+  };
+  const setDecisionFilter = (v: DecisionFilter) => {
+    setDecisionFilterRaw(v);
+    setPage(0);
+  };
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -59,42 +74,28 @@ export function ListView({
     (safePage + 1) * PAGE_SIZE,
   );
 
-  useEffect(() => {
-    setPage(0);
-  }, [roleFilter, statusFilter, decisionFilter]);
-
   const hasActiveFilters =
     roleFilter !== "all" || statusFilter !== "all" || decisionFilter !== "all";
 
   const resetFilters = useCallback(() => {
-    setRoleFilter("all");
-    setStatusFilter("all");
-    setDecisionFilter("all");
+    setRoleFilterRaw("all");
+    setStatusFilterRaw("all");
+    setDecisionFilterRaw("all");
+    setPage(0);
   }, []);
 
   if (groups.length === 0) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          py: 6,
-          px: 3,
-          gap: 1,
-          textAlign: "center",
-        }}
-      >
-        <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 600 }}>
-          No prompt runs yet
-        </Typography>
-        <Typography variant="body2" color="text.disabled" sx={{ maxWidth: 320 }}>
-          Submit a prompt in the Agent Task View. Each run will appear here —
-          click to view the AI agent's reasoning steps, tool calls, and policy
-          check results.
-        </Typography>
-      </Box>
+      <EmptyState
+        icon={<HistoryIcon sx={{ fontSize: 30 }} />}
+        title="No prompt runs yet"
+        steps={[
+          "Pick a role from the controls bar above",
+          "Type a prompt in the Agent Task View",
+          "Each run appears here with its policy decisions",
+          "Click on a prompt run to view the agent's steps",
+        ]}
+      />
     );
   }
 
@@ -210,7 +211,7 @@ export function ListView({
               color="text.disabled"
               sx={{ fontSize: "0.65rem" }}
             >
-              {filtered.length} of {groups.length}
+              {filtered.length} of {groups.length} records displayed.
             </Typography>
             <Button
               size="small"

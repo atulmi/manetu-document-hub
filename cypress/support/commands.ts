@@ -1,6 +1,7 @@
 import type { UserRole } from '../../src/types/index';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       switchRole(role: UserRole): Chainable<void>;

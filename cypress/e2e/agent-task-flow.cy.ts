@@ -35,13 +35,21 @@ describe('Agent task flow — submit, steps appear, final answer', () => {
   it('task input re-enables after completion', () => {
     cy.submitAgentTask('What documents do I have access to?');
     cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
-    // After completion, task clears and input re-enables
     cy.get('[data-testid="agent-prompt-input"]').find('textarea').first().should('not.be.disabled');
   });
 
   it('prompt appears in prompt history after completion', () => {
     cy.submitAgentTask('What documents do I have access to?');
     cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
+    // Back button returns to prompt history list
+    cy.get('button').find('svg[data-testid="ArrowBackIcon"]').click();
     cy.contains('What documents do I have access to?').should('be.visible');
+  });
+
+  it('re-run button is visible in prompt history row', () => {
+    cy.submitAgentTask('What documents do I have access to?');
+    cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
+    cy.get('button').find('svg[data-testid="ArrowBackIcon"]').click();
+    cy.get('svg[data-testid="ReplayIcon"]').should('be.visible');
   });
 });

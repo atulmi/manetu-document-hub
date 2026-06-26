@@ -19,10 +19,8 @@ import { ThreePanel } from "../components/dashboard/ThreePanel";
 import { DocLibrary } from "../components/docs/DocLibrary";
 import { DocPreview } from "../components/docs/DocPreview";
 import { AgentTaskPanel } from "../components/agent/AgentTaskPanel";
-import {
-  AgentStepsPanel,
-  useAgentStepsHeader,
-} from "../components/agent/AgentStepsPanel";
+import { AgentStepsPanel } from "../components/agent/AgentStepsPanel";
+import { useAgentStepsHeader } from "../hooks/useAgentStepsHeader";
 import { useStore } from "../lib/store";
 import { exportFullReport } from "../lib/export-txt";
 

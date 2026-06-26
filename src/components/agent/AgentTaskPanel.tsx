@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -27,15 +27,16 @@ export function AgentTaskPanel() {
   const [prompt, setPrompt] = useState("");
   const { submit, stop, isRunning } = useAgentRun();
   const currentTask = useStore((s) => s.currentTask);
-  const wasRunning = useRef(false);
-
-  // Clear prompt when task finishes (currentTask becomes null)
   useEffect(() => {
-    if (wasRunning.current && !currentTask) {
-      setPrompt("");
-    }
-    wasRunning.current = currentTask?.status === "running";
-  }, [currentTask]);
+    let prev = currentTask;
+    const unsub = useStore.subscribe((s) => {
+      if (prev?.status === "running" && !s.currentTask) {
+        setPrompt("");
+      }
+      prev = s.currentTask;
+    });
+    return unsub;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayPrompt = isRunning ? (currentTask?.prompt ?? prompt) : prompt;
 

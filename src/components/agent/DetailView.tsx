@@ -3,6 +3,8 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import SearchOff from "@mui/icons-material/SearchOff";
+import { EmptyState } from "../shared/EmptyState";
 import { useStore } from "../../lib/store";
 import { relativeTime } from "../../lib/format-time";
 import { ROLE_COLORS } from "../../lib/role-permissions";
@@ -134,20 +136,14 @@ export function DetailView({
             )}
           </>
         ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              py: 6,
-              gap: 1,
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              Step details not available for this run.
-            </Typography>
-          </Box>
+          <EmptyState
+            icon={<SearchOff sx={{ fontSize: 24 }} />}
+            title="Step details not available"
+            steps={[
+              "This run may have been saved before step tracking was added",
+              "Try re-running the same prompt to see full agent steps",
+            ]}
+          />
         )}
       </Box>
     </Box>

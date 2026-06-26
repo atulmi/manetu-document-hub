@@ -5,7 +5,7 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.visit('/');
   });
 
-  it('clicking a locked doc shows access restriction warning', () => {
+  it('internal docs section is visible with lock indicator', () => {
     cy.contains('Internal').should('be.visible');
   });
 
@@ -20,7 +20,7 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.contains('Denied', { timeout: 10000 }).should('be.visible');
   });
 
-  it('denied tool call shows the error message', () => {
+  it('denied tool call shows the error message and policy explanation', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-denied-stream.txt',
@@ -29,6 +29,18 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.submitAgentTask('What is the Q3 revenue forecast?');
 
     cy.contains('Access denied by policy engine', { timeout: 10000 }).should('be.visible');
+    cy.contains('is not allowed to use', { timeout: 10000 }).should('be.visible');
+  });
+
+  it('denied tool call shows clickable policy link', () => {
+    cy.intercept('POST', '/api/agent/run', {
+      headers: { 'content-type': 'text/event-stream' },
+      fixture: 'agent-denied-stream.txt',
+    });
+
+    cy.submitAgentTask('What is the Q3 revenue forecast?');
+
+    cy.contains('Click to view', { timeout: 10000 }).should('be.visible');
   });
 
   it('final answer explains the restriction', () => {

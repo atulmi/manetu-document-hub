@@ -31,7 +31,7 @@ describe('Security demo mode — toggle, banner, bypassed events', () => {
     cy.get('[data-testid="security-toggle"]').find('input[role="switch"]').should('not.be.checked');
   });
 
-  it('with security off, agent task shows bypassed events', () => {
+  it('with security off, agent task shows bypassed audit events', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-bypassed-stream.txt',

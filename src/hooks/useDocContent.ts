@@ -6,6 +6,7 @@ export function useDocContent(docPath: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!docPath) {
       setContent(null);
@@ -32,6 +33,7 @@ export function useDocContent(docPath: string | null) {
 
     return () => { cancelled = true; };
   }, [docPath]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   return { content, loading, error };
 }

@@ -11,49 +11,52 @@ export function useAuditStream() {
   const retriesRef = useRef(0);
   const esRef = useRef<EventSource | null>(null);
   const seenIds = useRef(new Set<string>());
-
-  const connect = useCallback(() => {
-    const es = new EventSource('/api/audit/stream');
-    esRef.current = es;
-
-    es.addEventListener('open', () => {
-      setConnected(true);
-      retriesRef.current = 0;
-    });
-
-    es.addEventListener('audit', (e) => {
-      try {
-        const event = JSON.parse(e.data) as AuditEvent;
-        if (seenIds.current.has(event.id)) return;
-        seenIds.current.add(event.id);
-        setEvents((prev) => {
-          const next = [event, ...prev];
-          return next.length > MAX_EVENTS ? next.slice(0, MAX_EVENTS) : next;
-        });
-      } catch {
-        // skip malformed events
-      }
-    });
-
-    es.addEventListener('error', () => {
-      es.close();
-      setConnected(false);
-
-      if (retriesRef.current < MAX_RETRIES) {
-        const delay = BASE_DELAY_MS * Math.pow(2, retriesRef.current);
-        retriesRef.current++;
-        setTimeout(connect, delay);
-      }
-    });
-  }, []);
+  const connectRef = useRef<() => void>();
 
   useEffect(() => {
+    const connect = () => {
+      const es = new EventSource('/api/audit/stream');
+      esRef.current = es;
+
+      es.addEventListener('open', () => {
+        setConnected(true);
+        retriesRef.current = 0;
+      });
+
+      es.addEventListener('audit', (e) => {
+        try {
+          const event = JSON.parse(e.data) as AuditEvent;
+          if (seenIds.current.has(event.id)) return;
+          seenIds.current.add(event.id);
+          setEvents((prev) => {
+            const next = [event, ...prev];
+            return next.length > MAX_EVENTS ? next.slice(0, MAX_EVENTS) : next;
+          });
+        } catch {
+          // skip malformed events
+        }
+      });
+
+      es.addEventListener('error', () => {
+        es.close();
+        setConnected(false);
+
+        if (retriesRef.current < MAX_RETRIES) {
+          const delay = BASE_DELAY_MS * Math.pow(2, retriesRef.current);
+          retriesRef.current++;
+          setTimeout(connect, delay);
+        }
+      });
+    };
+
+    connectRef.current = connect;
     connect();
+
     return () => {
       esRef.current?.close();
       esRef.current = null;
     };
-  }, [connect]);
+  }, []);
 
   const clear = useCallback(() => {
     setEvents([]);
@@ -63,8 +66,8 @@ export function useAuditStream() {
     esRef.current = null;
     setConnected(false);
     retriesRef.current = 0;
-    setTimeout(connect, 500);
-  }, [connect]);
+    setTimeout(() => connectRef.current?.(), 500);
+  }, []);
 
   return { events, connected, clear };
 }

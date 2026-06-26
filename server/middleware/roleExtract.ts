@@ -4,11 +4,9 @@ import type { UserRole } from '../types.ts';
 
 const VALID_ROLES: ReadonlySet<string> = new Set(ALL_ROLES);
 
-declare global {
-  namespace Express {
-    interface Request {
-      role?: UserRole;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    role?: UserRole;
   }
 }
 
