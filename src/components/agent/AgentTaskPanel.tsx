@@ -129,7 +129,7 @@ export function AgentTaskPanel() {
                 variant="outlined"
                 disabled={isRunning}
                 onClick={() => setPrompt(s)}
-                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem" }}
+                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem", "&:hover": { bgcolor: "rgba(99,102,241,0.15)" } }}
               />
             ))}
           </Box>
@@ -149,7 +149,7 @@ export function AgentTaskPanel() {
                 variant="outlined"
                 disabled={isRunning}
                 onClick={() => setPrompt(s)}
-                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem" }}
+                sx={{ cursor: isRunning ? "default" : "pointer", fontSize: "0.75rem", "&:hover": { bgcolor: "rgba(99,102,241,0.15)" } }}
               />
             ))}
           </Box>

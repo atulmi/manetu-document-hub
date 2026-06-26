@@ -66,7 +66,7 @@ function PromptRow({
         px: 1.5,
         py: 1,
         cursor: "pointer",
-        "&:hover": { bgcolor: "action.hover" },
+        "&:hover": { bgcolor: "rgba(99,102,241,0.12)" },
         borderBottom: 1,
         borderColor: "divider",
         transition: "background-color 0.15s",
@@ -395,7 +395,7 @@ function ListView({
                 bgcolor: page === i ? "primary.main" : "transparent",
                 color: page === i ? "primary.contrastText" : "text.secondary",
                 "&:hover": {
-                  bgcolor: page === i ? "primary.dark" : "action.hover",
+                  bgcolor: page === i ? "primary.dark" : "rgba(99,102,241,0.15)",
                 },
                 transition: "background-color 0.15s",
               }}

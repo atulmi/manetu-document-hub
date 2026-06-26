@@ -118,7 +118,7 @@
         "operations": ["invoke"],
         "rule": "auditor-read-file",
         "reason": "Auditor can read files"
-      },
+      }
     ]
   },
 
