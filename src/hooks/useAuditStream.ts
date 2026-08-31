@@ -11,7 +11,7 @@ export function useAuditStream() {
   const retriesRef = useRef(0);
   const esRef = useRef<EventSource | null>(null);
   const seenIds = useRef(new Set<string>());
-  const connectRef = useRef<() => void>();
+  const connectRef = useRef<(() => void) | undefined>(undefined);
 
   useEffect(() => {
     const connect = () => {

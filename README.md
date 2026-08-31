@@ -1,12 +1,14 @@
 # AI Document Hub
 
-A React/TypeScript dashboard that demonstrates **AI agent orchestration** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), secured by the [Manetu Policy Engine (MPE)](https://manetu.github.io/policyengine). Every AI tool call is gated by fine-grained, role-based access control — and every policy decision is visible in a real-time audit trail.
+A React/TypeScript dashboard that demonstrates **AI agent orchestration** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), secured by [Open Policy Agent (OPA)](https://www.openpolicyagent.org/) and Rego policies. Every AI tool call is gated by fine-grained, role-based access control — and every policy decision is visible in a real-time audit trail.
+
+> **Note:** This app does not integrate the actual [Manetu Policy Engine (MPE)](https://manetu.github.io/policyengine). It uses OPA directly to illustrate the kinds of tool-call-level, MRN-based authorization use cases MPE is designed to solve.
 
 > **Built with Claude** — this project was developed using [Claude Code](https://claude.ai/code) (Anthropic's AI coding agent) for implementation, architecture decisions, and iterative UI refinement.
 
 ## Why This Project Matters
 
-This project makes AI agent security **visible and interactive**. You can watch every tool call get checked by the Manetu Policy Engine (MPE) in real time, switch roles to see access change instantly, and toggle security off to see exactly what the MPE policy layer prevents.
+This project makes AI agent security **visible and interactive**. You can watch every tool call get checked by OPA in real time, switch roles to see access change instantly, and toggle security off to see exactly what the policy layer prevents.
 
 - **Watch** an AI agent (Claude Sonnet 4.6) answer questions by reading documents across sensitivity tiers
 - **See** every tool invocation evaluated **before** execution — with allow/deny decisions in real time
@@ -22,7 +24,7 @@ Asking to "summarize all documents" triggers reads across every sensitivity tier
 
 ### The Solution
 
-The [Manetu Policy Engine](https://manetu.github.io/policyengine) evaluates access at the **tool call level** using MRN-based policies (Manetu Resource Notation). Instead of blanket "this user can access this service," it answers: _"Can a viewer-role agent invoke `read-file` on a confidential document right now?"_ — and produces a structured audit record for every decision.
+This app uses [OPA](https://www.openpolicyagent.org/) with Rego policies to evaluate access at the **tool call level** using MRN-style resource identifiers (Manetu Resource Notation), the same model the [Manetu Policy Engine](https://manetu.github.io/policyengine) is built around. Instead of blanket "this user can access this service," it answers: _"Can a viewer-role agent invoke `read-file` on a confidential document right now?"_ — and produces a structured audit record for every decision. This is a demonstration of the use case MPE targets, not an integration with MPE itself.
 
 ## Architecture
 
@@ -34,11 +36,11 @@ graph LR
   subgraph "Express Backend"
     API[Node.js Proxy]
     CLAUDE[Claude Agent Loop]
-    MPE_CLIENT[MPE Client]
+    OPA_CLIENT[OPA Client]
     FS_CLIENT[MCP Filesystem Client]
   end
   subgraph Docker
-    MPE[("Manetu Policy Engine<br/>(OPA) :8181")]
+    OPA[("OPA<br/>Open Policy Agent :8181")]
   end
   DOCS[("docs-corpus/<br/>15 documents")]
   ANTHROPIC[("Anthropic API<br/>Claude Sonnet 4.6")]
@@ -48,8 +50,8 @@ graph LR
   UI -->|"GET /api/audit/stream (SSE)"| API
   API --> CLAUDE
   CLAUDE -->|"tool call"| FS_CLIENT
-  FS_CLIENT -->|"evaluate(role, MRN, op)"| MPE_CLIENT
-  MPE_CLIENT -->|"POST /v1/data/docs/authz"| MPE
+  FS_CLIENT -->|"evaluate(role, MRN, op)"| OPA_CLIENT
+  OPA_CLIENT -->|"POST /v1/data/docs/authz"| OPA
   FS_CLIENT -->|"read/list/search"| DOCS
   CLAUDE -->|"messages API"| ANTHROPIC
 ```
@@ -115,7 +117,7 @@ The app works without Docker — the backend will return a clear error if OPA is
 | Variable            | Description                                              |
 | ------------------- | -------------------------------------------------------- |
 | `ANTHROPIC_API_KEY` | Claude API key (required for agent)                      |
-| `MPE_BASE_URL`      | OPA policy engine URL (default: `http://localhost:8181`) |
+| `MPE_BASE_URL`      | OPA policy engine URL (default: `http://localhost:8181`) — name kept for MRN-style compatibility with MPE |
 | `MCP_DOCS_PATH`     | Path to document corpus (default: `./docs-corpus`)       |
 | `PORT`              | Backend server port (default: `3001`)                    |
 
@@ -132,7 +134,7 @@ The app works without Docker — the backend will return a clear error if OPA is
 ### Header Controls
 
 - **Brand bar** — purple Manetu AI Document Hub branding
-- **Controls row** — Role switcher (5 roles with color-coded dots), Manetu Policy Engine toggle (enabled/disabled with confirmation dialog), and dark/light theme toggle
+- **Controls row** — Role switcher (5 roles with color-coded dots), policy engine toggle (enabled/disabled with confirmation dialog), and dark/light theme toggle
 
 ### Security Demo Mode
 
@@ -192,13 +194,13 @@ server/
   index.ts           Express entry point
   routes/
     agent.ts         POST /api/agent/run — SSE streaming agent orchestration
-    tools.ts         GET /api/tools — MPE-filtered tool list with 60s cache
+    tools.ts         GET /api/tools — OPA-filtered tool list with 60s cache
     docs.ts          GET /api/docs — doc list; GET /api/docs/content/:path — doc content
     audit.ts         GET /api/audit/stream — persistent SSE audit broadcast
   middleware/
     roleExtract.ts   x-role header validation
   lib/
-    claude-agent.ts  Agent loop: Claude API → MPE check → tool execution → SSE emit
+    claude-agent.ts  Agent loop: Claude API → OPA check → tool execution → SSE emit
     mpe-client.ts    Typed OPA client (evaluate + discover)
     mcp-fs-client.ts Filesystem client (list, read, keyword search with frontmatter)
     audit-bus.ts     Event bus with 50-event ring buffer
