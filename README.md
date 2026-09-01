@@ -80,6 +80,55 @@ graph LR
 
 Tool access is enforced at the MRN level. Even if a role has `read-file` permission, the document's sensitivity tier is checked separately — a developer with `read-file` access will still be denied when attempting to read a confidential document.
 
+## Example: A Denied Request
+
+Here's what actually happens end-to-end when a policy blocks a tool call — using the "developer can't read confidential docs" case from the table above.
+
+You're on the **Developer** role and ask the agent:
+
+> "Summarize the Q3 financial results."
+
+Claude decides to call the `read-file` tool with `path: "confidential/q3-financials.md"`. Before the file is touched, the backend ([`claude-agent.ts`](server/lib/claude-agent.ts)) runs it through OPA in up to two steps:
+
+**1. Can `developer` invoke the `read-file` tool at all?**
+
+```json
+// POST /v1/data/docs/authz
+{ "input": { "principal": "developer", "resource": "mrn:mcp:filesystem:tool:read-file", "operation": "invoke" } }
+```
+```json
+{ "result": { "allow": true, "rule": "developer-read-file", "reason": "Developer role can read files" } }
+```
+
+Allowed — `read-file` is a generic tool grant, though, so it doesn't know *which* document is being read. So the backend runs a second check derived from the file's path (`confidential/...`):
+
+**2. Can `developer` `read` the `confidential` sensitivity tier?**
+
+```json
+// POST /v1/data/docs/authz
+{ "input": { "principal": "developer", "resource": "mrn:mcp:docs:resource:confidential:*", "operation": "read" } }
+```
+```json
+{ "result": { "allow": false, "rule": "default-deny", "reason": "No policy rule matched — access denied by default" } }
+```
+
+[`roles-data.json`](policies/roles-data.json) only grants the developer role `public:*` and `internal:*` document MRNs — there's no confidential grant — so [`docs-domain.rego`](policies/docs-domain.rego) falls through to its default-deny. The tool call is blocked before it reaches the filesystem:
+
+- The **agent** gets a tool error of `Access denied by policy engine: default-deny` and has to work around it in its response instead of returning file contents.
+- The **audit trail** (Prompt History panel, and `GET /api/audit/stream`) records a structured event:
+
+```json
+{
+  "principal": "developer",
+  "resource": "mrn:mcp:filesystem:tool:read-file",
+  "operation": "invoke",
+  "decision": "deny",
+  "policyRule": "default-deny"
+}
+```
+
+Switch to **Admin** or **Auditor** and ask the same question — both roles have an explicit `confidential:*` grant (`admin-unrestricted` and `auditor-confidential-read` respectively), so both checks pass and the agent reads and summarizes the document.
+
 ## Quick Start
 
 ### Prerequisites
@@ -131,10 +180,15 @@ The app works without Docker — the backend will return a clear error if OPA is
 
 - **Right — Prompt History & Agent Steps**: Master-detail view. The list shows all past prompt runs with role, timestamp, and allow/deny counts. Click any run to see the full step trace: thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer with source citations.
 
-### Header Controls
+### Control Bar
 
-- **Brand bar** — purple Manetu AI Document Hub branding
-- **Controls row** — Role switcher (5 roles with color-coded dots), policy engine toggle (enabled/disabled with confirmation dialog), and dark/light theme toggle
+The control bar sits below the brand bar and holds everything that changes how the agent is allowed to behave:
+
+- **Role** — a dropdown with all 5 roles (Viewer, Developer, Data Analyst, Auditor, Admin), each with a color-coded dot. Switching roles is instant — it just changes which principal is sent on subsequent requests — and shows a toast confirming the switch. Next to it, an info icon opens a popover listing the active role's exact document-tier and tool permissions (allow/deny), sourced from the same [`roles-data.json`](policies/roles-data.json) grants OPA evaluates against.
+
+- **Policy engine toggle** — an Enabled/Disabled switch (green when on, red when off). Turning it off opens a confirmation dialog warning that *all* AI tool calls will execute without policy checks, regardless of role; confirming flips `securityEnabled` in the store, which — per the [example above](#example-a-denied-request) — makes the backend skip the OPA calls entirely and auto-allow every tool call with `rule: "security-disabled"`. The switch is disabled while an agent task is actively running, so you can't change security mid-request.
+
+- **Theme toggle** — a single icon button on the right edge that flips between dark and light mode (persisted via Zustand/localStorage).
 
 ### Security Demo Mode
 
