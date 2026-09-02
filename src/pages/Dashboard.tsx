@@ -103,16 +103,16 @@ export function Dashboard() {
       >
         <Box
           sx={{
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
             px: 3,
             py: 2,
             display: "flex",
             alignItems: "center",
             gap: 1.5,
+            borderBottom: 1,
+            borderColor: "divider",
           }}
         >
-          <DeleteOutline />
+          <DeleteOutline sx={{ color: "error.main" }} />
           <Typography id="clear-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
             Clear all history?
           </Typography>

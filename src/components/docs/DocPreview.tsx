@@ -74,13 +74,13 @@ export function DocPreview() {
       aria-labelledby="doc-preview-title"
       PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden', maxHeight: '85vh' } }}
     >
-      <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Description />
+      <Box sx={{ px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, borderBottom: 1, borderColor: 'divider' }}>
+        <Description sx={{ color: 'primary.main' }} />
         <Typography id="doc-preview-title" variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }} noWrap>
           {selectedDoc?.title}
         </Typography>
         {selectedDoc && <SensitivityBadge sensitivity={selectedDoc.sensitivity} />}
-        <IconButton onClick={handleClose} size="small" sx={{ color: 'inherit', ml: 1 }}>
+        <IconButton onClick={handleClose} size="small" sx={{ ml: 1 }}>
           <Close fontSize="small" />
         </IconButton>
       </Box>

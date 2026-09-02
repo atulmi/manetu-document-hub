@@ -11,8 +11,8 @@ import type { UserRole } from '../../types';
 
 const ROLES: { value: UserRole; label: string; dotColor: string }[] = [
   { value: 'viewer',       label: 'Viewer',        dotColor: '#29b6f6' },
-  { value: 'developer',    label: 'Developer',     dotColor: '#6366f1' },
-  { value: 'data-analyst', label: 'Data Analyst',  dotColor: '#6366f1' },
+  { value: 'developer',    label: 'Developer',     dotColor: '#1d4ed8' },
+  { value: 'data-analyst', label: 'Data Analyst',  dotColor: '#0d9488' },
   { value: 'auditor',      label: 'Auditor',       dotColor: '#f59e0b' },
   { value: 'admin',        label: 'Admin',         dotColor: '#ef4444' },
 ];

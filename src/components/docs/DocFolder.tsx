@@ -49,7 +49,7 @@ export function DocFolder({ sensitivity, totalCount, accessibleCount, children }
           cursor: 'pointer',
           borderRadius: 1.5,
           bgcolor: (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e8eaed',
-          '&:hover': { bgcolor: 'rgba(99,102,241,0.08) !important' },
+          '&:hover': { bgcolor: 'rgba(29,78,216,0.08) !important' },
         }}
       >
         <Icon sx={{ fontSize: 16, color: 'text.secondary' }} />

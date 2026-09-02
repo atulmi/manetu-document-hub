@@ -335,7 +335,7 @@ export function ListView({
                 color: page === i ? "primary.contrastText" : "text.secondary",
                 "&:hover": {
                   bgcolor:
-                    page === i ? "primary.dark" : "rgba(99,102,241,0.15)",
+                    page === i ? "primary.dark" : "rgba(29,78,216,0.15)",
                 },
                 transition: "none",
               }}
@@ -363,16 +363,16 @@ export function ListView({
       >
         <Box
           sx={{
-            bgcolor: "primary.main",
-            color: "primary.contrastText",
             px: 3,
             py: 2,
             display: "flex",
             alignItems: "center",
             gap: 1.5,
+            borderBottom: 1,
+            borderColor: "divider",
           }}
         >
-          <DeleteOutline />
+          <DeleteOutline sx={{ color: "error.main" }} />
           <Typography
             id="delete-run-dialog-title"
             variant="subtitle1"

@@ -7,8 +7,8 @@ export interface RolePermissions {
 
 export const ROLE_COLORS: Record<UserRole, string> = {
   viewer: '#29b6f6',
-  developer: '#6366f1',
-  'data-analyst': '#6366f1',
+  developer: '#1d4ed8',
+  'data-analyst': '#0d9488',
   auditor: '#f59e0b',
   admin: '#ef4444',
 };

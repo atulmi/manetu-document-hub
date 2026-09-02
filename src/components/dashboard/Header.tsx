@@ -18,6 +18,7 @@ import { useStore } from "../../lib/store";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { SecurityToggle } from "./SecurityToggle";
 import { ROLE_PERMISSIONS } from "../../lib/role-permissions";
+import { HEADER_TEAL, HEADER_TEAL_DARK } from "../../lib/theme";
 
 function PermIcon({ allowed }: { allowed: boolean }) {
   return allowed ? (
@@ -40,10 +41,7 @@ export function Header() {
         position="static"
         elevation={0}
         sx={(t) => ({
-          background:
-            t.palette.mode === "dark"
-              ? "linear-gradient(135deg, #1e2040 0%, #171930 100%)"
-              : "linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)",
+          background: t.palette.mode === "dark" ? HEADER_TEAL_DARK : HEADER_TEAL,
         })}
       >
         <Toolbar variant="dense" sx={{ height: 40, minHeight: 40 }}>

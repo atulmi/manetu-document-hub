@@ -131,14 +131,14 @@ export const ToolCallCard = memo(function ToolCallCard({
                 mt: 1,
                 p: 1,
                 borderRadius: 1,
-                bgcolor: "error.main",
-                color: "#fff",
+                borderLeft: 2,
+                borderColor: "error.main",
+                bgcolor: "rgba(239,68,68,0.08)",
               }}
             >
               <Typography
                 variant="caption"
                 sx={{
-                  fontWeight: 600,
                   lineHeight: 1.6,
                   display: "block",
                   fontSize: "0.7rem",
@@ -150,8 +150,9 @@ export const ToolCallCard = memo(function ToolCallCard({
                 {(openPerms) => (
                   <Typography
                     variant="caption"
+                    color="text.secondary"
                     onClick={openPerms}
-                    sx={{ fontSize: "0.65rem", opacity: 0.9, mt: 0.5, cursor: "pointer", textDecoration: "underline", display: "inline-block" }}
+                    sx={{ fontSize: "0.65rem", mt: 0.5, cursor: "pointer", textDecoration: "underline", display: "inline-block" }}
                   >
                     Click to view {role} role's full policy
                   </Typography>
@@ -172,7 +173,7 @@ export const ToolCallCard = memo(function ToolCallCard({
                 onClick={handleViewDoc}
                 sx={{ ml: "auto", fontSize: "0.7rem" }}
               >
-                View Document →
+                View Document
               </Button>
             )}
           </Box>

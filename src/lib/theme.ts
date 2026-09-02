@@ -1,11 +1,14 @@
 import { createTheme, type PaletteMode } from '@mui/material/styles';
 
+export const HEADER_TEAL = '#0f766e';
+export const HEADER_TEAL_DARK = '#134e4a';
+
 export function buildTheme(mode: PaletteMode) {
   const dark = mode === 'dark';
   return createTheme({
     palette: {
       mode,
-      primary: { main: '#6366f1' },
+      primary: { main: '#1d4ed8' },
       error:   { main: '#ef4444' },
       warning: { main: '#f59e0b' },
       success: { main: '#22c55e' },
@@ -39,13 +42,13 @@ export function buildTheme(mode: PaletteMode) {
         styleOverrides: {
           root: {
             '&:hover': {
-              backgroundColor: 'rgba(99,102,241,0.08)',
+              backgroundColor: 'rgba(29,78,216,0.08)',
             },
             '&.Mui-selected': {
-              backgroundColor: 'rgba(99,102,241,0.15)',
+              backgroundColor: 'rgba(29,78,216,0.15)',
             },
             '&.Mui-selected:hover': {
-              backgroundColor: 'rgba(99,102,241,0.18)',
+              backgroundColor: 'rgba(29,78,216,0.18)',
             },
           },
         },

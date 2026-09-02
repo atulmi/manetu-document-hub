@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
+import { HEADER_TEAL, HEADER_TEAL_DARK } from '../../lib/theme';
 
 interface PanelHeaderProps {
   title: string;
@@ -13,9 +14,7 @@ export function PanelHeader({ title, subtitle, action }: PanelHeaderProps) {
   return (
     <Box sx={(t) => ({
       flexShrink: 0,
-      background: t.palette.mode === 'dark'
-        ? 'linear-gradient(135deg, rgba(99,102,241,0.35) 0%, rgba(79,70,229,0.35) 100%)'
-        : 'linear-gradient(135deg, #8385f5 0%, #7071e8 100%)',
+      background: t.palette.mode === 'dark' ? HEADER_TEAL_DARK : HEADER_TEAL,
     })}>
       <Box sx={{ display: 'flex', alignItems: 'center', px: 2, minHeight: 40 }}>
         <Box sx={{ flex: 1 }}>

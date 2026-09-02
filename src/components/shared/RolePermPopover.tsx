@@ -23,7 +23,7 @@ interface RolePermPopoverProps {
 export function RolePermPopover({ role, children }: RolePermPopoverProps) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const perms = ROLE_PERMISSIONS[role];
-  const color = ROLE_COLORS[role] ?? "#6366f1";
+  const color = ROLE_COLORS[role] ?? "#1d4ed8";
 
   return (
     <>

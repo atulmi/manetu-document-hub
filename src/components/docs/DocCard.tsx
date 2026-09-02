@@ -40,9 +40,9 @@ export const DocCard = memo(function DocCard({ doc, selected, onSelect, onLocked
           p: 1,
           minHeight: 44,
           cursor: doc.accessible ? 'pointer' : 'not-allowed',
-          bgcolor: selected ? 'rgba(99,102,241,0.15)' : 'transparent',
+          bgcolor: selected ? 'rgba(29,78,216,0.15)' : 'transparent',
           '&:hover': doc.accessible ? {
-            bgcolor: 'rgba(99,102,241,0.08) !important',
+            bgcolor: 'rgba(29,78,216,0.08) !important',
           } : {},
           borderBottom: 1,
           borderColor: 'divider',

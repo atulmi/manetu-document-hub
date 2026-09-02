@@ -134,8 +134,8 @@ export function AgentTaskPanel() {
                   cursor: isRunning ? "default" : "pointer",
                   fontSize: "0.75rem",
                   "&:hover": {
-                    bgcolor: "rgba(99,102,241,0.12) !important",
-                    borderColor: "rgba(99,102,241,0.4) !important",
+                    bgcolor: "rgba(29,78,216,0.12) !important",
+                    borderColor: "rgba(29,78,216,0.4) !important",
                   },
                 }}
               />
@@ -161,8 +161,8 @@ export function AgentTaskPanel() {
                   cursor: isRunning ? "default" : "pointer",
                   fontSize: "0.75rem",
                   "&:hover": {
-                    bgcolor: "rgba(99,102,241,0.12) !important",
-                    borderColor: "rgba(99,102,241,0.4) !important",
+                    bgcolor: "rgba(29,78,216,0.12) !important",
+                    borderColor: "rgba(29,78,216,0.4) !important",
                   },
                 }}
               />

@@ -64,7 +64,7 @@ function PanelCard({
         height: "100%",
         overflow: "hidden",
         bgcolor: "background.paper",
-        border: "1px solid rgba(99,102,241,0.2)",
+        border: "1px solid rgba(29,78,216,0.2)",
         borderRadius: 1.5,
         boxShadow: "0 4px 20px rgba(0,0,0,0.25), 0 2px 6px rgba(0,0,0,0.15)",
       }}

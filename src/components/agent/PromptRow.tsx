@@ -2,8 +2,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import Person from "@mui/icons-material/Person";
-import AccessTime from "@mui/icons-material/AccessTime";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
@@ -50,7 +48,7 @@ export const PromptRow = memo(function PromptRow({
         px: 1.5,
         py: 1,
         cursor: "pointer",
-        "&:hover": { bgcolor: "rgba(99,102,241,0.08) !important" },
+        "&:hover": { bgcolor: "rgba(29,78,216,0.08) !important" },
         borderBottom: 1,
         borderColor: "divider",
         transition: "none",
@@ -61,11 +59,12 @@ export const PromptRow = memo(function PromptRow({
           {group.prompt}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          <Person sx={{ fontSize: 12, color: "text.disabled" }} />
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
             {group.role}
           </Typography>
-          <AccessTime sx={{ fontSize: 12, color: "text.disabled", ml: 0.25 }} />
+          <Typography variant="caption" color="text.disabled" sx={{ fontSize: "0.7rem" }}>
+            ·
+          </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.7rem" }}>
             {timeLabel}
           </Typography>

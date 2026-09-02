@@ -29,7 +29,7 @@ export function DetailView({
   onBack: () => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
-  const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#6366f1";
+  const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#1d4ed8";
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>

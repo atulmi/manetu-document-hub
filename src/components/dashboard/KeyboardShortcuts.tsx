@@ -36,11 +36,11 @@ export function KeyboardShortcuts() {
       aria-labelledby="shortcuts-title"
       PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden' } }}
     >
-      <Box sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', px: 3, py: 1.5, display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ px: 3, py: 1.5, display: 'flex', alignItems: 'center', borderBottom: 1, borderColor: 'divider' }}>
         <Typography id="shortcuts-title" variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
           Keyboard shortcuts
         </Typography>
-        <IconButton size="small" onClick={() => setOpen(false)} sx={{ color: 'inherit' }}>
+        <IconButton size="small" onClick={() => setOpen(false)}>
           <Close fontSize="small" />
         </IconButton>
       </Box>
