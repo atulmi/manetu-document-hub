@@ -6,6 +6,7 @@ import Chip from '@mui/material/Chip';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { CARD_SHADOW } from '../../lib/theme';
 import type { AgentStep } from '../../types';
 import type { Components } from 'react-markdown';
 
@@ -28,10 +29,10 @@ export const FinalAnswerCard = memo(function FinalAnswerCard({ step, priorSteps 
     .map((s) => s.toolCall!.args['path'] as string);
 
   return (
-    <Box sx={{ border: 1, borderColor: 'success.main', borderRadius: 1.5, borderLeftWidth: 3, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+    <Box sx={{ border: 1, borderColor: 'success.main', borderRadius: 1.5, borderLeftWidth: 3, boxShadow: CARD_SHADOW }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1.5, py: 1 }}>
         <CheckCircle sx={{ fontSize: 18, color: 'success.main' }} />
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           Final Answer
         </Typography>
       </Box>

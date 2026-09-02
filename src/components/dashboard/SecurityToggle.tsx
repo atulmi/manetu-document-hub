@@ -76,7 +76,7 @@ export function SecurityToggle() {
             Access controls, sensitivity filters, and audit enforcement will be bypassed.
           </DialogContentText>
           <DialogContentText sx={{ mt: 1.5, color: 'text.secondary', fontSize: '0.8rem' }}>
-            This is for demonstration purposes only — to show the difference the Manetu Policy Engine makes.
+            This is for demonstration purposes only — to show the difference the policy engine makes.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>

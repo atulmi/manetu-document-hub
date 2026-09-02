@@ -15,7 +15,8 @@ import FileDownload from "@mui/icons-material/FileDownload";
 import MoreVert from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import { AppShell } from "../components/dashboard/AppShell";
-import { ThreePanel } from "../components/dashboard/ThreePanel";
+import { DashboardLayout } from "../components/dashboard/DashboardLayout";
+import { LibraryHistoryTabs } from "../components/dashboard/LibraryHistoryTabs";
 import { DocLibrary } from "../components/docs/DocLibrary";
 import { DocPreview } from "../components/docs/DocPreview";
 import { AgentTaskPanel } from "../components/agent/AgentTaskPanel";
@@ -28,6 +29,8 @@ import { fetchFullPromptHistoryForExport } from "../lib/prompt-history-api";
 
 export function Dashboard() {
   const selectDoc = useStore((s) => s.selectDoc);
+  const docPanelTab = useStore((s) => s.docPanelTab);
+  const setDocPanelTab = useStore((s) => s.setDocPanelTab);
   const { count, subtitle, handleClear } = useAgentStepsHeader();
   useHistorySync();
 
@@ -47,48 +50,53 @@ export function Dashboard() {
 
   return (
     <AppShell>
-      <ThreePanel
-        left={<DocLibrary onSelectDoc={selectDoc} />}
-        center={<AgentTaskPanel />}
-        right={<AgentStepsPanel />}
-        rightTitle={`Prompt History${subtitle ? ` (${subtitle})` : ""}`}
-        rightAction={
-          count > 0 ? (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              <IconButton
-                size="small"
-                onClick={(e) => setMenuAnchor(e.currentTarget)}
-                sx={{ color: "rgba(255,255,255,0.8)" }}
-              >
-                <MoreVert sx={{ fontSize: 18 }} />
-              </IconButton>
-              <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={() => setMenuAnchor(null)}
-              >
-                <MenuItem onClick={handleExport}>
-                  <ListItemIcon>
-                    <FileDownload fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText>Export all prompt runs</ListItemText>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    setMenuAnchor(null);
-                    setConfirmOpen(true);
-                  }}
-                >
-                  <ListItemIcon>
-                    <DeleteOutline fontSize="small" color="error" />
-                  </ListItemIcon>
-                  <ListItemText sx={{ color: "error.main" }}>
-                    Clear all history
-                  </ListItemText>
-                </MenuItem>
-              </Menu>
-            </Box>
-          ) : undefined
+      <DashboardLayout
+        main={<AgentTaskPanel />}
+        tabs={docPanelTab === "library" ? <DocLibrary onSelectDoc={selectDoc} /> : <AgentStepsPanel />}
+        tabsHeader={
+          <LibraryHistoryTabs
+            value={docPanelTab}
+            onChange={setDocPanelTab}
+            historyLabel={`Prompt History${subtitle ? ` (${subtitle})` : ""}`}
+            action={
+              count > 0 ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pr: 0.5 }}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => setMenuAnchor(e.currentTarget)}
+                    sx={{ color: "text.secondary" }}
+                  >
+                    <MoreVert sx={{ fontSize: 18 }} />
+                  </IconButton>
+                  <Menu
+                    anchorEl={menuAnchor}
+                    open={Boolean(menuAnchor)}
+                    onClose={() => setMenuAnchor(null)}
+                  >
+                    <MenuItem onClick={handleExport}>
+                      <ListItemIcon>
+                        <FileDownload fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText>Export all prompt runs</ListItemText>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setMenuAnchor(null);
+                        setConfirmOpen(true);
+                      }}
+                    >
+                      <ListItemIcon>
+                        <DeleteOutline fontSize="small" color="error" />
+                      </ListItemIcon>
+                      <ListItemText sx={{ color: "error.main" }}>
+                        Clear all history
+                      </ListItemText>
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              ) : undefined
+            }
+          />
         }
       />
       <DocPreview />

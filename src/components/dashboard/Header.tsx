@@ -12,21 +12,11 @@ import Shield from "@mui/icons-material/Shield";
 import DarkMode from "@mui/icons-material/DarkMode";
 import LightMode from "@mui/icons-material/LightMode";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
-import Check from "@mui/icons-material/Check";
-import Close from "@mui/icons-material/Close";
 import { useStore } from "../../lib/store";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { SecurityToggle } from "./SecurityToggle";
 import { ROLE_PERMISSIONS } from "../../lib/role-permissions";
-import { HEADER_TEAL, HEADER_TEAL_DARK } from "../../lib/theme";
-
-function PermIcon({ allowed }: { allowed: boolean }) {
-  return allowed ? (
-    <Check sx={{ fontSize: 14, color: "success.main" }} />
-  ) : (
-    <Close sx={{ fontSize: 14, color: "error.main" }} />
-  );
-}
+import { HEADER_TEAL, HEADER_TEAL_DARK, CARD_SHADOW } from "../../lib/theme";
 
 export function Header() {
   const themeMode = useStore((s) => s.themeMode);
@@ -68,7 +58,7 @@ export function Header() {
           bgcolor: "background.paper",
           borderBottom: 1,
           borderColor: "divider",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+          boxShadow: CARD_SHADOW,
           position: "relative",
           zIndex: 1,
         }}
@@ -137,7 +127,6 @@ export function Header() {
                   key={tier}
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
-                  <PermIcon allowed={allowed} />
                   <Typography
                     variant="caption"
                     sx={{ textTransform: "capitalize" }}
@@ -173,7 +162,6 @@ export function Header() {
                   key={tool}
                   sx={{ display: "flex", alignItems: "center", gap: 1 }}
                 >
-                  <PermIcon allowed={allowed} />
                   <Typography
                     variant="caption"
                     sx={{ fontFamily: "monospace", fontSize: "0.7rem" }}

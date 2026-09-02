@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import { useStore } from '../../lib/store';
 import { useDocContent } from '../../hooks/useDocContent';
 import { SensitivityBadge } from './SensitivityBadge';
+import { CARD_SHADOW } from '../../lib/theme';
 import type { Components } from 'react-markdown';
 
 const mdComponents: Components = {
@@ -76,18 +77,47 @@ export function DocPreview() {
     >
       <Box sx={{ px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1.5, borderBottom: 1, borderColor: 'divider' }}>
         <Description sx={{ color: 'primary.main' }} />
-        <Typography id="doc-preview-title" variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }} noWrap>
-          {selectedDoc?.title}
-        </Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography id="doc-preview-title" variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.3 }} noWrap>
+            {selectedDoc?.title}
+          </Typography>
+          {selectedDoc?.path && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
+              noWrap
+            >
+              {selectedDoc.path}
+            </Typography>
+          )}
+        </Box>
         {selectedDoc && <SensitivityBadge sensitivity={selectedDoc.sensitivity} />}
         <IconButton onClick={handleClose} size="small" sx={{ ml: 1 }}>
           <Close fontSize="small" />
         </IconButton>
       </Box>
 
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent
+        sx={(t) => ({
+          p: { xs: 1.5, sm: 3 },
+          bgcolor: t.palette.mode === 'dark' ? '#0a0b10' : '#e9ebef',
+        })}
+      >
         {loading && (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              borderRadius: 1.5,
+              boxShadow: CARD_SHADOW,
+              maxWidth: 760,
+              mx: 'auto',
+              p: { xs: 2.5, sm: 4 },
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+          >
             <Skeleton variant="text" width="60%" height={32} />
             <Skeleton variant="text" width="100%" />
             <Skeleton variant="text" width="100%" />
@@ -97,16 +127,36 @@ export function DocPreview() {
         )}
 
         {error && (
-          <Box>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              borderRadius: 1.5,
+              boxShadow: CARD_SHADOW,
+              maxWidth: 760,
+              mx: 'auto',
+              p: { xs: 2.5, sm: 4 },
+            }}
+          >
             <Typography color="error" variant="body2" sx={{ fontWeight: 600 }}>Access restricted</Typography>
             <Typography variant="caption" color="text.secondary">{error}</Typography>
           </Box>
         )}
 
         {content && !loading && (
-          <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
-            {content}
-          </ReactMarkdown>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              borderRadius: 1.5,
+              boxShadow: CARD_SHADOW,
+              maxWidth: 760,
+              mx: 'auto',
+              p: { xs: 2.5, sm: 4 },
+            }}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+              {content}
+            </ReactMarkdown>
+          </Box>
         )}
       </DialogContent>
     </Dialog>

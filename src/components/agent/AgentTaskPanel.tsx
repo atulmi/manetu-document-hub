@@ -75,8 +75,7 @@ export function AgentTaskPanel() {
           color="text.disabled"
           sx={{ mb: 0.5, fontSize: "0.7rem" }}
         >
-          Powered by Claude Sonnet 4.6 · Tool calls enforced by Manetu Policy
-          Engine
+          Powered by Claude Sonnet 4.6
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {isRunning ? (
@@ -133,6 +132,8 @@ export function AgentTaskPanel() {
                 sx={{
                   cursor: isRunning ? "default" : "pointer",
                   fontSize: "0.75rem",
+                  bgcolor: "rgba(15,118,110,0.1)",
+                  borderColor: "rgba(15,118,110,0.35)",
                   "&:hover": {
                     bgcolor: "rgba(29,78,216,0.12) !important",
                     borderColor: "rgba(29,78,216,0.4) !important",
@@ -146,7 +147,7 @@ export function AgentTaskPanel() {
             color="text.secondary"
             sx={{ mt: 3, mb: 1, display: "block" }}
           >
-            Or try these (may trigger policy denials depending on role):
+            Prompts that test role permissions:
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
             {SUGGESTIONS_SECONDARY.map((s) => (

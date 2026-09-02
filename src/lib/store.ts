@@ -16,6 +16,10 @@ interface ThemeSlice {
   themeMode: PaletteMode;
   toggleTheme: () => void;
 }
+interface UiSlice {
+  docPanelTab: 'library' | 'history';
+  setDocPanelTab: (tab: 'library' | 'history') => void;
+}
 interface DocSlice {
   selectedDoc: DocMeta | null;
   selectDoc: (doc: DocMeta | null) => void;
@@ -43,7 +47,7 @@ interface AgentSlice {
   setViewingTaskId: (id: string | null) => void;
 }
 
-type StoreState = RoleSlice & SecuritySlice & ThemeSlice & DocSlice & AgentSlice;
+type StoreState = RoleSlice & SecuritySlice & ThemeSlice & UiSlice & DocSlice & AgentSlice;
 
 const MAX_TASK_HISTORY = 100;
 
@@ -79,6 +83,8 @@ export const useStore = create<StoreState>()(
     toggleSecurity: () => set((s) => ({ securityEnabled: !s.securityEnabled })),
     themeMode: 'light',
     toggleTheme: () => set((s) => ({ themeMode: s.themeMode === 'dark' ? 'light' : 'dark' })),
+    docPanelTab: 'history',
+    setDocPanelTab: (tab) => set({ docPanelTab: tab }),
     selectedDoc: null,
     selectDoc: (doc) => set({ selectedDoc: doc }),
     currentTask: null,
@@ -156,6 +162,7 @@ export const useStore = create<StoreState>()(
       auditPrompts: state.auditPrompts,
       unsyncedTaskIds: state.unsyncedTaskIds,
       themeMode: state.themeMode,
+      docPanelTab: state.docPanelTab,
       activeRole: state.activeRole,
       securityEnabled: state.securityEnabled,
     }) as unknown as StoreState,

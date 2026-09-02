@@ -2,6 +2,10 @@ import { createTheme, type PaletteMode } from '@mui/material/styles';
 
 export const HEADER_TEAL = '#0f766e';
 export const HEADER_TEAL_DARK = '#134e4a';
+export const TEAL_TEXT_LIGHT = '#0f766e';
+export const TEAL_TEXT_DARK = '#2dd4bf';
+export const CARD_SHADOW = '0 1px 2px rgba(0,0,0,0.06)';
+export const PANEL_SHADOW = '0 2px 10px rgba(0,0,0,0.14)';
 
 export function buildTheme(mode: PaletteMode) {
   const dark = mode === 'dark';
@@ -18,7 +22,7 @@ export function buildTheme(mode: PaletteMode) {
             divider: 'rgba(255,255,255,0.12)',
           }
         : {
-            background: { default: '#f0f2f5', paper: '#ffffff' },
+            background: { default: '#eceff3', paper: '#ffffff' },
             divider: 'rgba(0,0,0,0.15)',
           }
       ),

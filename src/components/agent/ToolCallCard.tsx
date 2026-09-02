@@ -9,6 +9,7 @@ import { PolicyDecisionBadge } from "../docs/PolicyDecisionBadge";
 import { RolePermPopover } from "../shared/RolePermPopover";
 import { ROLE_PERMISSIONS } from "../../lib/role-permissions";
 import { useStore } from "../../lib/store";
+import { CARD_SHADOW } from "../../lib/theme";
 import type { AgentStep, UserRole } from "../../types";
 
 function explainDenial(
@@ -81,7 +82,7 @@ export const ToolCallCard = memo(function ToolCallCard({
         borderColor: denied ? "error.main" : "success.main",
         borderRadius: 1.5,
         borderLeftWidth: 3,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+        boxShadow: CARD_SHADOW,
       }}
     >
       <Box
@@ -92,7 +93,7 @@ export const ToolCallCard = memo(function ToolCallCard({
         ) : (
           <Build sx={{ fontSize: 18, color: "text.secondary" }} />
         )}
-        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
           Step {step.stepNumber} · Tool Call
         </Typography>
         <Box sx={{ flex: 1 }} />
