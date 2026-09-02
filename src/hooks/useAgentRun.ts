@@ -3,17 +3,9 @@ import { useStore } from '../lib/store';
 import type { AgentStep, AuditEvent } from '../types';
 
 function failTask(message: string) {
-  useStore.setState((s) => {
-    if (!s.currentTask) return {};
-    const finished = { ...s.currentTask, status: 'failed' as const, finalAnswer: message, completedAt: new Date().toISOString() };
-    const history = s.taskHistory.filter((t) => t.id !== finished.id);
-    return {
-      currentTask: null,
-      viewingTaskId: finished.id,
-      taskHistory: [...history, finished],
-      auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
-    };
-  });
+  const { currentTask, finishTask } = useStore.getState();
+  if (!currentTask) return;
+  finishTask({ ...currentTask, status: 'failed', finalAnswer: message, completedAt: new Date().toISOString() });
 }
 
 export function useAgentRun() {
@@ -115,23 +107,16 @@ export function useAgentRun() {
                 appendAuditEvent(auditData);
               } else if (eventType === 'done') {
                 const backendTaskId = (data as { taskId?: string }).taskId;
-                useStore.setState((s) => {
-                  if (!s.currentTask) return {};
-                  const finalId = backendTaskId ?? s.currentTask.id;
-                  const finished = {
-                    ...s.currentTask,
+                const { currentTask: taskAtDone, finishTask } = useStore.getState();
+                if (taskAtDone) {
+                  const finalId = backendTaskId ?? taskAtDone.id;
+                  finishTask({
+                    ...taskAtDone,
                     id: finalId,
-                    status: 'completed' as const,
+                    status: 'completed',
                     completedAt: new Date().toISOString(),
-                  };
-                  const history = s.taskHistory.filter((t) => t.id !== finalId);
-                  return {
-                    currentTask: null,
-                    viewingTaskId: finalId,
-                    taskHistory: [...history, finished],
-                    auditPrompts: { ...s.auditPrompts, [finalId]: s.currentTask.prompt },
-                  };
-                });
+                  });
+                }
               } else if (eventType === 'error') {
                 const msg = (data as { message?: string }).message ?? 'Agent error';
                 failTask(msg);
@@ -145,16 +130,10 @@ export function useAgentRun() {
       }
 
       // Stream ended — if task is still running (no done event received), mark completed
-      useStore.setState((s) => {
-        if (s.currentTask?.status !== 'running') return {};
-        const finished = { ...s.currentTask, status: 'completed' as const, completedAt: new Date().toISOString() };
-        return {
-          currentTask: null,
-          viewingTaskId: finished.id,
-          taskHistory: s.taskHistory.some((t) => t.id === finished.id) ? s.taskHistory : [...s.taskHistory, finished],
-          auditPrompts: { ...s.auditPrompts, [finished.id]: s.currentTask.prompt },
-        };
-      });
+      const { currentTask: taskAtStreamEnd, finishTask } = useStore.getState();
+      if (taskAtStreamEnd?.status === 'running') {
+        finishTask({ ...taskAtStreamEnd, status: 'completed', completedAt: new Date().toISOString() });
+      }
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         failTask('Connection to agent lost unexpectedly.');

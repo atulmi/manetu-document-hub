@@ -10,6 +10,8 @@ import { agentRouter } from './routes/agent.ts';
 import { toolsRouter } from './routes/tools.ts';
 import { docsRouter } from './routes/docs.ts';
 import { auditRouter } from './routes/audit.ts';
+import { promptHistoryRouter } from './routes/prompt-history.ts';
+import { ensureIndices } from './lib/es-client.ts';
 
 const app = express();
 app.use(cors({ origin: process.env['CORS_ORIGIN'] ?? 'http://localhost:5173' }));
@@ -19,6 +21,11 @@ app.use('/api/agent', agentRouter);
 app.use('/api/tools', toolsRouter);
 app.use('/api/docs', docsRouter);
 app.use('/api/audit', auditRouter);
+app.use('/api/prompt-history', promptHistoryRouter);
+
+ensureIndices().catch((err) => {
+  console.warn('Elasticsearch is not reachable at startup — prompt history will not persist until it is available:', err instanceof Error ? err.message : err);
+});
 
 const port = process.env['PORT'] ?? 3001;
 app.listen(port, () => {

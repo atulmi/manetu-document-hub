@@ -168,6 +168,7 @@ The app works without Docker — the backend will return a clear error if OPA is
 | `ANTHROPIC_API_KEY` | Claude API key (required for agent)                      |
 | `MPE_BASE_URL`      | OPA policy engine URL (default: `http://localhost:8181`) — name kept for MRN-style compatibility with MPE |
 | `MCP_DOCS_PATH`     | Path to document corpus (default: `./docs-corpus`)       |
+| `ELASTICSEARCH_URL` | Elasticsearch URL for prompt history/audit persistence (default: `http://localhost:9200`) |
 | `PORT`              | Backend server port (default: `3001`)                    |
 
 ## UI Overview

@@ -1,5 +1,7 @@
 # CI override — MPE runs with bundled policies, no external volumes needed.
-# MCP filesystem is mocked by cy.intercept() in Cypress tests.
+# MCP filesystem and Elasticsearch calls are mocked by cy.intercept() in
+# Cypress tests, so the elasticsearch service here only backs any
+# server-side (Vitest) tests that talk to a real ES instance.
 
 services:
   mpe:
@@ -20,3 +22,19 @@ services:
       timeout: 3s
       retries: 5
       start_period: 3s
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s

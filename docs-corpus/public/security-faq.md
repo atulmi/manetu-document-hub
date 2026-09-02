@@ -17,7 +17,7 @@ All data at rest is encrypted using AES-256-GCM. Data in transit is protected wi
 
 ### How does access control work?
 
-DataVault uses the Manetu Policy Engine (MPE) to evaluate every access request in real time. Access control is role-based with five default roles: developer, data-analyst, viewer, auditor, and admin. Each role has a defined set of permissions that determine which documents and tools they can access.
+DataVault uses the Policy Engine (MPE) to evaluate every access request in real time. Access control is role-based with five default roles: developer, data-analyst, viewer, auditor, and admin. Each role has a defined set of permissions that determine which documents and tools they can access.
 
 Policy rules are written in a declarative format and evaluated against the user's role, the target resource's sensitivity level, and the requested operation. For example, a rule might state: "viewers can read documents with public sensitivity but cannot access internal or confidential documents."
 

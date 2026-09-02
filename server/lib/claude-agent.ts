@@ -16,6 +16,7 @@ export interface AgentRunOptions {
   prompt: string;
   role: UserRole;
   securityEnabled: boolean;
+  onTaskStart?: (task: AgentTask) => void;
   onStep: (step: AgentStep) => void;
   onAudit: (event: AuditEvent) => void;
   mpeClient: MPEClient;
@@ -101,7 +102,7 @@ async function executeTool(
 }
 
 export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
-  const { prompt, role, securityEnabled, onStep, onAudit, mpeClient, fsClient, signal } = opts;
+  const { prompt, role, securityEnabled, onTaskStart, onStep, onAudit, mpeClient, fsClient, signal } = opts;
   const taskId = randomUUID();
   const task: AgentTask = {
     id: taskId,
@@ -111,6 +112,7 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
     steps: [],
     startedAt: now(),
   };
+  onTaskStart?.(task);
 
   const MAX_ITERATIONS = 10;
 

@@ -1,14 +1,28 @@
-import { Router } from 'express';
-import { roleExtract } from '../middleware/roleExtract.ts';
-import { runAgentLoop } from '../lib/claude-agent.ts';
-import { buildMPEClient, MPEConnectionError } from '../lib/mpe-client.ts';
-import { buildFSClient } from '../lib/mcp-fs-client.ts';
-import { auditBus } from '../lib/audit-bus.ts';
-import type { AgentStep, AuditEvent } from '../types.ts';
+import { Router } from "express";
+import { roleExtract } from "../middleware/roleExtract.ts";
+import { runAgentLoop } from "../lib/claude-agent.ts";
+import { buildMPEClient, MPEConnectionError } from "../lib/mpe-client.ts";
+import { buildFSClient } from "../lib/mcp-fs-client.ts";
+import { auditBus } from "../lib/audit-bus.ts";
+import {
+  indexPromptRunStart,
+  indexPromptRunComplete,
+  indexAgentStep,
+  indexAuditEvent,
+} from "../lib/audit-index.ts";
+import type { AgentStep, AgentTask, AuditEvent } from "../types.ts";
+
+function indexInBackground<T>(label: string, work: Promise<T>): void {
+  work.catch((err) => console.warn(`[es] failed to index ${label}:`, err));
+}
 
 export const agentRouter = Router();
 
-function writeSSE(res: import('express').Response, event: string, data: unknown): boolean {
+function writeSSE(
+  res: import("express").Response,
+  event: string,
+  data: unknown,
+): boolean {
   try {
     if (!res.writableEnded && !res.destroyed) {
       res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
@@ -20,46 +34,66 @@ function writeSSE(res: import('express').Response, event: string, data: unknown)
   return false;
 }
 
-agentRouter.post('/run', roleExtract, async (req, res) => {
+agentRouter.post("/run", roleExtract, async (req, res) => {
   const role = req.role!;
   const prompt = req.body?.prompt;
-  if (typeof prompt !== 'string' || !prompt.trim()) {
-    res.status(400).json({ error: 'Missing or empty prompt' });
+  if (typeof prompt !== "string" || !prompt.trim()) {
+    res.status(400).json({ error: "Missing or empty prompt" });
     return;
   }
 
-  const securityEnabled = req.headers['x-security-enabled'] !== 'false';
+  const securityEnabled = req.headers["x-security-enabled"] !== "false";
 
-  if (!process.env['ANTHROPIC_API_KEY']) {
-    res.status(503).json({ error: 'ANTHROPIC_API_KEY is not set. Add it to your .env file and restart the server.' });
+  if (!process.env["ANTHROPIC_API_KEY"]) {
+    res
+      .status(503)
+      .json({
+        error:
+          "ANTHROPIC_API_KEY is not set. Add it to your .env file and restart the server.",
+      });
     return;
   }
 
   if (securityEnabled) {
     const mpe = buildMPEClient();
     try {
-      await mpe.evaluate({ principal: role, resource: 'mrn:mcp:healthcheck', operation: 'discover' });
+      await mpe.evaluate({
+        principal: role,
+        resource: "mrn:mcp:healthcheck",
+        operation: "discover",
+      });
     } catch (err) {
       if (err instanceof MPEConnectionError) {
-        res.status(503).json({ error: 'Manetu Policy Engine is not running. Start it with: docker compose -f docker/docker-compose.yml up -d' });
+        res
+          .status(503)
+          .json({
+            error:
+              "Policy Engine is not running. Start it with: docker compose -f docker/docker-compose.yml up -d",
+          });
         return;
       }
     }
   }
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
   const abortController = new AbortController();
-  res.on('close', () => { abortController.abort(); });
+  res.on("close", () => {
+    abortController.abort();
+  });
 
   const mpeClient = buildMPEClient();
   const fsClient = buildFSClient();
 
-  console.log(`Agent run starting: role=${role}, security=${securityEnabled}, prompt="${prompt.slice(0, 50)}"`);
+  console.log(
+    `Agent run starting: role=${role}, security=${securityEnabled}, prompt="${prompt.slice(0, 50)}"`,
+  );
+
+  let taskId: string | undefined;
 
   try {
     const task = await runAgentLoop({
@@ -69,22 +103,34 @@ agentRouter.post('/run', roleExtract, async (req, res) => {
       mpeClient,
       fsClient,
       signal: abortController.signal,
+      onTaskStart: (task: AgentTask) => {
+        taskId = task.id;
+        indexInBackground("prompt-run start", indexPromptRunStart(task));
+      },
       onStep: (step: AgentStep) => {
-        writeSSE(res, 'step', step);
+        writeSSE(res, "step", step);
+        if (taskId)
+          indexInBackground("agent step", indexAgentStep(taskId, step));
       },
       onAudit: (event: AuditEvent) => {
-        auditBus.emit('audit', event);
-        writeSSE(res, 'audit', event);
+        auditBus.emit("audit", event);
+        writeSSE(res, "audit", event);
+        indexInBackground("audit event", indexAuditEvent(event));
       },
     });
 
-    writeSSE(res, 'done', { taskId: task.id });
+    indexInBackground("prompt-run completion", indexPromptRunComplete(task));
+    writeSSE(res, "done", { taskId: task.id });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Agent run error:', message);
-    writeSSE(res, 'error', { message });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("Agent run error:", message);
+    writeSSE(res, "error", { message });
   } finally {
-    console.log('Agent run finished, aborted:', abortController.signal.aborted);
-    try { if (!res.writableEnded) res.end(); } catch { /* already closed */ }
+    console.log("Agent run finished, aborted:", abortController.signal.aborted);
+    try {
+      if (!res.writableEnded) res.end();
+    } catch {
+      /* already closed */
+    }
   }
 });

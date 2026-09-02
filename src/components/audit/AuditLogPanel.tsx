@@ -11,6 +11,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuditStream } from "../../hooks/useAuditStream";
 import { useStore } from "../../lib/store";
+import { clearPromptHistory } from "../../lib/prompt-history-api";
 import { AuditEventRow } from "./AuditEventRow";
 import type { AuditEvent } from "../../types";
 
@@ -120,7 +121,6 @@ export function AuditLogPanel() {
   const { events: sseEvents, connected, clear: clearSSE } = useAuditStream();
   const storeEvents = useStore((s) => s.auditEvents);
   const auditPrompts = useStore((s) => s.auditPrompts);
-  const clearAllHistory = useStore((s) => s.clearAllHistory);
   const viewingTaskId = useStore((s) => s.viewingTaskId);
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
 
@@ -165,7 +165,9 @@ export function AuditLogPanel() {
 
   const handleClear = () => {
     clearSSE();
-    clearAllHistory();
+    clearPromptHistory().catch((err) =>
+      console.error("Failed to clear prompt history:", err),
+    );
     setViewingTaskId(null);
   };
 
@@ -218,8 +220,8 @@ export function AuditLogPanel() {
             </Typography>
             <Typography variant="body2" color="text.disabled">
               Submit a prompt above — each file read, directory listing, and
-              search operation will be checked against the Manetu Policy Engine
-              and logged here.
+              search operation will be checked against the Policy Engine and
+              logged here.
             </Typography>
           </Box>
         )}

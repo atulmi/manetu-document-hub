@@ -15,7 +15,7 @@ We are thrilled to announce the general availability of **DataVault 3.0**, the m
 
 ### AI-Native Document Workflows
 
-DataVault 3.0 introduces first-class support for AI agents through the Model Context Protocol (MCP). AI agents can now browse, search, and summarize documents within your corpus — all while respecting your organization's access policies. Every agent action is evaluated by the Manetu Policy Engine in real time, ensuring that a viewer-role agent cannot access confidential financial documents even if explicitly instructed to do so.
+DataVault 3.0 introduces first-class support for AI agents through the Model Context Protocol (MCP). AI agents can now browse, search, and summarize documents within your corpus — all while respecting your organization's access policies. Every agent action is evaluated by the Policy Engine in real time, ensuring that a viewer-role agent cannot access confidential financial documents even if explicitly instructed to do so.
 
 ### Real-Time Policy Dashboard
 

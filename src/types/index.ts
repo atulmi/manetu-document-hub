@@ -80,6 +80,21 @@ export interface AuditEvent {
   agentTaskId: string;
 }
 
+// Summary of a prompt run as returned by GET /api/prompt-history
+// (backed by Elasticsearch — see server/lib/audit-index.ts). Deliberately
+// omits the full step trace and audit events, which are fetched
+// separately per-run via GET /api/prompt-history/:taskId.
+export interface PromptRunSummary {
+  taskId: string;
+  prompt: string;
+  role: string;
+  timestamp: string;
+  status: string;
+  allowCount: number;
+  denyCount: number;
+  bypassedCount: number;
+}
+
 // SSE event envelopes (discriminated union)
 export type AgentSSEEvent =
   | { type: 'step';  data: AgentStep }

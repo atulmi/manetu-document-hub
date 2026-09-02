@@ -21,14 +21,15 @@ import { DocPreview } from "../components/docs/DocPreview";
 import { AgentTaskPanel } from "../components/agent/AgentTaskPanel";
 import { AgentStepsPanel } from "../components/agent/AgentStepsPanel";
 import { useAgentStepsHeader } from "../hooks/useAgentStepsHeader";
+import { useHistorySync } from "../hooks/useHistorySync";
 import { useStore } from "../lib/store";
 import { exportFullReport } from "../lib/export-txt";
+import { fetchFullPromptHistoryForExport } from "../lib/prompt-history-api";
 
 export function Dashboard() {
   const selectDoc = useStore((s) => s.selectDoc);
-  const taskHistory = useStore((s) => s.taskHistory);
-  const auditEvents = useStore((s) => s.auditEvents);
   const { count, subtitle, handleClear } = useAgentStepsHeader();
+  useHistorySync();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -38,9 +39,10 @@ export function Dashboard() {
     setConfirmOpen(false);
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     setMenuAnchor(null);
-    exportFullReport(taskHistory, auditEvents);
+    const { tasks, auditEvents } = await fetchFullPromptHistoryForExport();
+    exportFullReport(tasks, auditEvents);
   };
 
   return (

@@ -1,23 +1,17 @@
-import { useMemo } from "react";
 import { useStore } from "../lib/store";
 import { useAuditStream } from "./useAuditStream";
+import { clearPromptHistory } from "../lib/prompt-history-api";
+import { usePromptHistory } from "./usePromptHistory";
 
 export function useAgentStepsHeader() {
-  const taskHistory = useStore((s) => s.taskHistory);
-  const storeEvents = useStore((s) => s.auditEvents);
-  const clearAllHistory = useStore((s) => s.clearAllHistory);
+  const { groups } = usePromptHistory();
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
-  const { events: sseEvents, clear: clearSSE } = useAuditStream();
+  const { clear: clearSSE } = useAuditStream();
 
-  const count = useMemo(() => {
-    const taskIds = new Set<string>();
-    taskHistory.forEach((t) => taskIds.add(t.id));
-    [...storeEvents, ...sseEvents].forEach((e) => taskIds.add(e.agentTaskId));
-    return taskIds.size;
-  }, [taskHistory, storeEvents, sseEvents]);
+  const count = groups.length;
 
   const handleClear = () => {
-    clearAllHistory();
+    clearPromptHistory().catch((err) => console.error("Failed to clear prompt history:", err));
     clearSSE();
     setViewingTaskId(null);
   };

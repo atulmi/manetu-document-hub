@@ -25,7 +25,7 @@ As of DataVault 3.0, our AI capabilities include:
 - **Real-time streaming** — agent reasoning and tool calls are streamed to the frontend via SSE
 - **Full audit trail** — every tool invocation and policy decision is logged and displayed in the audit panel
 
-These features are powered by Claude (Anthropic) as our primary LLM provider, the Model Context Protocol for tool interaction, and the Manetu Policy Engine for access control.
+These features are powered by Claude (Anthropic) as our primary LLM provider, the Model Context Protocol for tool interaction, and the Policy Engine for access control.
 
 ## Strategic Priorities for 2026
 
@@ -46,6 +46,7 @@ Allow enterprise customers to define their own MCP tools that connect to interna
 ### 3. Agent Autonomy Levels
 
 Introduce configurable autonomy levels for AI agents:
+
 - **Supervised** — agent proposes actions, human approves each one
 - **Semi-autonomous** — agent executes allowed actions automatically, pauses on denials
 - **Autonomous** — agent executes all allowed actions without human intervention

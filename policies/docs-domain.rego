@@ -1,4 +1,4 @@
-# Manetu Policy Engine — Document Access Domain
+# Policy Engine — Document Access Domain
 #
 # Evaluates MCP tool calls against role-based access rules.
 # Default-deny: if no rule explicitly allows, the request is denied.

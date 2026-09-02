@@ -10,4 +10,5 @@ export type {
   AgentTask,
   AuditEvent,
   AgentSSEEvent,
+  PromptRunSummary,
 } from '../src/types/index.ts';

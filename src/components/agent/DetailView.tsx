@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
+import CircularProgress from "@mui/material/CircularProgress";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import SearchOff from "@mui/icons-material/SearchOff";
 import { EmptyState } from "../shared/EmptyState";
@@ -12,15 +13,19 @@ import { RolePermPopover } from "../shared/RolePermPopover";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { PromptGroup } from "./prompt-group";
-import type { UserRole } from "../../types";
+import type { AuditEvent, UserRole } from "../../types";
 
 export function DetailView({
   group,
   task,
+  auditEvents,
+  loading,
   onBack,
 }: {
   group: PromptGroup;
   task: ReturnType<typeof useStore.getState>["currentTask"];
+  auditEvents: AuditEvent[];
+  loading?: boolean;
   onBack: () => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
@@ -104,10 +109,14 @@ export function DetailView({
 
       {/* Step trace + policy checks */}
       <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
-        {task ? (
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : task ? (
           <>
             <StepTrace task={task} />
-            {group.events.length > 0 && (
+            {auditEvents.length > 0 && (
               <Box sx={{ mt: 2 }}>
                 <Typography
                   variant="caption"
@@ -118,7 +127,7 @@ export function DetailView({
                     display: "block",
                   }}
                 >
-                  Policy checks ({group.events.length} total)
+                  Policy checks ({auditEvents.length} total)
                 </Typography>
                 <Box
                   sx={{
@@ -128,7 +137,7 @@ export function DetailView({
                     overflow: "hidden",
                   }}
                 >
-                  {group.events.map((event) => (
+                  {auditEvents.map((event) => (
                     <AuditEventRow key={event.id} event={event} />
                   ))}
                 </Box>

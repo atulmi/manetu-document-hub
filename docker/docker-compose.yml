@@ -1,5 +1,5 @@
 services:
-  # Manetu Policy Engine — OPA-based access control
+  # Policy Engine — OPA-based access control
   # Evaluates every MCP tool call against role-based policies
   #
   # OPA automatically loads all .rego and .json files from /policies on startup.
@@ -29,3 +29,33 @@ services:
   # Express backend (not as a separate container), since the official
   # MCP filesystem server uses stdio transport. The docs-corpus is
   # mounted into the backend's working directory.
+
+  # Elasticsearch — durable, searchable storage for prompt history and
+  # audit trail records (see .sudocode/issues/ISSUE-030). Single-node,
+  # security disabled for local dev only (ES 8.x enables TLS+auth by
+  # default even for one node).
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sf http://localhost:9200/_cluster/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  es-data:

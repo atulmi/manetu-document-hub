@@ -18,7 +18,7 @@ Acme Corp was founded in 2019 with a single goal: make enterprise data managemen
 Our flagship product, **DataVault**, is a policy-driven data management platform used by over 200 enterprise customers. DataVault provides:
 
 - **Document lifecycle management** — ingest, classify, store, and retire documents with full audit trails
-- **Role-based access control** — powered by our Manetu Policy Engine (MPE), which evaluates every access request in real time
+- **Role-based access control** — powered by our Policy Engine (MPE), which evaluates every access request in real time
 - **AI-assisted workflows** — using the Model Context Protocol (MCP) to let AI agents interact with documents while respecting organizational policies
 
 We also offer **DataVault Cloud**, a managed SaaS version that handles infrastructure, compliance, and scaling so teams can focus on their data rather than their servers.

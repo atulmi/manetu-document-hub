@@ -15,9 +15,10 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import HistoryIcon from "@mui/icons-material/History";
+import CircularProgress from "@mui/material/CircularProgress";
 import { EmptyState } from "../shared/EmptyState";
-import { useStore } from "../../lib/store";
 import { exportSingleRun } from "../../lib/export-txt";
+import { getRunDetail, deletePromptRun } from "../../lib/prompt-history-api";
 import { ALL_ROLES } from "../../types";
 import { PromptRow } from "./PromptRow";
 import type { PromptGroup } from "./prompt-group";
@@ -30,10 +31,14 @@ type DecisionFilter = "all" | "allowed" | "denied" | "bypassed";
 
 export function ListView({
   groups,
+  loading,
+  error,
   onSelect,
   onRerun,
 }: {
   groups: PromptGroup[];
+  loading?: boolean;
+  error?: string | null;
   onSelect: (taskId: string) => void;
   onRerun: (prompt: string) => void;
 }) {
@@ -55,6 +60,13 @@ export function ListView({
     setPage(0);
   };
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const closeDeleteDialog = useCallback(() => {
+    setPendingDeleteId(null);
+    setDeleteError(null);
+  }, []);
 
   const filtered = useMemo(() => {
     return groups.filter((g) => {
@@ -83,6 +95,24 @@ export function ListView({
     setDecisionFilterRaw("all");
     setPage(0);
   }, []);
+
+  if (loading && groups.length === 0) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
+        <CircularProgress size={24} />
+      </Box>
+    );
+  }
+
+  if (error && groups.length === 0) {
+    return (
+      <EmptyState
+        icon={<HistoryIcon sx={{ fontSize: 30 }} />}
+        title="Couldn't load prompt history"
+        steps={[error, "Make sure Elasticsearch is running: docker compose -f docker/docker-compose.yml up -d"]}
+      />
+    );
+  }
 
   if (groups.length === 0) {
     return (
@@ -256,12 +286,11 @@ export function ListView({
               key={group.taskId}
               group={group}
               onClick={() => onSelect(group.taskId)}
-              onExport={() => {
-                const { taskHistory, auditEvents } = useStore.getState();
-                const task = taskHistory.find((t) => t.id === group.taskId);
-                if (task) exportSingleRun(task, auditEvents);
+              onExport={async () => {
+                const detail = await getRunDetail(group.taskId);
+                if (detail) exportSingleRun(detail.task, detail.auditEvents);
               }}
-              onDelete={() => setPendingDeleteId(group.taskId)}
+              onDelete={() => { setPendingDeleteId(group.taskId); setDeleteError(null); }}
               onRerun={() => onRerun(group.prompt)}
             />
           ))
@@ -326,7 +355,7 @@ export function ListView({
 
       <Dialog
         open={pendingDeleteId !== null}
-        onClose={() => setPendingDeleteId(null)}
+        onClose={closeDeleteDialog}
         maxWidth="xs"
         fullWidth
         aria-labelledby="delete-run-dialog-title"
@@ -357,21 +386,35 @@ export function ListView({
             This will permanently delete this prompt run and its agent steps and
             policy checks.
           </DialogContentText>
+          {deleteError && (
+            <DialogContentText sx={{ mt: 1.5, color: "error.main", fontSize: "0.8rem" }}>
+              {deleteError}
+            </DialogContentText>
+          )}
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
-          <Button variant="outlined" onClick={() => setPendingDeleteId(null)}>
+          <Button variant="outlined" onClick={closeDeleteDialog} disabled={deleting}>
             Cancel
           </Button>
           <Button
             variant="outlined"
             color="error"
-            onClick={() => {
-              if (pendingDeleteId)
-                useStore.getState().deleteTaskById(pendingDeleteId);
-              setPendingDeleteId(null);
+            disabled={deleting}
+            onClick={async () => {
+              if (!pendingDeleteId) return;
+              setDeleting(true);
+              setDeleteError(null);
+              try {
+                await deletePromptRun(pendingDeleteId);
+                setPendingDeleteId(null);
+              } catch (err) {
+                setDeleteError(err instanceof Error ? err.message : "Failed to delete this run.");
+              } finally {
+                setDeleting(false);
+              }
             }}
           >
-            Delete
+            {deleting ? "Deleting…" : "Delete"}
           </Button>
         </DialogActions>
       </Dialog>
