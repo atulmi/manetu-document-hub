@@ -16,9 +16,10 @@ interface ThemeSlice {
   themeMode: PaletteMode;
   toggleTheme: () => void;
 }
+export type PanelKind = 'library' | 'history' | 'agent';
 interface UiSlice {
-  docPanelTab: 'library' | 'history';
-  setDocPanelTab: (tab: 'library' | 'history') => void;
+  panelOrder: PanelKind[];
+  movePanel: (kind: PanelKind, direction: -1 | 1) => void;
 }
 interface DocSlice {
   selectedDoc: DocMeta | null;
@@ -83,8 +84,15 @@ export const useStore = create<StoreState>()(
     toggleSecurity: () => set((s) => ({ securityEnabled: !s.securityEnabled })),
     themeMode: 'light',
     toggleTheme: () => set((s) => ({ themeMode: s.themeMode === 'dark' ? 'light' : 'dark' })),
-    docPanelTab: 'history',
-    setDocPanelTab: (tab) => set({ docPanelTab: tab }),
+    panelOrder: ['library', 'agent', 'history'],
+    movePanel: (kind, direction) => set((s) => {
+      const order = [...s.panelOrder];
+      const i = order.indexOf(kind);
+      const j = i + direction;
+      if (i === -1 || j < 0 || j >= order.length) return {};
+      [order[i], order[j]] = [order[j], order[i]];
+      return { panelOrder: order };
+    }),
     selectedDoc: null,
     selectDoc: (doc) => set({ selectedDoc: doc }),
     currentTask: null,
@@ -162,7 +170,7 @@ export const useStore = create<StoreState>()(
       auditPrompts: state.auditPrompts,
       unsyncedTaskIds: state.unsyncedTaskIds,
       themeMode: state.themeMode,
-      docPanelTab: state.docPanelTab,
+      panelOrder: state.panelOrder,
       activeRole: state.activeRole,
       securityEnabled: state.securityEnabled,
     }) as unknown as StoreState,

@@ -10,7 +10,6 @@ export function AgentStepsPanel() {
   const currentTask = useStore((s) => s.currentTask);
   const viewingTaskId = useStore((s) => s.viewingTaskId);
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
-  const setDocPanelTab = useStore((s) => s.setDocPanelTab);
   const { submit, isRunning } = useAgentRun();
   const { groups, loading, error } = usePromptHistory();
   const { task: selectedTask, auditEvents: selectedEvents, loading: detailLoading } = usePromptRunDetail(viewingTaskId);
@@ -18,9 +17,8 @@ export function AgentStepsPanel() {
   useEffect(() => {
     if (currentTask?.status === "running" && currentTask.id) {
       setViewingTaskId(currentTask.id);
-      setDocPanelTab("history");
     }
-  }, [currentTask?.id, currentTask?.status, setViewingTaskId, setDocPanelTab]);
+  }, [currentTask?.id, currentTask?.status, setViewingTaskId]);
 
   const handleRerun = useCallback(
     (prompt: string) => {

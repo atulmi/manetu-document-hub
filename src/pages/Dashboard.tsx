@@ -16,7 +16,6 @@ import MoreVert from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import { AppShell } from "../components/dashboard/AppShell";
 import { DashboardLayout } from "../components/dashboard/DashboardLayout";
-import { LibraryHistoryTabs } from "../components/dashboard/LibraryHistoryTabs";
 import { DocLibrary } from "../components/docs/DocLibrary";
 import { DocPreview } from "../components/docs/DocPreview";
 import { AgentTaskPanel } from "../components/agent/AgentTaskPanel";
@@ -29,8 +28,6 @@ import { fetchFullPromptHistoryForExport } from "../lib/prompt-history-api";
 
 export function Dashboard() {
   const selectDoc = useStore((s) => s.selectDoc);
-  const docPanelTab = useStore((s) => s.docPanelTab);
-  const setDocPanelTab = useStore((s) => s.setDocPanelTab);
   const { count, subtitle, handleClear } = useAgentStepsHeader();
   useHistorySync();
 
@@ -51,16 +48,15 @@ export function Dashboard() {
   return (
     <AppShell>
       <DashboardLayout
-        main={<AgentTaskPanel />}
-        tabs={docPanelTab === "library" ? <DocLibrary onSelectDoc={selectDoc} /> : <AgentStepsPanel />}
-        tabsHeader={
-          <LibraryHistoryTabs
-            value={docPanelTab}
-            onChange={setDocPanelTab}
-            historyLabel={`Prompt History${subtitle ? ` (${subtitle})` : ""}`}
-            action={
+        panels={{
+          agent: { title: "Agent Task View", content: <AgentTaskPanel /> },
+          library: { title: "Document Library", content: <DocLibrary onSelectDoc={selectDoc} /> },
+          history: {
+            title: `Prompt History${subtitle ? ` (${subtitle})` : ""}`,
+            content: <AgentStepsPanel />,
+            action:
               count > 0 ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pr: 0.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center" }}>
                   <IconButton
                     size="small"
                     onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -94,10 +90,9 @@ export function Dashboard() {
                     </MenuItem>
                   </Menu>
                 </Box>
-              ) : undefined
-            }
-          />
-        }
+              ) : undefined,
+          },
+        }}
       />
       <DocPreview />
 
