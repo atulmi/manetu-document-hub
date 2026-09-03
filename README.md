@@ -13,7 +13,7 @@ This project makes AI agent security **visible and interactive**. You can watch 
 - **Watch** an AI agent (Claude Sonnet 4.6) answer questions by reading documents across sensitivity tiers
 - **See** every tool invocation evaluated **before** execution — with allow/deny decisions in real time
 - **Switch roles** instantly — a viewer can only read public docs, while an admin has full access
-- **Browse prompt history** — every thinking step, tool call, MRN, policy rule, and final answer is recorded
+- **Browse prompt history** — every thinking step, tool call, MRN, policy rule, and final answer is recorded, durably indexed to Elasticsearch so it survives a server restart and stays searchable
 - **Toggle security off** to compare — demonstrating exactly what the policy engine blocks
 
 ### The Problem
@@ -38,9 +38,11 @@ graph LR
     CLAUDE[Claude Agent Loop]
     OPA_CLIENT[OPA Client]
     FS_CLIENT[MCP Filesystem Client]
+    ES_CLIENT[Elasticsearch Client]
   end
   subgraph Docker
     OPA[("OPA<br/>Open Policy Agent :8181")]
+    ES[("Elasticsearch :9200<br/>prompt-runs / agent-steps / audit-events")]
   end
   DOCS[("docs-corpus/<br/>15 documents")]
   ANTHROPIC[("Anthropic API<br/>Claude Sonnet 4.6")]
@@ -48,12 +50,17 @@ graph LR
   UI -->|"POST /api/agent/run (SSE)"| API
   UI -->|"GET /api/docs"| API
   UI -->|"GET /api/audit/stream (SSE)"| API
+  UI -->|"GET/DELETE /api/prompt-history"| API
+  UI -.->|"POST /api/audit/backfill (if ES was down)"| API
   API --> CLAUDE
   CLAUDE -->|"tool call"| FS_CLIENT
   FS_CLIENT -->|"evaluate(role, MRN, op)"| OPA_CLIENT
   OPA_CLIENT -->|"POST /v1/data/docs/authz"| OPA
   FS_CLIENT -->|"read/list/search"| DOCS
   CLAUDE -->|"messages API"| ANTHROPIC
+  CLAUDE -.->|"index step/decision (non-blocking)"| ES_CLIENT
+  API -->|"query prompt-runs"| ES_CLIENT
+  ES_CLIENT -->|"index/get/search"| ES
 ```
 
 ## Roles and Access
@@ -129,12 +136,23 @@ Allowed — `read-file` is a generic tool grant, though, so it doesn't know *whi
 
 Switch to **Admin** or **Auditor** and ask the same question — both roles have an explicit `confidential:*` grant (`admin-unrestricted` and `auditor-confidential-read` respectively), so both checks pass and the agent reads and summarizes the document.
 
+## Persistence: Prompt History & Audit Trail
+
+Prompt runs, agent steps, and audit events are durably indexed to **Elasticsearch** rather than kept only in an in-memory buffer or the browser's `localStorage` — modeling the kind of long-term, searchable audit retention a real compliance requirement would demand.
+
+- **Three flat indices**, joined by `agentTaskId` (no nesting): `prompt-runs` (one doc per task, upserted with denormalized allow/deny/bypass counts), `agent-steps` (one doc per step), and `audit-events` (one doc per policy decision).
+- **Writes are non-blocking** — indexing happens off the same points that already emit SSE events (`onTaskStart`, `onStep`, `onAudit`) via fire-and-forget calls, so an Elasticsearch hiccup never slows down or breaks a live agent run.
+- **Local durability buffer** — the frontend always writes a finished run to its Zustand-backed local buffer first, unconditionally. A background sync loop (`useHistorySync`) retries `POST /api/audit/backfill` every ~15s; once Elasticsearch confirms the write, the run is cleared from the local buffer. This means an outage of any length — not just a brief blip — never loses data, and nothing is gated on a health check first, since the write attempt itself is the health check.
+- **Reads go through the backend**, never straight to Elasticsearch from the browser: `GET /api/prompt-history` (list), `GET /api/prompt-history/:taskId` (full detail), `DELETE /api/prompt-history[/:taskId]` (clear one or all), plus `GET /api/audit/health` for the sync loop's advisory status check.
+
+Elasticsearch runs locally via the `elasticsearch` service in `docker/docker-compose.yml` (single-node, security disabled — local dev only) — no cloud account or API key needed. If it's not running, prompt history simply falls back to the local buffer until it comes back.
+
 ## Quick Start
 
 ### Prerequisites
 
 - Node.js 20+
-- Docker Desktop (for OPA policy engine)
+- Docker Desktop (for the OPA policy engine and Elasticsearch)
 - Anthropic API key ([console.anthropic.com](https://console.anthropic.com/settings/keys))
 
 ### Install and Run
@@ -144,7 +162,7 @@ git clone <repo-url>
 cd manetu-document-hub
 npm install
 
-# 1. Start the policy engine
+# 1. Start the policy engine and Elasticsearch
 docker compose -f docker/docker-compose.yml up -d
 
 # 2. Set up environment
@@ -159,7 +177,7 @@ The app will be at **http://localhost:5173**.
 
 ### Running Without Docker
 
-The app works without Docker — the backend will return a clear error if OPA is unreachable when security is enabled. You can disable the policy engine via the toggle in the header to use the agent without OPA.
+The app works without Docker. If OPA is unreachable when security is enabled, the backend returns a clear error — you can disable the policy engine via the toggle in the header to use the agent without OPA. If Elasticsearch is unreachable, prompt history and audit events are simply held in the browser's local durability buffer and synced automatically once it's back (see [Persistence](#persistence-prompt-history--audit-trail)) — nothing else about the app degrades.
 
 ### Environment Variables
 
@@ -175,11 +193,13 @@ The app works without Docker — the backend will return a clear error if OPA is
 
 ### Three-Panel Layout
 
-- **Left — Document Library**: Browse 15 documents organized by sensitivity tier (public/internal/confidential). Documents show sensitivity badges and lock icons based on the active role. Click to preview in a modal with full markdown rendering.
+The dashboard is three independent panels — **Document Library**, **Agent Task View**, and **Prompt History** — that default to that left-to-right order but aren't fixed to it: each panel's header has move buttons to swap it with its neighbor, and a drag handle between panels lets you resize them. Layout order persists across reloads; panel width resets to its default whenever panels are reordered.
 
-- **Center — Agent Task View**: Chat interface powered by Claude Sonnet 4.6. Type a question or click a suggested prompt. The agent reads documents, respects policy checks, and streams responses. Shows task status (running/completed/failed) with stop and new task controls.
+- **Document Library**: Browse 15 documents organized by sensitivity tier (public/internal/confidential). Documents show sensitivity badges and lock icons based on the active role. Click to preview in a document-viewer-style modal — the markdown renders inside a distinct "page" card with the file's path shown, rather than as raw text filling the dialog.
 
-- **Right — Prompt History & Agent Steps**: Master-detail view. The list shows all past prompt runs with role, timestamp, and allow/deny counts. Click any run to see the full step trace: thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer with source citations.
+- **Agent Task View**: Chat interface powered by Claude Sonnet 4.6. Type a question or click a suggested prompt. The agent reads documents, respects policy checks, and streams responses. Shows task status (running/completed/failed) with stop and new task controls.
+
+- **Prompt History**: Master-detail view, backed by Elasticsearch (see [Persistence](#persistence-prompt-history--audit-trail)). The list shows all past prompt runs with role, timestamp, and allow/deny counts. Click any run to see the full step trace: thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer with source citations.
 
 ### Control Bar
 
@@ -237,10 +257,15 @@ src/
     useAuditStream.ts  EventSource connection to audit SSE endpoint
     useDocLibrary.ts   Fetches docs with role-based access flags
     useDocContent.ts   Fetches document content for preview
+    usePromptHistory.ts     Fetches prompt run list from Elasticsearch (via backend)
+    usePromptRunDetail.ts   Resolves a run's full detail — local if live/unsynced, fetched otherwise
+    useHistorySync.ts       Retries syncing the local durability buffer to Elasticsearch
   lib/
-    api.ts           Typed fetch wrapper (auto-attaches x-role, x-security-enabled)
-    store.ts         Zustand store with localStorage persistence
-    theme.ts         MUI theme (dark/light mode, purple brand palette)
+    api.ts               Typed fetch wrapper (auto-attaches x-role, x-security-enabled)
+    prompt-history-api.ts Prompt history fetch/delete/export, local-vs-backend resolution
+    store.ts             Zustand store — role/security/theme state, plus the local
+                         write-side durability buffer for prompt history (see Persistence)
+    theme.ts             MUI theme (dark/light mode, blue/teal brand palette)
   types/
     index.ts         All domain types (single source of truth)
   pages/
@@ -248,10 +273,12 @@ src/
 server/
   index.ts           Express entry point
   routes/
-    agent.ts         POST /api/agent/run — SSE streaming agent orchestration
-    tools.ts         GET /api/tools — OPA-filtered tool list with 60s cache
-    docs.ts          GET /api/docs — doc list; GET /api/docs/content/:path — doc content
-    audit.ts         GET /api/audit/stream — persistent SSE audit broadcast
+    agent.ts           POST /api/agent/run — SSE streaming agent orchestration
+    tools.ts           GET /api/tools — OPA-filtered tool list with 60s cache
+    docs.ts            GET /api/docs — doc list; GET /api/docs/content/:path — doc content
+    audit.ts           GET /api/audit/stream — persistent SSE audit broadcast;
+                       GET /api/audit/health, POST /api/audit/backfill
+    prompt-history.ts  GET/DELETE /api/prompt-history[/:taskId] — reads/deletes in Elasticsearch
   middleware/
     roleExtract.ts   x-role header validation
   lib/
@@ -260,8 +287,10 @@ server/
     mcp-fs-client.ts Filesystem client (list, read, keyword search with frontmatter)
     audit-bus.ts     Event bus with 50-event ring buffer
     tool-registry.ts 6 MCP tool definitions with MRNs
+    es-client.ts     Elasticsearch client, index creation, health check
+    audit-index.ts   Prompt run / step / audit event indexing and queries
 docker/
-  docker-compose.yml     OPA policy engine on port 8181
+  docker-compose.yml     OPA policy engine (port 8181) + Elasticsearch (port 9200)
   docker-compose.ci.yml  CI override
 policies/
   docs-domain.rego   OPA Rego policy (default-deny, MRN wildcard matching)
@@ -296,6 +325,7 @@ No API keys or Docker required in CI — Cypress tests use `cy.intercept()` to m
 | Backend          | Express 5, Node.js 20                                            |
 | AI               | Claude Sonnet 4.6 (Anthropic SDK)                                |
 | Policy Engine    | OPA (Open Policy Agent) with Rego policies                       |
+| Audit Storage    | Elasticsearch 8.15 (`@elastic/elasticsearch`)                    |
 | Document Parsing | gray-matter (YAML frontmatter)                                   |
 | Markdown         | react-markdown + remark-gfm                                      |
 | Testing          | Vitest, React Testing Library, MSW, Cypress                      |
