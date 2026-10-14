@@ -3,13 +3,18 @@ import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
+import Collapse from "@mui/material/Collapse";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import SearchOff from "@mui/icons-material/SearchOff";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import { useState } from "react";
 import { EmptyState } from "../shared/EmptyState";
 import { useStore } from "../../lib/store";
 import { relativeTime } from "../../lib/format-time";
 import { ROLE_COLORS } from "../../lib/role-permissions";
 import { RolePermPopover } from "../shared/RolePermPopover";
+import { RoleBadge } from "../shared/RoleBadge";
 import { StepTrace } from "./StepTrace";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { PromptGroup } from "./prompt-group";
@@ -30,6 +35,7 @@ export function DetailView({
 }) {
   const timeLabel = relativeTime(group.timestamp);
   const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#1d4ed8";
+  const [auditLogOpen, setAuditLogOpen] = useState(false);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -44,19 +50,18 @@ export function DetailView({
           flexShrink: 0,
           borderBottom: 1,
           borderColor: "divider",
-          bgcolor: (t: import("@mui/material").Theme) =>
-            t.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#e8eaed",
         }}
       >
         <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
           <ArrowBack sx={{ fontSize: 18 }} />
         </IconButton>
+        <RoleBadge role={group.role} size={22} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="body2" sx={{ fontWeight: 700 }}>
             {group.prompt}
           </Typography>
           <Box
-            sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25 }}
+            sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25, flexWrap: "wrap" }}
           >
             <RolePermPopover role={group.role as UserRole}>
               {(openPerms) => (
@@ -118,29 +123,42 @@ export function DetailView({
             <StepTrace task={task} />
             {auditEvents.length > 0 && (
               <Box sx={{ mt: 2 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    color: "text.secondary",
-                    mb: 0.5,
-                    display: "block",
-                  }}
-                >
-                  Policy checks ({auditEvents.length} total)
-                </Typography>
                 <Box
+                  onClick={() => setAuditLogOpen((o) => !o)}
                   sx={{
-                    border: 1,
-                    borderColor: "divider",
-                    borderRadius: 1,
-                    overflow: "hidden",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    cursor: "pointer",
+                    mb: auditLogOpen ? 0.5 : 0,
                   }}
                 >
-                  {auditEvents.map((event) => (
-                    <AuditEventRow key={event.id} event={event} />
-                  ))}
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 600, color: "text.secondary" }}
+                  >
+                    Raw audit log ({auditEvents.length} check{auditEvents.length !== 1 ? "s" : ""})
+                  </Typography>
+                  {auditLogOpen ? (
+                    <ExpandLess sx={{ fontSize: 16, color: "text.secondary" }} />
+                  ) : (
+                    <ExpandMore sx={{ fontSize: 16, color: "text.secondary" }} />
+                  )}
                 </Box>
+                <Collapse in={auditLogOpen}>
+                  <Box
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {auditEvents.map((event) => (
+                      <AuditEventRow key={event.id} event={event} />
+                    ))}
+                  </Box>
+                </Collapse>
               </Box>
             )}
           </>

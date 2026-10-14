@@ -14,6 +14,7 @@ import Replay from "@mui/icons-material/Replay";
 import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import { relativeTime } from "../../lib/format-time";
+import { RoleBadge } from "../shared/RoleBadge";
 import { memo, useState } from "react";
 import type { PromptGroup } from "./prompt-group";
 
@@ -61,7 +62,8 @@ export const PromptRow = memo(function PromptRow({
         transition: "none",
       }}
     >
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <RoleBadge role={group.role} />
+      <Box sx={{ flex: 1, minWidth: 0, ml: 1.25 }}>
         <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.25 }} noWrap>
           {group.prompt}
         </Typography>

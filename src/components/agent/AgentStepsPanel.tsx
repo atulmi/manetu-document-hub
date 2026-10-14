@@ -4,7 +4,8 @@ import { usePromptHistory } from "../../hooks/usePromptHistory";
 import { usePromptRunDetail } from "../../hooks/usePromptRunDetail";
 import { ListView } from "./ListView";
 import { DetailView } from "./DetailView";
-import { useEffect, useCallback } from "react";
+import { RunDetailModal } from "./RunDetailModal";
+import { useEffect, useCallback, useState } from "react";
 
 export function AgentStepsPanel() {
   const currentTask = useStore((s) => s.currentTask);
@@ -13,6 +14,7 @@ export function AgentStepsPanel() {
   const { submit, isRunning } = useAgentRun();
   const { groups, loading, error } = usePromptHistory();
   const { task: selectedTask, auditEvents: selectedEvents, loading: detailLoading } = usePromptRunDetail(viewingTaskId);
+  const [modalTaskId, setModalTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentTask?.status === "running" && currentTask.id) {
@@ -28,6 +30,8 @@ export function AgentStepsPanel() {
     [submit, isRunning],
   );
 
+  // The live-tracked run (currently running, or just finished and not yet
+  // backed out of) stays inline — that's the "watch it happen" moment.
   const selectedGroup = viewingTaskId
     ? groups.find((g) => g.taskId === viewingTaskId)
     : null;
@@ -44,13 +48,29 @@ export function AgentStepsPanel() {
     );
   }
 
+  // Anything picked from the list is a historical run — open it wide in a
+  // modal instead of cramping the panel, since there's no live content to
+  // watch alongside the composer for these.
+  const modalGroup = modalTaskId
+    ? groups.find((g) => g.taskId === modalTaskId)
+    : null;
+
   return (
-    <ListView
-      groups={groups}
-      loading={loading}
-      error={error}
-      onSelect={setViewingTaskId}
-      onRerun={handleRerun}
-    />
+    <>
+      <ListView
+        groups={groups}
+        loading={loading}
+        error={error}
+        onSelect={setModalTaskId}
+        onRerun={handleRerun}
+      />
+      {modalTaskId && modalGroup && (
+        <RunDetailModal
+          taskId={modalTaskId}
+          group={modalGroup}
+          onClose={() => setModalTaskId(null)}
+        />
+      )}
+    </>
   );
 }
