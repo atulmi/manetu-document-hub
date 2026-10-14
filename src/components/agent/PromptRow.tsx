@@ -2,14 +2,19 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import ChevronRight from "@mui/icons-material/ChevronRight";
+import MoreVert from "@mui/icons-material/MoreVert";
 import FileDownloadOutlined from "@mui/icons-material/FileDownloadOutlined";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import Replay from "@mui/icons-material/Replay";
 import CheckCircleOutline from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import { relativeTime } from "../../lib/format-time";
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { PromptGroup } from "./prompt-group";
 
 function DecisionDot({ count, color, label }: { count: number; color: string; label: string }) {
@@ -38,6 +43,8 @@ export const PromptRow = memo(function PromptRow({
   onRerun: () => void;
 }) {
   const timeLabel = relativeTime(group.timestamp);
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const closeMenu = () => setMenuAnchor(null);
 
   return (
     <Box
@@ -83,33 +90,40 @@ export const PromptRow = memo(function PromptRow({
           )}
         </Box>
       </Box>
-      <Tooltip title="Re-run with current role">
+      <Tooltip title="More actions">
         <IconButton
           size="small"
-          onClick={(e) => { e.stopPropagation(); onRerun(); }}
+          onClick={(e) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); }}
           sx={{ flexShrink: 0, ml: 0.5 }}
         >
-          <Replay sx={{ fontSize: 16, color: "text.disabled" }} />
+          <MoreVert sx={{ fontSize: 16, color: "text.disabled" }} />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Export this run">
-        <IconButton
-          size="small"
-          onClick={(e) => { e.stopPropagation(); onExport(); }}
-          sx={{ flexShrink: 0 }}
-        >
-          <FileDownloadOutlined sx={{ fontSize: 16, color: "text.disabled" }} />
-        </IconButton>
-      </Tooltip>
-      <Tooltip title="Delete this run">
-        <IconButton
-          size="small"
-          onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          sx={{ flexShrink: 0 }}
-        >
-          <DeleteOutline sx={{ fontSize: 16, color: "text.disabled" }} />
-        </IconButton>
-      </Tooltip>
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={closeMenu}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <MenuItem onClick={() => { closeMenu(); onRerun(); }}>
+          <ListItemIcon>
+            <Replay fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Re-run with current role</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => { closeMenu(); onExport(); }}>
+          <ListItemIcon>
+            <FileDownloadOutlined fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Export this run</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => { closeMenu(); onDelete(); }}>
+          <ListItemIcon>
+            <DeleteOutline fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText sx={{ color: "error.main" }}>Delete</ListItemText>
+        </MenuItem>
+      </Menu>
       <ChevronRight sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0 }} />
     </Box>
   );

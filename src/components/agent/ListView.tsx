@@ -5,6 +5,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import IconButton from "@mui/material/IconButton";
+import Popover from "@mui/material/Popover";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
@@ -13,6 +14,7 @@ import Button from "@mui/material/Button";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import FilterAlt from "@mui/icons-material/FilterAlt";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import HistoryIcon from "@mui/icons-material/History";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -62,6 +64,7 @@ export function ListView({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
 
   const closeDeleteDialog = useCallback(() => {
     setPendingDeleteId(null);
@@ -88,6 +91,11 @@ export function ListView({
 
   const hasActiveFilters =
     roleFilter !== "all" || statusFilter !== "all" || decisionFilter !== "all";
+  const activeFilterCount = [
+    roleFilter !== "all",
+    statusFilter !== "all",
+    decisionFilter !== "all",
+  ].filter(Boolean).length;
 
   const resetFilters = useCallback(() => {
     setRoleFilterRaw("all");
@@ -130,7 +138,6 @@ export function ListView({
   }
 
   const selectSx = {
-    minWidth: 100,
     ".MuiSelect-select": { py: 0.5, fontSize: "0.75rem" },
     bgcolor: "action.hover",
   };
@@ -146,113 +153,119 @@ export function ListView({
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          flexWrap: "wrap",
+          gap: 1,
         }}
       >
-        <Box>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{
-              fontWeight: 600,
-              fontSize: "0.65rem",
-              display: "block",
-              mb: 0.25,
-            }}
-          >
-            User role
-          </Typography>
-          <FormControl size="small">
-            <Select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              sx={selectSx}
-              aria-label="Filter by user role"
-            >
-              <MenuItem value="all">All roles</MenuItem>
-              {ALL_ROLES.map((r) => (
-                <MenuItem key={r} value={r}>
-                  {r}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-        <Box>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{
-              fontWeight: 600,
-              fontSize: "0.65rem",
-              display: "block",
-              mb: 0.25,
-            }}
-          >
-            Job status
-          </Typography>
-          <FormControl size="small">
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-              sx={selectSx}
-              aria-label="Filter by job status"
-            >
-              <MenuItem value="all">All statuses</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-              <MenuItem value="failed">Stopped</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <Box>
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{
-              fontWeight: 600,
-              fontSize: "0.65rem",
-              display: "block",
-              mb: 0.25,
-            }}
-          >
-            Policy decision
-          </Typography>
-          <FormControl size="small">
-            <Select
-              value={decisionFilter}
-              aria-label="Filter by policy decision"
-              onChange={(e) =>
-                setDecisionFilter(e.target.value as DecisionFilter)
-              }
-              sx={selectSx}
-            >
-              <MenuItem value="all">All decisions</MenuItem>
-              <MenuItem value="allowed">Has allowed</MenuItem>
-              <MenuItem value="denied">Has denied</MenuItem>
-              <MenuItem value="bypassed">Has bypassed</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={<FilterAlt sx={{ fontSize: 16 }} />}
+          onClick={(e) => setFilterAnchor(e.currentTarget)}
+          sx={{ fontSize: "0.75rem", textTransform: "none" }}
+        >
+          Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ""}
+        </Button>
         {hasActiveFilters && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Typography
-              variant="caption"
-              color="text.disabled"
-              sx={{ fontSize: "0.65rem" }}
-            >
-              {filtered.length} of {groups.length} records displayed.
-            </Typography>
-            <Button
-              size="small"
-              startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
-              onClick={resetFilters}
-              sx={{ fontSize: "0.65rem", minWidth: 0, textTransform: "none" }}
-            >
-              Reset
-            </Button>
-          </Box>
+          <Typography
+            variant="caption"
+            color="text.disabled"
+            sx={{ fontSize: "0.65rem" }}
+          >
+            {filtered.length} of {groups.length} shown
+          </Typography>
         )}
+        <Popover
+          open={Boolean(filterAnchor)}
+          anchorEl={filterAnchor}
+          onClose={() => setFilterAnchor(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          slotProps={{
+            paper: { sx: { p: 2, width: 220, borderRadius: 2 } },
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+              >
+                User role
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  sx={selectSx}
+                  aria-label="Filter by user role"
+                >
+                  <MenuItem value="all">All roles</MenuItem>
+                  {ALL_ROLES.map((r) => (
+                    <MenuItem key={r} value={r}>
+                      {r}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+              >
+                Job status
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+                  sx={selectSx}
+                  aria-label="Filter by job status"
+                >
+                  <MenuItem value="all">All statuses</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                  <MenuItem value="failed">Stopped</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Box>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+              >
+                Policy decision
+              </Typography>
+              <FormControl size="small" fullWidth>
+                <Select
+                  value={decisionFilter}
+                  aria-label="Filter by policy decision"
+                  onChange={(e) =>
+                    setDecisionFilter(e.target.value as DecisionFilter)
+                  }
+                  sx={selectSx}
+                >
+                  <MenuItem value="all">All decisions</MenuItem>
+                  <MenuItem value="allowed">Has allowed</MenuItem>
+                  <MenuItem value="denied">Has denied</MenuItem>
+                  <MenuItem value="bypassed">Has bypassed</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            {hasActiveFilters && (
+              <Button
+                size="small"
+                startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
+                onClick={resetFilters}
+                sx={{ fontSize: "0.7rem", textTransform: "none", alignSelf: "flex-start" }}
+              >
+                Reset filters
+              </Button>
+            )}
+          </Box>
+        </Popover>
       </Box>
       <Divider />
       {/* List */}

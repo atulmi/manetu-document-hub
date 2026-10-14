@@ -46,10 +46,11 @@ describe('Agent task flow — submit, steps appear, final answer', () => {
     cy.contains('What documents do I have access to?').should('be.visible');
   });
 
-  it('re-run button is visible in prompt history row', () => {
+  it('re-run action is available from the prompt history row menu', () => {
     cy.submitAgentTask('What documents do I have access to?');
     cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
     cy.get('button').find('svg[data-testid="ArrowBackIcon"]').click();
+    cy.get('button').find('svg[data-testid="MoreVertIcon"]').click();
     cy.get('svg[data-testid="ReplayIcon"]').should('be.visible');
   });
 });
