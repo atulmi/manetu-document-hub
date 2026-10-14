@@ -51,6 +51,7 @@ export function StepTrace({ task, onRetry }: StepTraceProps) {
         {steps.map((step: AgentStep, i: number) => (
           <motion.div
             key={step.stepNumber}
+            id={`step-${step.stepNumber}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}

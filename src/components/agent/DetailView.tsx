@@ -16,6 +16,7 @@ import { ROLE_COLORS } from "../../lib/role-permissions";
 import { RolePermPopover } from "../shared/RolePermPopover";
 import { RoleBadge } from "../shared/RoleBadge";
 import { StepTrace } from "./StepTrace";
+import { StepSidebar } from "./StepSidebar";
 import { AuditEventRow } from "../audit/AuditEventRow";
 import type { PromptGroup } from "./prompt-group";
 import type { AuditEvent, UserRole } from "../../types";
@@ -26,12 +27,14 @@ export function DetailView({
   auditEvents,
   loading,
   onBack,
+  showStepSidebar,
 }: {
   group: PromptGroup;
   task: ReturnType<typeof useStore.getState>["currentTask"];
   auditEvents: AuditEvent[];
   loading?: boolean;
   onBack: () => void;
+  showStepSidebar?: boolean;
 }) {
   const timeLabel = relativeTime(group.timestamp);
   const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#1d4ed8";
@@ -113,65 +116,70 @@ export function DetailView({
       </Box>
 
       {/* Step trace + policy checks */}
-      <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : task ? (
-          <>
-            <StepTrace task={task} />
-            {auditEvents.length > 0 && (
-              <Box sx={{ mt: 2 }}>
-                <Box
-                  onClick={() => setAuditLogOpen((o) => !o)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    cursor: "pointer",
-                    mb: auditLogOpen ? 0.5 : 0,
-                  }}
-                >
-                  <Typography
-                    variant="caption"
-                    sx={{ fontWeight: 600, color: "text.secondary" }}
-                  >
-                    Raw audit log ({auditEvents.length} check{auditEvents.length !== 1 ? "s" : ""})
-                  </Typography>
-                  {auditLogOpen ? (
-                    <ExpandLess sx={{ fontSize: 16, color: "text.secondary" }} />
-                  ) : (
-                    <ExpandMore sx={{ fontSize: 16, color: "text.secondary" }} />
-                  )}
-                </Box>
-                <Collapse in={auditLogOpen}>
+      <Box sx={{ flex: 1, overflow: "hidden", display: "flex" }}>
+        {showStepSidebar && !loading && task && task.steps.length > 0 && (
+          <StepSidebar steps={task.steps} />
+        )}
+        <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : task ? (
+            <>
+              <StepTrace task={task} />
+              {auditEvents.length > 0 && (
+                <Box sx={{ mt: 2 }}>
                   <Box
+                    onClick={() => setAuditLogOpen((o) => !o)}
                     sx={{
-                      border: 1,
-                      borderColor: "divider",
-                      borderRadius: 1,
-                      overflow: "hidden",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      cursor: "pointer",
+                      mb: auditLogOpen ? 0.5 : 0,
                     }}
                   >
-                    {auditEvents.map((event) => (
-                      <AuditEventRow key={event.id} event={event} />
-                    ))}
+                    <Typography
+                      variant="caption"
+                      sx={{ fontWeight: 600, color: "text.secondary" }}
+                    >
+                      Raw audit log ({auditEvents.length} check{auditEvents.length !== 1 ? "s" : ""})
+                    </Typography>
+                    {auditLogOpen ? (
+                      <ExpandLess sx={{ fontSize: 16, color: "text.secondary" }} />
+                    ) : (
+                      <ExpandMore sx={{ fontSize: 16, color: "text.secondary" }} />
+                    )}
                   </Box>
-                </Collapse>
-              </Box>
-            )}
-          </>
-        ) : (
-          <EmptyState
-            icon={<SearchOff sx={{ fontSize: 24 }} />}
-            title="Step details not available"
-            steps={[
-              "This run may have been saved before step tracking was added",
-              "Try re-running the same prompt to see full agent steps",
-            ]}
-          />
-        )}
+                  <Collapse in={auditLogOpen}>
+                    <Box
+                      sx={{
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: 1,
+                        overflow: "hidden",
+                      }}
+                    >
+                      {auditEvents.map((event) => (
+                        <AuditEventRow key={event.id} event={event} />
+                      ))}
+                    </Box>
+                  </Collapse>
+                </Box>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon={<SearchOff sx={{ fontSize: 24 }} />}
+              title="Step details not available"
+              steps={[
+                "This run may have been saved before step tracking was added",
+                "Try re-running the same prompt to see full agent steps",
+              ]}
+            />
+          )}
+        </Box>
       </Box>
     </Box>
   );

@@ -28,6 +28,7 @@ export function RunDetailModal({
         auditEvents={auditEvents}
         loading={loading}
         onBack={onClose}
+        showStepSidebar
       />
     </Dialog>
   );
