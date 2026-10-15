@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import { buildTheme } from './lib/theme';
 import { useStore } from './lib/store';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthGate } from './components/auth/AuthGate';
 import App from './App';
 
 export function Root() {
@@ -17,7 +18,9 @@ export function Root() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ErrorBoundary>
-        <App />
+        <AuthGate>
+          <App />
+        </AuthGate>
       </ErrorBoundary>
     </ThemeProvider>
   );

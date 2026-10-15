@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { useStore } from '../lib/store';
+import { getAccessToken } from '../lib/auth-store';
 import type { AgentStep, AuditEvent } from '../types';
 
 function failTask(message: string) {
@@ -28,6 +29,7 @@ export function useAgentRun() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    const accessToken = getAccessToken();
     let res: Response;
     try {
       res = await fetch('/api/agent/run', {
@@ -36,6 +38,7 @@ export function useAgentRun() {
           'Content-Type': 'application/json',
           'x-role': activeRole,
           'x-security-enabled': String(securityEnabled),
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         },
         body: JSON.stringify({ prompt }),
         signal: controller.signal,

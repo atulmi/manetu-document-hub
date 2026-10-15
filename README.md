@@ -147,6 +147,16 @@ Prompt runs, agent steps, and audit events are durably indexed to **Elasticsearc
 
 Elasticsearch runs locally via the `elasticsearch` service in `docker/docker-compose.yml` (single-node, security disabled — local dev only) — no cloud account or API key needed. If it's not running, prompt history simply falls back to the local buffer until it comes back.
 
+## Optional: Auth (Supabase)
+
+By default there is no login — the app works exactly as described above, gated only by the RoleSwitcher's demo roles. Auth exists for a different reason: on a hosted deployment, a shared `ANTHROPIC_API_KEY` needs protecting from being run up by strangers. Turning it on requires a login before the agent can be used, and enforces a daily per-user quota against it.
+
+- **Off by default, everywhere.** If `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` aren't set, the backend's `authGate` middleware is a no-op and `/api/agent/run` behaves exactly as it does today. If the matching `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` aren't set, the frontend's `AuthGate` renders the app directly with no login screen. This is the same "reachability-optional" pattern as Elasticsearch — nothing about local dev requires a Supabase account.
+- **Runs fully local via the Supabase CLI**, no account needed to try it: `npx supabase start` spins up a complete local stack (Postgres, Auth, Studio) in Docker from the migrations in `supabase/migrations/`. `npm run supabase:start` / `supabase:stop` / `supabase:status` / `supabase:reset` are shortcuts for the same.
+- **Schema**: `profiles` (one row per user, auto-created by a trigger on `auth.users` insert, RLS-scoped to its own row) and `usage_log` (one row per agent run, used to count a user's runs in the trailing 24h). Both are plain versioned SQL migrations — nothing Supabase-specific about how they're authored.
+- **Enforcement**: `server/middleware/authGate.ts` verifies the `Authorization: Bearer <token>` header via `supabase.auth.getUser()` and attaches `req.userId`; `server/lib/usage-quota.ts` checks/logs against `usage_log` (`AGENT_DAILY_QUOTA`, default 20/day) before the request reaches Claude.
+- **Merging local → hosted later**: once you create a free Supabase project, `supabase link --project-ref <ref>` then `supabase db push` applies every local migration to the real database — no app code changes, just swapping the local URL/keys in `.env` for the hosted project's.
+
 ## Quick Start
 
 ### Prerequisites
@@ -188,6 +198,9 @@ The app works without Docker. If OPA is unreachable when security is enabled, th
 | `MCP_DOCS_PATH`     | Path to document corpus (default: `./docs-corpus`)       |
 | `ELASTICSEARCH_URL` | Elasticsearch URL for prompt history/audit persistence (default: `http://localhost:9200`) |
 | `PORT`              | Backend server port (default: `3001`)                    |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | Optional — enables login + quota enforcement (see [Auth](#optional-auth-supabase)). Leave unset for no-login local dev. |
+| `AGENT_DAILY_QUOTA` | Optional — max agent runs per user per day when auth is enabled (default: `20`) |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Frontend counterpart of the two Supabase vars above — same opt-in behavior |
 
 ## UI Overview
 
@@ -252,6 +265,7 @@ src/
     agent/           Agent task panel, step trace cards, prompt history
     audit/           Audit event rows, audit log panel
     docs/            Document library, doc cards, sensitivity badges, preview modal
+    auth/            AuthGate (no-op when Supabase is unconfigured), LoginForm
   hooks/
     useAgentRun.ts   SSE stream parser for agent runs
     useAuditStream.ts  EventSource connection to audit SSE endpoint
@@ -266,6 +280,8 @@ src/
     store.ts             Zustand store — role/security/theme state, plus the local
                          write-side durability buffer for prompt history (see Persistence)
     theme.ts             MUI theme (dark/light mode, blue/teal brand palette)
+    supabase-client.ts   Browser Supabase client; null when VITE_SUPABASE_* unset
+    auth-store.ts        Zustand slice for session state, sign in/up/out
   types/
     index.ts         All domain types (single source of truth)
   pages/
@@ -281,6 +297,7 @@ server/
     prompt-history.ts  GET/DELETE /api/prompt-history[/:taskId] — reads/deletes in Elasticsearch
   middleware/
     roleExtract.ts   x-role header validation
+    authGate.ts      No-op unless Supabase is configured; else verifies the bearer token
   lib/
     claude-agent.ts  Agent loop: Claude API → OPA check → tool execution → SSE emit
     mpe-client.ts    Typed OPA client (evaluate + discover)
@@ -289,9 +306,14 @@ server/
     tool-registry.ts 6 MCP tool definitions with MRNs
     es-client.ts     Elasticsearch client, index creation, health check
     audit-index.ts   Prompt run / step / audit event indexing and queries
+    supabase-admin.ts Service-role Supabase client; undefined when auth is off
+    usage-quota.ts   Daily per-user agent-run quota check + logging
 docker/
   docker-compose.yml     OPA policy engine (port 8181) + Elasticsearch (port 9200)
   docker-compose.ci.yml  CI override
+supabase/
+  config.toml        Local Supabase CLI config (ports, auth settings)
+  migrations/        Versioned SQL schema (profiles, usage_log) — see Auth
 policies/
   docs-domain.rego   OPA Rego policy (default-deny, MRN wildcard matching)
   roles-data.json    Role grants for all 5 roles
@@ -326,6 +348,7 @@ No API keys or Docker required in CI — Cypress tests use `cy.intercept()` to m
 | AI               | Claude Sonnet 4.6 (Anthropic SDK)                                |
 | Policy Engine    | OPA (Open Policy Agent) with Rego policies                       |
 | Audit Storage    | Elasticsearch 8.15 (`@elastic/elasticsearch`)                    |
+| Auth (optional)  | Supabase (Postgres + Auth), local via Supabase CLI               |
 | Document Parsing | gray-matter (YAML frontmatter)                                   |
 | Markdown         | react-markdown + remark-gfm                                      |
 | Testing          | Vitest, React Testing Library, MSW, Cypress                      |

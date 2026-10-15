@@ -1,9 +1,12 @@
 import { Router } from "express";
 import { roleExtract } from "../middleware/roleExtract.ts";
+import { authGate } from "../middleware/authGate.ts";
 import { runAgentLoop } from "../lib/claude-agent.ts";
 import { buildMPEClient, MPEConnectionError } from "../lib/mpe-client.ts";
 import { buildFSClient } from "../lib/mcp-fs-client.ts";
 import { auditBus } from "../lib/audit-bus.ts";
+import { authEnabled } from "../lib/supabase-admin.ts";
+import { isOverQuota, logUsage } from "../lib/usage-quota.ts";
 import {
   indexPromptRunStart,
   indexPromptRunComplete,
@@ -34,12 +37,20 @@ function writeSSE(
   return false;
 }
 
-agentRouter.post("/run", roleExtract, async (req, res) => {
+agentRouter.post("/run", authGate, roleExtract, async (req, res) => {
   const role = req.role!;
   const prompt = req.body?.prompt;
   if (typeof prompt !== "string" || !prompt.trim()) {
     res.status(400).json({ error: "Missing or empty prompt" });
     return;
+  }
+
+  if (authEnabled && req.userId) {
+    if (await isOverQuota(req.userId)) {
+      res.status(429).json({ error: "Daily agent usage limit reached. Please try again tomorrow." });
+      return;
+    }
+    logUsage(req.userId);
   }
 
   const securityEnabled = req.headers["x-security-enabled"] !== "false";

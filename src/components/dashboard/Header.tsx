@@ -8,11 +8,20 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import Popover from "@mui/material/Popover";
 import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import Shield from "@mui/icons-material/Shield";
 import DarkMode from "@mui/icons-material/DarkMode";
 import LightMode from "@mui/icons-material/LightMode";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import Logout from "@mui/icons-material/Logout";
+import Person from "@mui/icons-material/Person";
 import { useStore } from "../../lib/store";
+import { authEnabled } from "../../lib/supabase-client";
+import { useAuthStore } from "../../lib/auth-store";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { SecurityToggle } from "./SecurityToggle";
 import { ROLE_PERMISSIONS } from "../../lib/role-permissions";
@@ -22,7 +31,10 @@ export function Header() {
   const themeMode = useStore((s) => s.themeMode);
   const toggleTheme = useStore((s) => s.toggleTheme);
   const activeRole = useStore((s) => s.activeRole);
+  const session = useAuthStore((s) => s.session);
+  const signOut = useAuthStore((s) => s.signOut);
   const [permAnchor, setPermAnchor] = useState<HTMLElement | null>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(null);
   const perms = ROLE_PERMISSIONS[activeRole];
 
   return (
@@ -43,6 +55,51 @@ export function Header() {
           >
             Manetu AI Document Hub
           </Typography>
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          {authEnabled && session && (
+            <>
+              <Button
+                size="small"
+                onClick={(e) => setUserMenuAnchor(e.currentTarget)}
+                startIcon={<Person sx={{ fontSize: 18 }} />}
+                sx={{
+                  textTransform: "none",
+                  color: "primary.contrastText",
+                  fontWeight: 600,
+                  maxWidth: 220,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  noWrap
+                  sx={{ fontWeight: 600, color: "inherit" }}
+                >
+                  {session.user.email}
+                </Typography>
+              </Button>
+              <Menu
+                anchorEl={userMenuAnchor}
+                open={Boolean(userMenuAnchor)}
+                onClose={() => setUserMenuAnchor(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <MenuItem
+                  onClick={() => {
+                    setUserMenuAnchor(null);
+                    signOut();
+                  }}
+                >
+                  <ListItemIcon>
+                    <Logout fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Log out</ListItemText>
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Toolbar>
       </AppBar>
 
