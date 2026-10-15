@@ -5,6 +5,10 @@ describe('Agent task flow — submit, steps appear, final answer', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-happy-path-stream.txt',
+      // Mocked responses resolve near-instantly, which races past the
+      // "running" state (disabled input, etc.) before it's observable —
+      // a small delay gives it a real window to assert against.
+      delay: 300,
     }).as('agentRun');
     cy.visit('/');
   });
@@ -42,15 +46,15 @@ describe('Agent task flow — submit, steps appear, final answer', () => {
     cy.submitAgentTask('What documents do I have access to?');
     cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
     // Back button returns to prompt history list
-    cy.get('button').find('svg[data-testid="ArrowBackIcon"]').click();
+    cy.get('[data-testid="run-detail-back-button"]').click();
     cy.contains('What documents do I have access to?').should('be.visible');
   });
 
   it('re-run action is available from the prompt history row menu', () => {
     cy.submitAgentTask('What documents do I have access to?');
     cy.contains('Final Answer', { timeout: 10000 }).should('be.visible');
-    cy.get('button').find('svg[data-testid="ArrowBackIcon"]').click();
-    cy.get('button').find('svg[data-testid="MoreVertIcon"]').click();
-    cy.get('svg[data-testid="ReplayIcon"]').should('be.visible');
+    cy.get('[data-testid="run-detail-back-button"]').click();
+    cy.get('[data-testid="prompt-row-menu-button"]').click();
+    cy.get('[data-testid="prompt-row-rerun-item"]').should('be.visible');
   });
 });

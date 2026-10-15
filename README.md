@@ -39,11 +39,13 @@ graph LR
     OPA_CLIENT[OPA Client]
     FS_CLIENT[MCP Filesystem Client]
     ES_CLIENT[Elasticsearch Client]
+    AUTH_GATE["authGate + usage-quota<br/>(no-op unless Supabase configured)"]
   end
   subgraph Docker
     OPA[("OPA<br/>Open Policy Agent :8181")]
     ES[("Elasticsearch :9200<br/>prompt-runs / agent-steps / audit-events")]
   end
+  SUPABASE[("Supabase (optional)<br/>Postgres + Auth, local via CLI")]
   DOCS[("docs-corpus/<br/>15 documents")]
   ANTHROPIC[("Anthropic API<br/>Claude Sonnet 4.6")]
 
@@ -52,7 +54,10 @@ graph LR
   UI -->|"GET /api/audit/stream (SSE)"| API
   UI -->|"GET/DELETE /api/prompt-history"| API
   UI -.->|"POST /api/audit/backfill (if ES was down)"| API
-  API --> CLAUDE
+  UI -.->|"sign in/up (if auth enabled)"| SUPABASE
+  API --> AUTH_GATE
+  AUTH_GATE -.->|"verify token + check/log quota (if auth enabled)"| SUPABASE
+  AUTH_GATE --> CLAUDE
   CLAUDE -->|"tool call"| FS_CLIENT
   FS_CLIENT -->|"evaluate(role, MRN, op)"| OPA_CLIENT
   OPA_CLIENT -->|"POST /v1/data/docs/authz"| OPA
@@ -212,7 +217,7 @@ The dashboard is three independent panels — **Document Library**, **Agent Task
 
 - **Agent Task View**: Chat interface powered by Claude Sonnet 4.6. Type a question or click a suggested prompt. The agent reads documents, respects policy checks, and streams responses. Shows task status (running/completed/failed) with stop and new task controls.
 
-- **Prompt History**: Master-detail view, backed by Elasticsearch (see [Persistence](#persistence-prompt-history--audit-trail)). The list shows all past prompt runs with role, timestamp, and allow/deny counts. Click any run to see the full step trace: thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer with source citations.
+- **Prompt History**: List view, backed by Elasticsearch (see [Persistence](#persistence-prompt-history--audit-trail)). Each row shows a role-letter badge, the prompt, timestamp, and allow/deny/bypassed dots; a single **Filters** button opens a popover with role/status/decision selects (badged with an active count) instead of three separate dropdowns, and a kebab menu on each row consolidates re-run/export/delete. Clicking a row opens the full step trace — thinking cards, tool call cards with MRN and policy decision badges, and the final markdown answer — in a wide modal with its own step-jump sidebar; the currently-*running* task is the one exception and stays inline in the panel instead of opening a modal, since there's nothing to navigate to yet.
 
 ### Control Bar
 
@@ -223,6 +228,8 @@ The control bar sits below the brand bar and holds everything that changes how t
 - **Policy engine toggle** — an Enabled/Disabled switch (green when on, red when off). Turning it off opens a confirmation dialog warning that *all* AI tool calls will execute without policy checks, regardless of role; confirming flips `securityEnabled` in the store, which — per the [example above](#example-a-denied-request) — makes the backend skip the OPA calls entirely and auto-allow every tool call with `rule: "security-disabled"`. The switch is disabled while an agent task is actively running, so you can't change security mid-request.
 
 - **Theme toggle** — a single icon button on the right edge that flips between dark and light mode (persisted via Zustand/localStorage).
+
+The brand bar above the control bar (the teal strip with the app name) also shows a **signed-in user menu** — email + person icon, opening a one-item "Log out" menu — but only when [auth](#optional-auth-supabase) is actually turned on; it's absent entirely in the default no-login setup.
 
 ### Security Demo Mode
 
@@ -255,6 +262,8 @@ npm run build && npm run preview   # start the preview server first
 npm run cypress:open                # interactive mode
 npm run cypress:run                 # headless (CI)
 ```
+
+Cypress mocks every backend call via `cy.intercept()` — no Docker, Elasticsearch, Claude key, or Supabase project needed to run the suite. Auth is untested in E2E for the same reason it's absent from CI generally: `VITE_SUPABASE_*` are build-time env vars, and leaving them unset (as CI does) keeps `AuthGate` a no-op, identical to a local clone with no Supabase project configured — see the comment in `cypress/support/e2e.ts`.
 
 ## Project Structure
 
@@ -319,7 +328,7 @@ policies/
   roles-data.json    Role grants for all 5 roles
 cypress/
   e2e/               E2E test specs
-  fixtures/          Mock API responses (12 fixture files)
+  fixtures/          Mock API responses (17 fixture files)
   support/           Custom commands (switchRole, toggleSecurity, etc.)
 docs-corpus/
   public/            5 public documents

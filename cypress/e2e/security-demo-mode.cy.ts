@@ -35,6 +35,9 @@ describe('Security demo mode — toggle, banner, bypassed events', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-bypassed-stream.txt',
+      // See agent-task-flow.cy.ts — an instantly-resolved mock can race
+      // past transient UI states before Cypress observes them.
+      delay: 300,
     });
 
     cy.toggleSecurity(false);

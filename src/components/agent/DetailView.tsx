@@ -89,7 +89,7 @@ export function DetailView({
             borderColor: "divider",
           }}
         >
-          <IconButton size="small" onClick={onBack} sx={{ mt: 0.5 }}>
+          <IconButton size="small" onClick={onBack} sx={{ mt: 0.5 }} data-testid="run-detail-back-button">
             <ArrowBack />
           </IconButton>
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -130,7 +130,7 @@ export function DetailView({
             borderColor: "divider",
           }}
         >
-          <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
+          <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }} data-testid="run-detail-back-button">
             <ArrowBack sx={{ fontSize: 18 }} />
           </IconButton>
           <RoleBadge role={group.role} size={22} />

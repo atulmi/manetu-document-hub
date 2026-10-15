@@ -1,0 +1,56 @@
+{
+  "task": {
+    "id": "hist-task-1",
+    "prompt": "What is our Q3 revenue?",
+    "role": "developer",
+    "status": "completed",
+    "startedAt": "2026-01-01T00:00:00Z",
+    "completedAt": "2026-01-01T00:00:05Z",
+    "finalAnswer": "Q3 revenue was $4.2M based on the financial summary.",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "type": "thinking",
+        "content": "I should check the internal financial documents.",
+        "timestamp": "2026-01-01T00:00:01Z"
+      },
+      {
+        "stepNumber": 2,
+        "type": "tool-call",
+        "content": "Reading financial summary",
+        "timestamp": "2026-01-01T00:00:02Z",
+        "toolCall": {
+          "toolName": "read-file",
+          "mrn": "mrn:mcp:filesystem:tool:read-file",
+          "args": { "path": "internal/q3-financials.md" },
+          "policyDecision": {
+            "decision": "allow",
+            "principal": "developer",
+            "resource": "mrn:mcp:filesystem:tool:read-file",
+            "operation": "invoke",
+            "rule": "developer-internal-scope"
+          },
+          "durationMs": 12
+        }
+      },
+      {
+        "stepNumber": 3,
+        "type": "final-answer",
+        "content": "Q3 revenue was $4.2M based on the financial summary.",
+        "timestamp": "2026-01-01T00:00:05Z"
+      }
+    ]
+  },
+  "auditEvents": [
+    {
+      "id": "evt-1",
+      "timestamp": "2026-01-01T00:00:02Z",
+      "principal": "developer",
+      "resource": "mrn:mcp:filesystem:tool:read-file",
+      "operation": "invoke",
+      "decision": "allow",
+      "policyRule": "developer-internal-scope",
+      "agentTaskId": "hist-task-1"
+    }
+  ]
+}

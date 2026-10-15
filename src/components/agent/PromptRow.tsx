@@ -97,6 +97,7 @@ export const PromptRow = memo(function PromptRow({
           size="small"
           onClick={(e) => { e.stopPropagation(); setMenuAnchor(e.currentTarget); }}
           sx={{ flexShrink: 0, ml: 0.5 }}
+          data-testid="prompt-row-menu-button"
         >
           <MoreVert sx={{ fontSize: 16, color: "text.disabled" }} />
         </IconButton>
@@ -107,7 +108,7 @@ export const PromptRow = memo(function PromptRow({
         onClose={closeMenu}
         onClick={(e) => e.stopPropagation()}
       >
-        <MenuItem onClick={() => { closeMenu(); onRerun(); }}>
+        <MenuItem onClick={() => { closeMenu(); onRerun(); }} data-testid="prompt-row-rerun-item">
           <ListItemIcon>
             <Replay fontSize="small" />
           </ListItemIcon>

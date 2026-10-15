@@ -13,6 +13,9 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-denied-stream.txt',
+      // See agent-task-flow.cy.ts — an instantly-resolved mock can race
+      // past transient UI states before Cypress observes them.
+      delay: 300,
     });
 
     cy.submitAgentTask('What is the Q3 revenue forecast?');
@@ -24,6 +27,9 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-denied-stream.txt',
+      // See agent-task-flow.cy.ts — an instantly-resolved mock can race
+      // past transient UI states before Cypress observes them.
+      delay: 300,
     });
 
     cy.submitAgentTask('What is the Q3 revenue forecast?');
@@ -36,6 +42,9 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-denied-stream.txt',
+      // See agent-task-flow.cy.ts — an instantly-resolved mock can race
+      // past transient UI states before Cypress observes them.
+      delay: 300,
     });
 
     cy.submitAgentTask('What is the Q3 revenue forecast?');
@@ -47,6 +56,9 @@ describe('Access denied — viewer sees restricted content', () => {
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-denied-stream.txt',
+      // See agent-task-flow.cy.ts — an instantly-resolved mock can race
+      // past transient UI states before Cypress observes them.
+      delay: 300,
     });
 
     cy.submitAgentTask('What is the Q3 revenue forecast?');
