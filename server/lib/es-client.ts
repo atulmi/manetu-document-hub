@@ -21,6 +21,7 @@ export async function ensureIndices(): Promise<void> {
   await createIndexIfMissing(INDICES.promptRuns, {
     properties: {
       id: { type: 'keyword' },
+      userId: { type: 'keyword' },
       prompt: { type: 'text' },
       role: { type: 'keyword' },
       status: { type: 'keyword' },
@@ -36,6 +37,7 @@ export async function ensureIndices(): Promise<void> {
   await createIndexIfMissing(INDICES.agentSteps, {
     properties: {
       agentTaskId: { type: 'keyword' },
+      userId: { type: 'keyword' },
       stepNumber: { type: 'integer' },
       type: { type: 'keyword' },
       content: { type: 'text' },
@@ -48,6 +50,7 @@ export async function ensureIndices(): Promise<void> {
     properties: {
       id: { type: 'keyword' },
       agentTaskId: { type: 'keyword' },
+      userId: { type: 'keyword' },
       timestamp: { type: 'date' },
       principal: { type: 'keyword' },
       resource: { type: 'keyword' },

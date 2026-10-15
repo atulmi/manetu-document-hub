@@ -116,17 +116,17 @@ agentRouter.post("/run", authGate, roleExtract, async (req, res) => {
       signal: abortController.signal,
       onTaskStart: (task: AgentTask) => {
         taskId = task.id;
-        indexInBackground("prompt-run start", indexPromptRunStart(task));
+        indexInBackground("prompt-run start", indexPromptRunStart(task, req.userId));
       },
       onStep: (step: AgentStep) => {
         writeSSE(res, "step", step);
         if (taskId)
-          indexInBackground("agent step", indexAgentStep(taskId, step));
+          indexInBackground("agent step", indexAgentStep(taskId, step, req.userId));
       },
       onAudit: (event: AuditEvent) => {
         auditBus.emit("audit", event);
         writeSSE(res, "audit", event);
-        indexInBackground("audit event", indexAuditEvent(event));
+        indexInBackground("audit event", indexAuditEvent(event, req.userId));
       },
     });
 

@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { getAccessToken } from './auth-store';
 
 const BASE_URL = '/api';
 
@@ -14,6 +15,7 @@ const ERROR_MESSAGES: Record<number, string> = {
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const { activeRole, securityEnabled } = useStore.getState();
+  const accessToken = getAccessToken();
 
   let res: Response;
   try {
@@ -23,6 +25,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
         'Content-Type': 'application/json',
         'x-role': activeRole,
         'x-security-enabled': String(securityEnabled),
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         ...init?.headers,
       },
     });

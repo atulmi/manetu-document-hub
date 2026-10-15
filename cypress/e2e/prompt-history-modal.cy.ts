@@ -36,7 +36,9 @@ describe("Prompt history — filters popover and historical run modal", () => {
     cy.get('[aria-label="Filter by user role"]').click();
     cy.get('li[role="option"]').contains("developer").click();
 
-    cy.contains("button", "Filters (1)").click();
+    // The Filters popover is still open at this point — selecting a Select
+    // option only closes the Select's own dropdown, not the parent
+    // popover — so "Reset filters" (rendered inside it) is already there.
     cy.contains("button", "Reset filters").click();
 
     cy.contains("List all confidential documents").should("be.visible");

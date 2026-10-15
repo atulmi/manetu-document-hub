@@ -24,8 +24,15 @@ export function LoginForm() {
     if (mode === "signin") {
       await signIn(email, password);
     } else {
-      await signUp(email, password);
-      setNotice("Account created — you're signed in.");
+      const ok = await signUp(email, password);
+      if (ok) {
+        const hasSession = Boolean(useAuthStore.getState().session);
+        setNotice(
+          hasSession
+            ? "Account created — you're signed in."
+            : "Account created — check your email to confirm before signing in.",
+        );
+      }
     }
     setSubmitting(false);
   };

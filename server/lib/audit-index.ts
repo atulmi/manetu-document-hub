@@ -10,12 +10,13 @@ import type { AgentTask, AgentStep, AuditEvent, UserRole, PromptRunSummary } fro
 // fire-and-forget with its own .catch() at each call site, since that
 // path must never block or break the live SSE stream.
 
-export async function indexPromptRunStart(task: AgentTask): Promise<void> {
+export async function indexPromptRunStart(task: AgentTask, userId?: string): Promise<void> {
   await esClient.update({
     index: INDICES.promptRuns,
     id: task.id,
     doc: {
       id: task.id,
+      userId,
       prompt: task.prompt,
       role: task.role,
       status: task.status,
@@ -23,6 +24,7 @@ export async function indexPromptRunStart(task: AgentTask): Promise<void> {
     },
     upsert: {
       id: task.id,
+      userId,
       prompt: task.prompt,
       role: task.role,
       status: task.status,
@@ -47,19 +49,19 @@ export async function indexPromptRunComplete(task: AgentTask): Promise<void> {
   });
 }
 
-export async function indexAgentStep(agentTaskId: string, step: AgentStep): Promise<void> {
+export async function indexAgentStep(agentTaskId: string, step: AgentStep, userId?: string): Promise<void> {
   await esClient.index({
     index: INDICES.agentSteps,
     id: `${agentTaskId}:${step.stepNumber}`,
-    document: { agentTaskId, ...step },
+    document: { agentTaskId, userId, ...step },
   });
 }
 
-export async function indexAuditEvent(event: AuditEvent): Promise<void> {
+export async function indexAuditEvent(event: AuditEvent, userId?: string): Promise<void> {
   await esClient.index({
     index: INDICES.auditEvents,
     id: event.id,
-    document: event,
+    document: { ...event, userId },
   });
 
   const field = event.decision === 'allow' ? 'allowCount'
@@ -78,13 +80,13 @@ export async function indexAuditEvent(event: AuditEvent): Promise<void> {
   });
 }
 
-export async function backfillRun(task: AgentTask, auditEvents: AuditEvent[]): Promise<void> {
-  await indexPromptRunStart(task);
+export async function backfillRun(task: AgentTask, auditEvents: AuditEvent[], userId?: string): Promise<void> {
+  await indexPromptRunStart(task, userId);
   for (const step of task.steps) {
-    await indexAgentStep(task.id, step);
+    await indexAgentStep(task.id, step, userId);
   }
   for (const event of auditEvents) {
-    await indexAuditEvent(event);
+    await indexAuditEvent(event, userId);
   }
   await indexPromptRunComplete(task);
 }
@@ -94,11 +96,12 @@ export async function backfillRun(task: AgentTask, auditEvents: AuditEvent[]): P
 // error status when Elasticsearch is unreachable rather than pretending
 // to succeed.
 
-export async function queryPromptRuns(): Promise<PromptRunSummary[]> {
+export async function queryPromptRuns(userId?: string): Promise<PromptRunSummary[]> {
   const result = await esClient.search({
     index: INDICES.promptRuns,
     size: 500,
     sort: [{ startedAt: { order: 'desc' } }],
+    ...(userId && { query: { term: { userId } } }),
   });
 
   return result.hits.hits.map((hit) => {
@@ -118,6 +121,7 @@ export async function queryPromptRuns(): Promise<PromptRunSummary[]> {
 
 export async function getPromptRunDetail(
   agentTaskId: string,
+  userId?: string,
 ): Promise<{ task: AgentTask; auditEvents: AuditEvent[] } | null> {
   let run: Record<string, unknown>;
   try {
@@ -132,6 +136,13 @@ export async function getPromptRunDetail(
       return null;
     }
     throw err;
+  }
+
+  // Ownership check: a run belonging to a different user reads as "not
+  // found" rather than 403, so a guessed/enumerated taskId can't be used
+  // to confirm another user's run even exists.
+  if (userId && run['userId'] !== userId) {
+    return null;
   }
 
   const stepsResult = await esClient.search({
@@ -164,7 +175,13 @@ export async function getPromptRunDetail(
   return { task, auditEvents };
 }
 
-export async function deletePromptRun(agentTaskId: string): Promise<void> {
+export async function deletePromptRun(agentTaskId: string, userId?: string): Promise<void> {
+  if (userId) {
+    // Same ownership check as getPromptRunDetail — silently no-op rather
+    // than delete (or reveal via error) a run that isn't this user's.
+    const detail = await getPromptRunDetail(agentTaskId, userId);
+    if (!detail) return;
+  }
   await Promise.all([
     esClient.delete({ index: INDICES.promptRuns, id: agentTaskId }).catch(() => {}),
     esClient.deleteByQuery({ index: INDICES.agentSteps, query: { term: { agentTaskId } } }),
@@ -172,10 +189,9 @@ export async function deletePromptRun(agentTaskId: string): Promise<void> {
   ]);
 }
 
-export async function clearAllPromptRuns(): Promise<void> {
+export async function clearAllPromptRuns(userId?: string): Promise<void> {
+  const query = userId ? { term: { userId } } : { match_all: {} };
   await Promise.all(
-    Object.values(INDICES).map((index) =>
-      esClient.deleteByQuery({ index, query: { match_all: {} } }),
-    ),
+    Object.values(INDICES).map((index) => esClient.deleteByQuery({ index, query })),
   );
 }

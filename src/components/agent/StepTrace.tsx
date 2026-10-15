@@ -31,7 +31,11 @@ export function StepTrace({ task, onRetry }: StepTraceProps) {
     if (task.id !== prevTaskId.current) {
       prevTaskId.current = task.id;
       topRef.current?.scrollIntoView({ behavior: 'smooth' });
-    } else if (status === 'running') {
+    } else {
+      // Not gated on status === 'running': a batch of steps can arrive and
+      // finish in the same render (e.g. a very fast run), in which case
+      // 'running' is never individually observed but new content still
+      // needs to be scrolled into view.
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [task.id, steps.length, status]);
