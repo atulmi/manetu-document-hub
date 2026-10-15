@@ -34,7 +34,7 @@ export function StepSidebar({ steps }: { steps: AgentStep[] }) {
         py: 1,
       }}
     >
-      {steps.map((step) => (
+      {steps.map((step, i) => (
         <Box
           key={step.stepNumber}
           onClick={() => handleJump(step.stepNumber)}
@@ -45,6 +45,7 @@ export function StepSidebar({ steps }: { steps: AgentStep[] }) {
             px: 1.5,
             py: 0.75,
             cursor: "pointer",
+            ...(i > 0 && { borderTop: 1, borderColor: "divider" }),
             "&:hover": { bgcolor: "action.hover" },
           }}
         >

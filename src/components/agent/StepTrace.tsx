@@ -57,7 +57,7 @@ export function StepTrace({ task, onRetry }: StepTraceProps) {
             transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             {step.type === 'thinking' && (
-              <ThinkingCard step={step} collapsed={i < steps.length - 1} />
+              <ThinkingCard step={step} />
             )}
             {step.type === 'tool-call' && (
               <ToolCallCard step={step} />

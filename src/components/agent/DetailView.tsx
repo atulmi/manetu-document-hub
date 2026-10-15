@@ -27,97 +27,147 @@ export function DetailView({
   auditEvents,
   loading,
   onBack,
-  showStepSidebar,
+  variant = "panel",
 }: {
   group: PromptGroup;
   task: ReturnType<typeof useStore.getState>["currentTask"];
   auditEvents: AuditEvent[];
   loading?: boolean;
   onBack: () => void;
-  showStepSidebar?: boolean;
+  variant?: "panel" | "modal";
 }) {
   const timeLabel = relativeTime(group.timestamp);
   const roleColor = ROLE_COLORS[group.role as UserRole] ?? "#1d4ed8";
   const [auditLogOpen, setAuditLogOpen] = useState(false);
+  const isModal = variant === "modal";
+
+  const countChips = (
+    <>
+      {group.allowCount > 0 && (
+        <Chip
+          label={`${group.allowCount} allowed`}
+          size="small"
+          color="success"
+          variant="filled"
+          sx={isModal ? undefined : { height: 18, fontSize: "0.6rem" }}
+        />
+      )}
+      {group.denyCount > 0 && (
+        <Chip
+          label={`${group.denyCount} denied`}
+          size="small"
+          color="error"
+          variant="filled"
+          sx={isModal ? undefined : { height: 18, fontSize: "0.6rem" }}
+        />
+      )}
+      {group.bypassedCount > 0 && (
+        <Chip
+          label={`${group.bypassedCount} bypassed`}
+          size="small"
+          color="warning"
+          variant="filled"
+          sx={isModal ? undefined : { height: 18, fontSize: "0.6rem" }}
+        />
+      )}
+    </>
+  );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 1,
-          px: 1.5,
-          py: 1,
-          flexShrink: 0,
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
-      >
-        <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
-          <ArrowBack sx={{ fontSize: 18 }} />
-        </IconButton>
-        <RoleBadge role={group.role} size={22} />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-            {group.prompt}
-          </Typography>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25, flexWrap: "wrap" }}
-          >
-            <RolePermPopover role={group.role as UserRole}>
-              {(openPerms) => (
-                <Chip
-                  label={group.role}
-                  size="small"
-                  variant="filled"
-                  onClick={openPerms}
-                  sx={{ height: 18, fontSize: "0.6rem", fontWeight: 700, bgcolor: roleColor, color: "#fff", cursor: "pointer" }}
-                />
-              )}
-            </RolePermPopover>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontSize: "0.7rem" }}
-            >
-              {timeLabel}
+      {isModal ? (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 1.5,
+            px: 3,
+            py: 2,
+            flexShrink: 0,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <IconButton size="small" onClick={onBack} sx={{ mt: 0.5 }}>
+            <ArrowBack />
+          </IconButton>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {group.prompt}
             </Typography>
-            {group.allowCount > 0 && (
-              <Chip
-                label={`${group.allowCount} allowed`}
-                size="small"
-                color="success"
-                variant="filled"
-                sx={{ height: 18, fontSize: "0.6rem" }}
-              />
-            )}
-            {group.denyCount > 0 && (
-              <Chip
-                label={`${group.denyCount} denied`}
-                size="small"
-                color="error"
-                variant="filled"
-                sx={{ height: 18, fontSize: "0.6rem" }}
-              />
-            )}
-            {group.bypassedCount > 0 && (
-              <Chip
-                label={`${group.bypassedCount} bypassed`}
-                size="small"
-                color="warning"
-                variant="filled"
-                sx={{ height: 18, fontSize: "0.6rem" }}
-              />
-            )}
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.75, flexWrap: "wrap" }}
+            >
+              <RolePermPopover role={group.role as UserRole}>
+                {(openPerms) => (
+                  <Chip
+                    label={group.role}
+                    size="small"
+                    variant="filled"
+                    onClick={openPerms}
+                    sx={{ fontWeight: 700, bgcolor: roleColor, color: "#fff", cursor: "pointer" }}
+                  />
+                )}
+              </RolePermPopover>
+              <Typography variant="body2" color="text.secondary">
+                {timeLabel}
+              </Typography>
+              {countChips}
+            </Box>
           </Box>
         </Box>
-      </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 1,
+            px: 1.5,
+            py: 1,
+            flexShrink: 0,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }}>
+            <ArrowBack sx={{ fontSize: 18 }} />
+          </IconButton>
+          <RoleBadge role={group.role} size={22} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              {group.prompt}
+            </Typography>
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25, flexWrap: "wrap" }}
+            >
+              <RolePermPopover role={group.role as UserRole}>
+                {(openPerms) => (
+                  <Chip
+                    label={group.role}
+                    size="small"
+                    variant="filled"
+                    onClick={openPerms}
+                    sx={{ height: 18, fontSize: "0.6rem", fontWeight: 700, bgcolor: roleColor, color: "#fff", cursor: "pointer" }}
+                  />
+                )}
+              </RolePermPopover>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontSize: "0.7rem" }}
+              >
+                {timeLabel}
+              </Typography>
+              {countChips}
+            </Box>
+          </Box>
+        </Box>
+      )}
 
       {/* Step trace + policy checks */}
       <Box sx={{ flex: 1, overflow: "hidden", display: "flex" }}>
-        {showStepSidebar && !loading && task && task.steps.length > 0 && (
+        {isModal && !loading && task && task.steps.length > 0 && (
           <StepSidebar steps={task.steps} />
         )}
         <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
