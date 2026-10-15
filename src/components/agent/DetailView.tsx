@@ -92,13 +92,21 @@ export function DetailView({
           <IconButton size="small" onClick={onBack} sx={{ mt: 0.5 }} data-testid="run-detail-back-button">
             <ArrowBack />
           </IconButton>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1.5,
+              flexWrap: "wrap",
+            }}
+          >
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {group.prompt}
             </Typography>
-            <Box
-              sx={{ display: "flex", alignItems: "center", gap: 1, mt: 0.75, flexWrap: "wrap" }}
-            >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
               <RolePermPopover role={group.role as UserRole}>
                 {(openPerms) => (
                   <Chip
@@ -110,7 +118,7 @@ export function DetailView({
                   />
                 )}
               </RolePermPopover>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
                 {timeLabel}
               </Typography>
               {countChips}

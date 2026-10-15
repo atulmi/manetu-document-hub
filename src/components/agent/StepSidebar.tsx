@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 import type { AgentStep } from "../../types";
 
 const STEP_LABEL: Record<AgentStep["type"], string> = {
@@ -16,6 +17,14 @@ function stepColor(step: AgentStep): string {
   return "#9ca3af"; // thinking — neutral
 }
 
+// Thinking steps stay neutral (no verdict to show); tool calls and the
+// final answer get a light tint of their dot color so pass/fail reads at
+// a glance, not just from the small dot.
+function stepTint(step: AgentStep): string | undefined {
+  if (step.type === "thinking") return undefined;
+  return stepColor(step);
+}
+
 export function StepSidebar({ steps }: { steps: AgentStep[] }) {
   const handleJump = (stepNumber: number) => {
     document
@@ -26,7 +35,7 @@ export function StepSidebar({ steps }: { steps: AgentStep[] }) {
   return (
     <Box
       sx={{
-        width: 150,
+        width: 170,
         flexShrink: 0,
         borderRight: 1,
         borderColor: "divider",
@@ -34,45 +43,44 @@ export function StepSidebar({ steps }: { steps: AgentStep[] }) {
         py: 1,
       }}
     >
-      {steps.map((step, i) => (
-        <Box
-          key={step.stepNumber}
-          onClick={() => handleJump(step.stepNumber)}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 0.75,
-            px: 1.5,
-            py: 0.75,
-            cursor: "pointer",
-            ...(i > 0 && { borderTop: 1, borderColor: "divider" }),
-            "&:hover": { bgcolor: "action.hover" },
-          }}
-        >
+      {steps.map((step, i) => {
+        const tint = stepTint(step);
+        return (
           <Box
+            key={step.stepNumber}
+            onClick={() => handleJump(step.stepNumber)}
             sx={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              bgcolor: stepColor(step),
-              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              px: 1.5,
+              py: 0.75,
+              cursor: "pointer",
+              bgcolor: tint ? alpha(tint, 0.1) : undefined,
+              ...(i > 0 && { borderTop: 1, borderColor: "divider" }),
+              "&:hover": { bgcolor: tint ? alpha(tint, 0.18) : "action.hover" },
             }}
-          />
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600, display: "block", fontSize: "0.7rem" }}>
-              Step {step.stepNumber}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ fontSize: "0.65rem", display: "block" }}
-              noWrap
-            >
-              {STEP_LABEL[step.type]}
-            </Typography>
+          >
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                bgcolor: stepColor(step),
+                flexShrink: 0,
+              }}
+            />
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, display: "block" }}>
+                Step {step.stepNumber}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ display: "block" }} noWrap>
+                {STEP_LABEL[step.type]}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      ))}
+        );
+      })}
     </Box>
   );
 }

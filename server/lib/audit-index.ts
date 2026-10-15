@@ -58,11 +58,25 @@ export async function indexAgentStep(agentTaskId: string, step: AgentStep, userI
 }
 
 export async function indexAuditEvent(event: AuditEvent, userId?: string): Promise<void> {
-  await esClient.index({
-    index: INDICES.auditEvents,
-    id: event.id,
-    document: { ...event, userId },
-  });
+  // This runs from two independent paths for the same event — the live
+  // SSE stream (fire-and-forget, per event) and useHistorySync's backfill
+  // retry (the full run, resent until it succeeds). Both can fire for the
+  // same event whenever Elasticsearch is reachable. The raw document write
+  // below is naturally idempotent (overwrite by event.id), but the count
+  // increment on promptRuns is not — so `create` (instead of `index`) is
+  // used to detect a repeat and skip double-counting it.
+  try {
+    await esClient.create({
+      index: INDICES.auditEvents,
+      id: event.id,
+      document: { ...event, userId },
+    });
+  } catch (err) {
+    if (err instanceof esErrors.ResponseError && err.statusCode === 409) {
+      return; // already indexed and counted — nothing more to do
+    }
+    throw err;
+  }
 
   const field = event.decision === 'allow' ? 'allowCount'
     : event.decision === 'deny' ? 'denyCount'

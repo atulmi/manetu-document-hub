@@ -18,7 +18,8 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run --browser chrome --headless"
+    "cypress:run": "cypress run --browser chrome --headless",
+    "test:e2e": "vite build && start-server-and-test preview http://localhost:4173 cypress:run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
@@ -64,6 +65,7 @@
     "globals": "^16.5.0",
     "jsdom": "^29.1.1",
     "msw": "^2.14.6",
+    "start-server-and-test": "^2.1.5",
     "supabase": "^2.121.0",
     "tsx": "^4.22.4",
     "typescript": "~5.9.3",
