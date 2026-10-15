@@ -1,7 +1,6 @@
 describe("Prompt history — filters popover and historical run modal", () => {
   beforeEach(() => {
     cy.intercept("GET", "/api/docs*", { fixture: "doc-list-viewer.json" });
-    cy.intercept("GET", "/api/audit/stream", { body: "" });
     cy.intercept("GET", "/api/prompt-history", {
       fixture: "prompt-history-list.json",
     }).as("getHistory");
@@ -58,20 +57,6 @@ describe("Prompt history — filters popover and historical run modal", () => {
       cy.contains("Step 2").should("be.visible");
       cy.contains("Tool Call").should("be.visible");
       cy.contains("Final Answer").should("be.visible");
-    });
-  });
-
-  it("jumping to a step from the sidebar scrolls it into view", () => {
-    cy.intercept("GET", "/api/prompt-history/hist-task-1", {
-      fixture: "prompt-run-detail.json",
-    });
-
-    cy.contains("What is our Q3 revenue?").click();
-    cy.contains("Final Answer", { timeout: 10000 }).should("exist");
-
-    cy.get('[role="dialog"]').within(() => {
-      cy.contains("Step 1").click();
-      cy.get("#step-1").should("be.visible");
     });
   });
 

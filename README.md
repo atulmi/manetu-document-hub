@@ -51,7 +51,6 @@ graph LR
 
   UI -->|"POST /api/agent/run (SSE)"| API
   UI -->|"GET /api/docs"| API
-  UI -->|"GET /api/audit/stream (SSE)"| API
   UI -->|"GET/DELETE /api/prompt-history"| API
   UI -.->|"POST /api/audit/backfill (if ES was down)"| API
   UI -.->|"sign in/up (if auth enabled)"| SUPABASE
@@ -127,7 +126,7 @@ Allowed — `read-file` is a generic tool grant, though, so it doesn't know *whi
 [`roles-data.json`](policies/roles-data.json) only grants the developer role `public:*` and `internal:*` document MRNs — there's no confidential grant — so [`docs-domain.rego`](policies/docs-domain.rego) falls through to its default-deny. The tool call is blocked before it reaches the filesystem:
 
 - The **agent** gets a tool error of `Access denied by policy engine: default-deny` and has to work around it in its response instead of returning file contents.
-- The **audit trail** (Prompt History panel, and `GET /api/audit/stream`) records a structured event:
+- The **audit trail** (Prompt History panel) records a structured event, streamed live over the same per-run `POST /api/agent/run` SSE connection and durably indexed to Elasticsearch:
 
 ```json
 {
@@ -267,6 +266,8 @@ npm run cypress:run                 # headless (CI)
 
 Cypress mocks every backend call via `cy.intercept()` — no Docker, Elasticsearch, Claude key, or Supabase project needed to run the suite. Auth is untested in E2E for the same reason it's absent from CI generally: `VITE_SUPABASE_*` are build-time env vars, and leaving them unset (as CI does) keeps `AuthGate` a no-op, identical to a local clone with no Supabase project configured — see the comment in `cypress/support/e2e.ts`.
 
+`cypress.config.ts` sets `retries: { runMode: 2, openMode: 0 }` — a safety net for genuine timing flakiness in CI (a mocked response resolving fast enough to race past a transient UI state before Cypress observes it), not a substitute for fixing root causes. A spec failing all 3 attempts in CI is signal, not noise — it means the failure is deterministic, not flaky, and worth the same scrutiny as a local failure.
+
 ## Project Structure
 
 ```
@@ -274,12 +275,11 @@ src/
   components/
     dashboard/       App shell, header, panels, role switcher, security toggle
     agent/           Agent task panel, step trace cards, prompt history
-    audit/           Audit event rows, audit log panel
+    audit/           Audit event row (used in the agent step detail's raw audit log)
     docs/            Document library, doc cards, sensitivity badges, preview modal
     auth/            AuthGate (no-op when Supabase is unconfigured), LoginForm
   hooks/
     useAgentRun.ts   SSE stream parser for agent runs
-    useAuditStream.ts  EventSource connection to audit SSE endpoint
     useDocLibrary.ts   Fetches docs with role-based access flags
     useDocContent.ts   Fetches document content for preview
     usePromptHistory.ts     Fetches prompt run list from Elasticsearch (via backend)
@@ -303,9 +303,8 @@ server/
     agent.ts           POST /api/agent/run — SSE streaming agent orchestration
     tools.ts           GET /api/tools — OPA-filtered tool list with 60s cache
     docs.ts            GET /api/docs — doc list; GET /api/docs/content/:path — doc content
-    audit.ts           GET /api/audit/stream — persistent SSE audit broadcast;
-                       GET /api/audit/health, POST /api/audit/backfill
-    prompt-history.ts  GET/DELETE /api/prompt-history[/:taskId] — reads/deletes in Elasticsearch
+    audit.ts           GET /api/audit/health, POST /api/audit/backfill
+    prompt-history.ts  GET/DELETE /api/prompt-history[/:taskId] — reads/deletes in Elasticsearch, per-user when auth is on
   middleware/
     roleExtract.ts   x-role header validation
     authGate.ts      No-op unless Supabase is configured; else verifies the bearer token
@@ -313,7 +312,6 @@ server/
     claude-agent.ts  Agent loop: Claude API → OPA check → tool execution → SSE emit
     mpe-client.ts    Typed OPA client (evaluate + discover)
     mcp-fs-client.ts Filesystem client (list, read, keyword search with frontmatter)
-    audit-bus.ts     Event bus with 50-event ring buffer
     tool-registry.ts 6 MCP tool definitions with MRNs
     es-client.ts     Elasticsearch client, index creation, health check
     audit-index.ts   Prompt run / step / audit event indexing and queries

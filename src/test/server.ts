@@ -8,9 +8,6 @@ const handlers = [
   http.post('/api/agent/run', () => {
     return new HttpResponse(null, { status: 501 });
   }),
-  http.get('/api/audit/stream', () => {
-    return new HttpResponse(null, { status: 501 });
-  }),
 ];
 
 export const server = setupServer(...handlers);

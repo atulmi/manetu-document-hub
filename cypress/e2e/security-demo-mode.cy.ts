@@ -1,7 +1,6 @@
 describe('Security demo mode — toggle, banner, bypassed events', () => {
   beforeEach(() => {
     cy.intercept('GET', '/api/docs*', { fixture: 'doc-list-viewer.json' });
-    cy.intercept('GET', '/api/audit/stream', { body: '' });
     cy.visit('/');
   });
 

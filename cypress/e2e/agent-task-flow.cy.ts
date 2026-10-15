@@ -1,7 +1,6 @@
 describe('Agent task flow — submit, steps appear, final answer', () => {
   beforeEach(() => {
     cy.intercept('GET', '/api/docs*', { fixture: 'doc-list-viewer.json' });
-    cy.intercept('GET', '/api/audit/stream', { body: '' });
     cy.intercept('POST', '/api/agent/run', {
       headers: { 'content-type': 'text/event-stream' },
       fixture: 'agent-happy-path-stream.txt',

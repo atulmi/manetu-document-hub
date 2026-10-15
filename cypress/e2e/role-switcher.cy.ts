@@ -3,7 +3,6 @@ describe("Role switcher updates document library", () => {
     cy.intercept("GET", "/api/docs*", { fixture: "doc-list-viewer.json" }).as(
       "getDocs",
     );
-    cy.intercept("GET", "/api/audit/stream", { body: "" });
     cy.visit("/");
     cy.wait("@getDocs");
   });

@@ -4,7 +4,6 @@ import { authGate } from "../middleware/authGate.ts";
 import { runAgentLoop } from "../lib/claude-agent.ts";
 import { buildMPEClient, MPEConnectionError } from "../lib/mpe-client.ts";
 import { buildFSClient } from "../lib/mcp-fs-client.ts";
-import { auditBus } from "../lib/audit-bus.ts";
 import { authEnabled } from "../lib/supabase-admin.ts";
 import { isOverQuota, logUsage } from "../lib/usage-quota.ts";
 import {
@@ -124,7 +123,6 @@ agentRouter.post("/run", authGate, roleExtract, async (req, res) => {
           indexInBackground("agent step", indexAgentStep(taskId, step, req.userId));
       },
       onAudit: (event: AuditEvent) => {
-        auditBus.emit("audit", event);
         writeSSE(res, "audit", event);
         indexInBackground("audit event", indexAuditEvent(event, req.userId));
       },

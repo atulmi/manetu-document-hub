@@ -1,7 +1,6 @@
 describe('Access denied — viewer sees restricted content', () => {
   beforeEach(() => {
     cy.intercept('GET', '/api/docs*', { fixture: 'doc-list-viewer.json' });
-    cy.intercept('GET', '/api/audit/stream', { body: '' });
     cy.visit('/');
   });
 
