@@ -13,7 +13,9 @@ function stepColor(step: AgentStep): string {
   if (step.type === "tool-call") {
     return step.toolCall?.policyDecision.decision === "deny" ? "#ef4444" : "#22c55e";
   }
-  if (step.type === "final-answer") return "#22c55e";
+  // Gold, not green — this is just the agent's last word, not a "passed"
+  // verdict like an allowed tool call, and green read as an extra success.
+  if (step.type === "final-answer") return "#ca8a04";
   return "#9ca3af"; // thinking — neutral
 }
 

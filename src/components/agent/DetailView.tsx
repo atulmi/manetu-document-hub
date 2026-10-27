@@ -89,7 +89,12 @@ export function DetailView({
             borderColor: "divider",
           }}
         >
-          <IconButton size="small" onClick={onBack} sx={{ mt: 0.5 }} data-testid="run-detail-back-button">
+          <IconButton
+            size="small"
+            onClick={onBack}
+            sx={{ mt: 0.5 }}
+            data-testid="run-detail-back-button"
+          >
             <ArrowBack />
           </IconButton>
           <Box
@@ -106,7 +111,14 @@ export function DetailView({
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               {group.prompt}
             </Typography>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                flexShrink: 0,
+              }}
+            >
               <RolePermPopover role={group.role as UserRole}>
                 {(openPerms) => (
                   <Chip
@@ -114,11 +126,20 @@ export function DetailView({
                     size="small"
                     variant="filled"
                     onClick={openPerms}
-                    sx={{ fontWeight: 700, bgcolor: roleColor, color: "#fff", cursor: "pointer" }}
+                    sx={{
+                      fontWeight: 700,
+                      bgcolor: roleColor,
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
                   />
                 )}
               </RolePermPopover>
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "nowrap" }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ whiteSpace: "nowrap" }}
+              >
                 {timeLabel}
               </Typography>
               {countChips}
@@ -138,7 +159,12 @@ export function DetailView({
             borderColor: "divider",
           }}
         >
-          <IconButton size="small" onClick={onBack} sx={{ mt: 0.25 }} data-testid="run-detail-back-button">
+          <IconButton
+            size="small"
+            onClick={onBack}
+            sx={{ mt: 0.25 }}
+            data-testid="run-detail-back-button"
+          >
             <ArrowBack sx={{ fontSize: 18 }} />
           </IconButton>
           <RoleBadge role={group.role} size={22} />
@@ -147,7 +173,13 @@ export function DetailView({
               {group.prompt}
             </Typography>
             <Box
-              sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.25, flexWrap: "wrap" }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                mt: 0.25,
+                flexWrap: "wrap",
+              }}
             >
               <RolePermPopover role={group.role as UserRole}>
                 {(openPerms) => (
@@ -156,7 +188,14 @@ export function DetailView({
                     size="small"
                     variant="filled"
                     onClick={openPerms}
-                    sx={{ height: 18, fontSize: "0.6rem", fontWeight: 700, bgcolor: roleColor, color: "#fff", cursor: "pointer" }}
+                    sx={{
+                      height: 18,
+                      fontSize: "0.6rem",
+                      fontWeight: 700,
+                      bgcolor: roleColor,
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
                   />
                 )}
               </RolePermPopover>
@@ -178,7 +217,7 @@ export function DetailView({
         {isModal && !loading && task && task.steps.length > 0 && (
           <StepSidebar steps={task.steps} />
         )}
-        <Box sx={{ flex: 1, overflow: "auto", p: 2.5 }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: 2.5, pl: 6, pr: 6 }}>
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
               <CircularProgress size={24} />
@@ -202,12 +241,17 @@ export function DetailView({
                       variant="caption"
                       sx={{ fontWeight: 600, color: "text.secondary" }}
                     >
-                      Raw audit log ({auditEvents.length} check{auditEvents.length !== 1 ? "s" : ""})
+                      Raw audit log ({auditEvents.length} check
+                      {auditEvents.length !== 1 ? "s" : ""})
                     </Typography>
                     {auditLogOpen ? (
-                      <ExpandLess sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <ExpandLess
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
                     ) : (
-                      <ExpandMore sx={{ fontSize: 16, color: "text.secondary" }} />
+                      <ExpandMore
+                        sx={{ fontSize: 16, color: "text.secondary" }}
+                      />
                     )}
                   </Box>
                   <Collapse in={auditLogOpen}>
