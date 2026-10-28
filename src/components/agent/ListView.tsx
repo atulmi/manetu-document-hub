@@ -22,6 +22,7 @@ import { EmptyState } from "../shared/EmptyState";
 import { exportSingleRun } from "../../lib/export-txt";
 import { getRunDetail, deletePromptRun } from "../../lib/prompt-history-api";
 import { ALL_ROLES } from "../../types";
+import { PANEL_SHADOW, TEAL_TEXT_LIGHT, TEAL_TEXT_DARK } from "../../lib/theme";
 import { PromptRow } from "./PromptRow";
 import type { PromptGroup } from "./prompt-group";
 import { useState, useMemo, useCallback } from "react";
@@ -181,17 +182,54 @@ export function ListView({
           anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
           transformOrigin={{ vertical: "top", horizontal: "left" }}
           slotProps={{
-            paper: { sx: { p: 2, width: 220, borderRadius: 2 } },
+            paper: {
+              sx: {
+                width: 260,
+                borderRadius: 2,
+                border: 1,
+                borderColor: "divider",
+                boxShadow: PANEL_SHADOW,
+                overflow: "hidden",
+              },
+            },
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 1.25,
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
+            <FilterAlt
+              sx={(t) => ({
+                fontSize: 17,
+                color: t.palette.mode === "dark" ? TEAL_TEXT_DARK : TEAL_TEXT_LIGHT,
+              })}
+            />
+            <Typography
+              variant="subtitle2"
+              sx={(t) => ({
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                color: t.palette.mode === "dark" ? TEAL_TEXT_DARK : TEAL_TEXT_LIGHT,
+              })}
+            >
+              Filters
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, p: 2 }}>
             <Box>
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+                sx={{ fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.05em", display: "block", mb: 0.5 }}
               >
-                User role
+                USER ROLE
               </Typography>
               <FormControl size="small" fullWidth>
                 <Select
@@ -213,9 +251,9 @@ export function ListView({
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+                sx={{ fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.05em", display: "block", mb: 0.5 }}
               >
-                Job status
+                JOB STATUS
               </Typography>
               <FormControl size="small" fullWidth>
                 <Select
@@ -234,9 +272,9 @@ export function ListView({
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ fontWeight: 600, fontSize: "0.65rem", display: "block", mb: 0.25 }}
+                sx={{ fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.05em", display: "block", mb: 0.5 }}
               >
-                Policy decision
+                POLICY DECISION
               </Typography>
               <FormControl size="small" fullWidth>
                 <Select
@@ -254,17 +292,22 @@ export function ListView({
                 </Select>
               </FormControl>
             </Box>
-            {hasActiveFilters && (
-              <Button
-                size="small"
-                startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
-                onClick={resetFilters}
-                sx={{ fontSize: "0.7rem", textTransform: "none", alignSelf: "flex-start" }}
-              >
-                Reset filters
-              </Button>
-            )}
           </Box>
+          {hasActiveFilters && (
+            <>
+              <Divider />
+              <Box sx={{ px: 2, py: 1 }}>
+                <Button
+                  size="small"
+                  startIcon={<FilterAltOff sx={{ fontSize: 14 }} />}
+                  onClick={resetFilters}
+                  sx={{ fontSize: "0.7rem", textTransform: "none" }}
+                >
+                  Reset filters
+                </Button>
+              </Box>
+            </>
+          )}
         </Popover>
       </Box>
       <Divider />

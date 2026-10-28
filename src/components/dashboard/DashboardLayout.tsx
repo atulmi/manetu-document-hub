@@ -24,9 +24,9 @@ interface DashboardLayoutProps {
 }
 
 const DEFAULT_SIZE: Record<PanelKind, string> = {
-  agent: "30%",
-  library: "35%",
-  history: "35%",
+  agent: "50%",
+  library: "22%",
+  history: "28%",
 };
 const MIN_SIZE: Record<PanelKind, string> = {
   agent: "20%",
