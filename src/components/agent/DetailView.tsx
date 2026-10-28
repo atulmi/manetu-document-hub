@@ -217,7 +217,7 @@ export function DetailView({
         {isModal && !loading && task && task.steps.length > 0 && (
           <StepSidebar steps={task.steps} />
         )}
-        <Box sx={{ flex: 1, overflow: "auto", p: 2.5, pl: 6, pr: 6 }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: 2.5, ...(isModal && { pl: 6, pr: 6 }) }}>
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
               <CircularProgress size={24} />

@@ -17,12 +17,14 @@ import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import FilterAlt from "@mui/icons-material/FilterAlt";
 import FilterAltOff from "@mui/icons-material/FilterAltOff";
 import HistoryIcon from "@mui/icons-material/History";
+import Replay from "@mui/icons-material/Replay";
 import CircularProgress from "@mui/material/CircularProgress";
 import { EmptyState } from "../shared/EmptyState";
 import { exportSingleRun } from "../../lib/export-txt";
 import { getRunDetail, deletePromptRun } from "../../lib/prompt-history-api";
-import { ALL_ROLES } from "../../types";
+import { ALL_ROLES, type UserRole } from "../../types";
 import { PANEL_SHADOW, TEAL_TEXT_LIGHT, TEAL_TEXT_DARK } from "../../lib/theme";
+import { ROLE_COLORS, ROLE_LABELS } from "../../lib/role-permissions";
 import { PromptRow } from "./PromptRow";
 import type { PromptGroup } from "./prompt-group";
 import { useState, useMemo, useCallback } from "react";
@@ -43,7 +45,7 @@ export function ListView({
   loading?: boolean;
   error?: string | null;
   onSelect: (taskId: string) => void;
-  onRerun: (prompt: string) => void;
+  onRerun: (prompt: string, role: UserRole) => void;
 }) {
   const [page, setPage] = useState(0);
   const [roleFilter, setRoleFilterRaw] = useState<string>("all");
@@ -66,6 +68,13 @@ export function ListView({
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
+  const [pendingRerun, setPendingRerun] = useState<PromptGroup | null>(null);
+  const [rerunRole, setRerunRole] = useState<UserRole>("viewer");
+
+  const openRerunDialog = useCallback((group: PromptGroup) => {
+    setPendingRerun(group);
+    setRerunRole(group.role as UserRole);
+  }, []);
 
   const closeDeleteDialog = useCallback(() => {
     setPendingDeleteId(null);
@@ -347,7 +356,7 @@ export function ListView({
                 if (detail) exportSingleRun(detail.task, detail.auditEvents);
               }}
               onDelete={() => { setPendingDeleteId(group.taskId); setDeleteError(null); }}
-              onRerun={() => onRerun(group.prompt)}
+              onRerun={() => openRerunDialog(group)}
             />
           ))
         )}
@@ -471,6 +480,87 @@ export function ListView({
             }}
           >
             {deleting ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={pendingRerun !== null}
+        onClose={() => setPendingRerun(null)}
+        maxWidth="xs"
+        fullWidth
+        aria-labelledby="rerun-dialog-title"
+        PaperProps={{ sx: { borderRadius: 2, overflow: "hidden" } }}
+      >
+        <Box
+          sx={{
+            px: 3,
+            py: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            borderBottom: 1,
+            borderColor: "divider",
+          }}
+        >
+          <Replay sx={{ color: "primary.main" }} />
+          <Typography id="rerun-dialog-title" variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Re-run this prompt
+          </Typography>
+        </Box>
+        <DialogContent sx={{ pt: 2.5, pb: 1 }}>
+          <DialogContentText
+            sx={{ color: "text.primary", fontStyle: "italic", mb: 2, lineHeight: 1.6 }}
+          >
+            "{pendingRerun?.prompt}"
+          </DialogContentText>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.05em", display: "block", mb: 0.5 }}
+          >
+            RUN AS
+          </Typography>
+          <FormControl size="small" fullWidth>
+            <Select
+              value={rerunRole}
+              onChange={(e) => setRerunRole(e.target.value as UserRole)}
+              aria-label="Role to re-run as"
+              sx={{ ".MuiSelect-select": { display: "flex", alignItems: "center", gap: 1 } }}
+              renderValue={(val) => (
+                <>
+                  <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: ROLE_COLORS[val] }} />
+                  {ROLE_LABELS[val]}
+                </>
+              )}
+            >
+              {ALL_ROLES.map((r) => (
+                <MenuItem key={r} value={r} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: ROLE_COLORS[r] }} />
+                  {ROLE_LABELS[r]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {pendingRerun && rerunRole !== pendingRerun.role && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.75, fontSize: "0.7rem" }}>
+              Originally run as {ROLE_LABELS[pendingRerun.role as UserRole]}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button variant="outlined" onClick={() => setPendingRerun(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (!pendingRerun) return;
+              onRerun(pendingRerun.prompt, rerunRole);
+              setPendingRerun(null);
+            }}
+          >
+            Re-run
           </Button>
         </DialogActions>
       </Dialog>

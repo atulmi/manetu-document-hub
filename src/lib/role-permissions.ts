@@ -13,6 +13,14 @@ export const ROLE_COLORS: Record<UserRole, string> = {
   admin: '#ef4444',
 };
 
+export const ROLE_LABELS: Record<UserRole, string> = {
+  viewer: 'Viewer',
+  developer: 'Developer',
+  'data-analyst': 'Data Analyst',
+  auditor: 'Auditor',
+  admin: 'Admin',
+};
+
 export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
   viewer: {
     docs: { public: true, internal: false, confidential: false },

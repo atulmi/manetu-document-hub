@@ -16,6 +16,27 @@ const mdComponents: Components = {
   p: ({ children }) => <Typography variant="body2" sx={{ mb: 1, lineHeight: 1.7 }}>{children}</Typography>,
   li: ({ children }) => <Typography component="li" variant="body2" sx={{ mb: 0.25, lineHeight: 1.7 }}>{children}</Typography>,
   strong: ({ children }) => <Box component="strong" sx={{ fontWeight: 700 }}>{children}</Box>,
+  // remarkGfm enables markdown tables, but without these the browser's
+  // default unstyled <table> renders at its natural width and can blow
+  // out past the card (and the whole panel) with nothing to contain it.
+  table: ({ children }) => (
+    <Box sx={{ overflowX: 'auto', mb: 1.5 }}>
+      <Box component="table" sx={{ borderCollapse: 'collapse', width: '100%' }}>
+        {children}
+      </Box>
+    </Box>
+  ),
+  tr: ({ children }) => <Box component="tr" sx={{ borderBottom: 1, borderColor: 'divider' }}>{children}</Box>,
+  th: ({ children }) => (
+    <Box component="th" sx={{ textAlign: 'left', px: 1, py: 0.5, fontSize: '0.75rem', fontWeight: 700, borderBottom: 2, borderColor: 'divider' }}>
+      {children}
+    </Box>
+  ),
+  td: ({ children }) => (
+    <Box component="td" sx={{ textAlign: 'left', px: 1, py: 0.5, fontSize: '0.8rem', verticalAlign: 'top' }}>
+      {children}
+    </Box>
+  ),
 };
 
 interface FinalAnswerCardProps {

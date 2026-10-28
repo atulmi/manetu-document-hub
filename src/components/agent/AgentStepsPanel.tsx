@@ -6,11 +6,14 @@ import { ListView } from "./ListView";
 import { DetailView } from "./DetailView";
 import { RunDetailModal } from "./RunDetailModal";
 import { useEffect, useCallback, useState } from "react";
+import type { UserRole } from "../../types";
 
 export function AgentStepsPanel() {
   const currentTask = useStore((s) => s.currentTask);
   const viewingTaskId = useStore((s) => s.viewingTaskId);
   const setViewingTaskId = useStore((s) => s.setViewingTaskId);
+  const activeRole = useStore((s) => s.activeRole);
+  const setRole = useStore((s) => s.setRole);
   const { submit, isRunning } = useAgentRun();
   const { groups, loading, error } = usePromptHistory();
   const { task: selectedTask, auditEvents: selectedEvents, loading: detailLoading } = usePromptRunDetail(viewingTaskId);
@@ -23,11 +26,16 @@ export function AgentStepsPanel() {
   }, [currentTask?.id, currentTask?.status, setViewingTaskId]);
 
   const handleRerun = useCallback(
-    (prompt: string) => {
+    (prompt: string, role: UserRole) => {
       if (isRunning) return;
+      // Re-running under a different role flips the global role switcher —
+      // the same, already-tested path a manual switch takes (doc-library
+      // refetch, toast, task reset) — rather than a separate per-request
+      // role override the backend has no concept of today. See i-rerun-as-role.
+      if (role !== activeRole) setRole(role);
       submit(prompt);
     },
-    [submit, isRunning],
+    [submit, isRunning, activeRole, setRole],
   );
 
   // The live-tracked run (currently running, or just finished and not yet

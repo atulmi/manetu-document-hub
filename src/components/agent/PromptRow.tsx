@@ -112,7 +112,7 @@ export const PromptRow = memo(function PromptRow({
           <ListItemIcon>
             <Replay fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Re-run with current role</ListItemText>
+          <ListItemText>Re-run…</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => { closeMenu(); onExport(); }}>
           <ListItemIcon>
