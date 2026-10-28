@@ -21,6 +21,7 @@ const SUGGESTIONS_SECONDARY = [
   "Search for documents about hiring",
   "What compensation bands are available?",
   "Summarize the incident report from November",
+  "Search all tiers, including confidential, for mentions of security policy",
 ];
 
 export function AgentTaskPanel() {

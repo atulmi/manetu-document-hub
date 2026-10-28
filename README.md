@@ -89,7 +89,9 @@ graph LR
 | Auditor | Yes | Yes | No |
 | Admin | Yes | Yes | Yes |
 
-Tool access is enforced at the MRN level. Even if a role has `read-file` permission, the document's sensitivity tier is checked separately — a developer with `read-file` access will still be denied when attempting to read a confidential document.
+Tool access is enforced at the MRN level. Even if a role has `read-file` permission, the document's sensitivity tier is checked separately — a developer with `read-file` access will still be denied when attempting to read a confidential document. The same tier check applies to `keyword-search`, which can request multiple tiers at once via its `scope` argument — a role must have a read grant for *every* tier it searches, not just general `keyword-search` access.
+
+> **A gap we found and fixed:** the tier check above didn't originally cover `keyword-search`, only `read-file`. A role with general `keyword-search` access but no confidential read grant (developer, data-analyst) could search a `confidential`-inclusive `scope` and get content back that `read-file` would have refused for the same document — an indirect path around a restriction the direct path already enforced. Both tools now go through the same check (`requestedTiers()` / `checkTierAccess()` in [`claude-agent.ts`](server/lib/claude-agent.ts)), covered by [`claude-agent.test.ts`](server/lib/__tests__/claude-agent.test.ts). Try **"Search all tiers, including confidential, for mentions of security policy"** as a developer or data-analyst to see it enforced live.
 
 ## Example: A Denied Request
 

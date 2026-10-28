@@ -77,6 +77,51 @@ const TOOL_MRN_MAP: Record<string, string> = {
   'keyword-search': 'mrn:mcp:docs:tool:keyword-search',
 };
 
+const TIER_MRNS: Record<string, string> = {
+  public: 'mrn:mcp:docs:resource:public:*',
+  internal: 'mrn:mcp:docs:resource:internal:*',
+  confidential: 'mrn:mcp:docs:resource:confidential:*',
+};
+
+// Tool-invoke permission alone only answers "can this role use this tool at
+// all" — it doesn't know which sensitivity tier(s) a given call actually
+// touches. read-file names one tier (via its path); keyword-search can
+// request several at once (via scope). Both need this second check, or a
+// role with general keyword-search access but no confidential read grant
+// could search confidential docs and get content read-file would refuse it.
+export function requestedTiers(toolName: string, args: Record<string, unknown>): string[] {
+  if (toolName === 'read-file') {
+    const filePath = args['path'] as string | undefined;
+    const tier = filePath?.split('/')[0];
+    return tier && tier in TIER_MRNS ? [tier] : [];
+  }
+  if (toolName === 'keyword-search') {
+    const scope = args['scope'];
+    return Array.isArray(scope) ? scope.filter((t) => t in TIER_MRNS) : [];
+  }
+  return [];
+}
+
+// Evaluates each requested tier and returns the first deny found (denying
+// the whole call), or null if every requested tier is allowed.
+export async function checkTierAccess(
+  mpeClient: MPEClient,
+  role: UserRole,
+  tiers: string[],
+): Promise<PolicyDecision | null> {
+  for (const tier of tiers) {
+    const tierDecision = await mpeClient.evaluate({
+      principal: role,
+      resource: TIER_MRNS[tier],
+      operation: 'read',
+    });
+    if (tierDecision.decision === 'deny') {
+      return tierDecision;
+    }
+  }
+  return null;
+}
+
 function now(): string {
   return new Date().toISOString();
 }
@@ -192,26 +237,14 @@ export async function runAgentLoop(opts: AgentRunOptions): Promise<AgentTask> {
             operation: 'invoke',
           });
 
-          // For read-file, also check resource-level access based on sensitivity tier
-          if (policyDecision.decision === 'allow' && toolName === 'read-file') {
-            const filePath = args['path'] as string | undefined;
-            if (filePath) {
-              const tier = filePath.split('/')[0];
-              const tierMrns: Record<string, string> = {
-                public: 'mrn:mcp:docs:resource:public:*',
-                internal: 'mrn:mcp:docs:resource:internal:*',
-                confidential: 'mrn:mcp:docs:resource:confidential:*',
-              };
-              const tierMrn = tierMrns[tier];
-              if (tierMrn) {
-                const tierDecision = await mpeClient.evaluate({
-                  principal: role,
-                  resource: tierMrn,
-                  operation: 'read',
-                });
-                if (tierDecision.decision === 'deny') {
-                  policyDecision = tierDecision;
-                }
+          // Also check resource-level access for any sensitivity tier(s)
+          // this specific call touches (see requestedTiers/checkTierAccess).
+          if (policyDecision.decision === 'allow') {
+            const tiers = requestedTiers(toolName, args);
+            if (tiers.length > 0) {
+              const tierDecision = await checkTierAccess(mpeClient, role, tiers);
+              if (tierDecision) {
+                policyDecision = tierDecision;
               }
             }
           }
