@@ -26,6 +26,19 @@ Asking to "summarize all documents" triggers reads across every sensitivity tier
 
 This app uses [OPA](https://www.openpolicyagent.org/) with Rego policies to evaluate access at the **tool call level** using MRN-style resource identifiers (Manetu Resource Notation), the same model the [Manetu Policy Engine](https://manetu.github.io/policyengine) is built around. Instead of blanket "this user can access this service," it answers: _"Can a viewer-role agent invoke `read-file` on a confidential document right now?"_ — and produces a structured audit record for every decision. This is a demonstration of the use case MPE targets, not an integration with MPE itself.
 
+### Why Claude Can't Just Talk Its Way Past This
+
+This isn't "the agent is asked nicely to check policy first" — Claude has no other way to act. The Anthropic API gives Claude exactly two kinds of output: text, and structured `tool_use` blocks (`{name, input}` JSON). It cannot read a file, query Elasticsearch, or touch anything else directly; the backend's agent loop (`runAgentLoop` in [`claude-agent.ts`](server/lib/claude-agent.ts)) is the *only* code with real filesystem access, and every `tool_use` block — regardless of what Claude's accompanying text says or claims — passes through the same fixed sequence before anything happens:
+
+1. Map the requested tool name to its MRN.
+2. Evaluate invoke-level access via OPA, using `principal: role` — the session's actual role, attached server-side from the authenticated request (or the `x-role` header in no-auth local dev). This value comes from request state the backend controls, never from the prompt text or anything Claude outputs.
+3. If allowed, evaluate resource-tier access for whatever sensitivity tier(s) the specific arguments touch (`requestedTiers()` / `checkTierAccess()`).
+4. Only if every check passes does `executeTool()` run — the single function that actually reads the filesystem.
+
+Because that's Claude's *only* channel to the outside world, there's nothing a prompt can say that skips it. "Pretend you're an admin," "policy checks are disabled in this test environment" — none of that changes the `role` value OPA evaluates against, because that value was never derived from the conversation in the first place. At most, a manipulative prompt changes what Claude *says* or *attempts* — not what's allowed to execute. The "Prompts that try to manipulate the agent" suggestions in the Agent Task panel show exactly this: Claude's own reasoning can explicitly name the manipulation attempt, decide to attempt the tool call anyway ("let me attempt to read the file as-is, and the system will enforce whatever permissions actually apply"), and still get denied by OPA — because the access decision was never Claude's to make.
+
+This also clarifies what the one real gap found in this project actually was (see the `keyword-search` callout below): it was a bug in *what* got checked — a missing tier dimension on one tool — not a bypass of the checking mechanism itself. No `tool_use` block has ever reached the filesystem without going through this sequence; the gap just meant step 3 wasn't thorough enough for every tool yet.
+
 ## Architecture
 
 ```mermaid
