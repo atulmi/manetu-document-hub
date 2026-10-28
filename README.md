@@ -146,6 +146,7 @@ Prompt runs, agent steps, and audit events are durably indexed to **Elasticsearc
 
 - **Three flat indices**, joined by `agentTaskId` (no nesting): `prompt-runs` (one doc per task, upserted with denormalized allow/deny/bypass counts), `agent-steps` (one doc per step), and `audit-events` (one doc per policy decision).
 - **Writes are non-blocking** — indexing happens off the same points that already emit SSE events (`onTaskStart`, `onStep`, `onAudit`) via fire-and-forget calls, so an Elasticsearch hiccup never slows down or breaks a live agent run.
+- **Idempotent against replay** — the live per-event write and the backfill retry below can both end up indexing the same audit event (e.g. a retry firing just after the live write already succeeded). The event document itself is keyed by its own id, so re-indexing it is a harmless overwrite; the run's denormalized allow/deny/bypass counters only increment the first time a given event id is actually seen (`indexAuditEvent` in `audit-index.ts`), so the two write paths can't double-count a decision.
 - **Local durability buffer** — the frontend always writes a finished run to its Zustand-backed local buffer first, unconditionally. A background sync loop (`useHistorySync`) retries `POST /api/audit/backfill` every ~15s; once Elasticsearch confirms the write, the run is cleared from the local buffer. This means an outage of any length — not just a brief blip — never loses data, and nothing is gated on a health check first, since the write attempt itself is the health check.
 - **Reads go through the backend**, never straight to Elasticsearch from the browser: `GET /api/prompt-history` (list), `GET /api/prompt-history/:taskId` (full detail), `DELETE /api/prompt-history[/:taskId]` (clear one or all), plus `GET /api/audit/health` for the sync loop's advisory status check.
 
@@ -259,9 +260,12 @@ npm test                 # watch mode
 npm run test:coverage    # single run with coverage
 
 # E2E tests (Cypress)
-npm run build && npm run preview   # start the preview server first
+npm run test:e2e                   # builds, serves the build, runs headless — mirrors CI in one command
+
+# ...or manually, e.g. to use cypress:open instead:
+npm run build && npm run preview   # start the preview server first (separate terminal)
 npm run cypress:open                # interactive mode
-npm run cypress:run                 # headless (CI)
+npm run cypress:run                 # headless
 ```
 
 Cypress mocks every backend call via `cy.intercept()` — no Docker, Elasticsearch, Claude key, or Supabase project needed to run the suite. Auth is untested in E2E for the same reason it's absent from CI generally: `VITE_SUPABASE_*` are build-time env vars, and leaving them unset (as CI does) keeps `AuthGate` a no-op, identical to a local clone with no Supabase project configured — see the comment in `cypress/support/e2e.ts`.
